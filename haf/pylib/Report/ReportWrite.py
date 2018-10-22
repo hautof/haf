@@ -5,6 +5,7 @@ sys.path.append("..")
 
 from haf.pylib.Log.LogController import LogController
 from haf.pylib.tools.PlatformTool import PlatformTool
+import allure_pytest
 class_name = "ReportWrite"
 logger = LogController.getLogger(class_name)
 
@@ -30,11 +31,12 @@ class ReportWrite(object):
         '''
         localpath = os.path.split(os.path.realpath(__file__))[0]
         if PlatformTool.getPlatformIsWindows():
-            allure_bin = os.path.abspath(os.path.join(localpath,"../../../base/binary/allure/bin/allure.bat"))
+            allure_bin = os.path.abspath(os.path.join(localpath,"../../bin/allure/bin/allure.bat"))
         else:
-            allure_bin = os.path.abspath(os.path.join(localpath,"../../../base/binary/allure/bin/allure"))
+            allure_bin = os.path.abspath(os.path.join(localpath,"../../bin/allure/bin/allure"))
             os.system("chmod +x " + allure_bin)
-            
+        
         cmdstr = allure_bin + " generate -c " + str(logpath) + " -o " + str(reportpath)
+        print(cmdstr)
         os.system(cmdstr)
         return True

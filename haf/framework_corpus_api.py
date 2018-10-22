@@ -233,6 +233,7 @@ class FrameworkOfZhan(object):
 
     def allurerun(self, logpath, reportpath, filename_pure, toOne=False):
         try:
+            self.logger.log_print("debug", "start allurerun now...")
             if toOne is True:
                 self.logger.log_print("debug", "allure to one file " + logpath)
                 FileCopy.copy(logpath, "data/log/" + filename_pure)

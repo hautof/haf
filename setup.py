@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
         name='haf',
-        version='1.0.3',
+        version='1.0.4',
         description=(
             '''
             haf : http api auto test framework
@@ -11,7 +11,7 @@ setup(
 
             python -m haf'''
         ),
-        url='http://github.com/tsbxmw/haf'
+        url='http://github.com/tsbxmw/haf',
         packages=['haf'],
         install_requires=[
             'pytest',

@@ -56,7 +56,7 @@ class PytestCode(object):
 import pytest, os, sys, allure
 sys.path.append("../haf")
 from haf.run import Run
-from haf.thirdparty.corpus_api.sqlcheck import sqlcheck
+#from haf.thirdparty.corpus_api.sqlcheck import sqlcheck
 class Test_case_name:
         """
             write_lines = write_lines.replace("case_name", self.case_name)
@@ -74,7 +74,7 @@ class Test_case_name:
 import pytest, os, sys, allure
 sys.path.append("../haf")
 from haf.run import Run
-from haf.thirdparty.corpus_api.sqlcheck import sqlcheck
+#from haf.thirdparty.corpus_api.sqlcheck import sqlcheck
 class Test_case_name:
         """
             write_lines = write_lines.replace("case_name", self.case_name)

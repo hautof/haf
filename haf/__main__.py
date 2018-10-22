@@ -43,7 +43,8 @@ def RunPys():
 def main():
     #LocalRun()
     print(sys.argv)
-    if len(sys.argv) > 1:
+    len_argv = len(sys.argv)
+    if len_argv > 1:
         para = sys.argv[1:]
     else:
         para = None

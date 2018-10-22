@@ -13,8 +13,9 @@ from haf.pylib.File.JsonTool import JsonTool
 from haf.check.CheckHttpResponse import CheckHttpResponse
 from haf.pylib.tools.debugprint import *
 from haf.setup.TestCaseReplace import TestCaseReplace
-from haf.thirdparty.sqlcheck import sqlcheck
+#from haf.thirdparty.sqlcheck import sqlcheck
 import urllib.request
+import importlib
 
 
 class_name = "Run"
@@ -213,10 +214,15 @@ class Run(object):
         '''
 
         logger.log_print("debug", str(testcase.sql_get_result), "SqlGetResultCheck_step")
-        funcname = testcase.expect_sql
-        if "None" in funcname:
+        fullname = testcase.expect_sql
+        if "None" in fullname:
             return True
-        func = getattr(sqlcheck, funcname)
+        model_path, class_name, func_name = fullname.rsplit('.',2)
+        logger.log_print("debug", model_path + " " + func_name)
+
+        class_content = importlib.import_module(model_path)
+        func = getattr(getattr(class_content, class_name), func_name)
+
         result = func(testcase.sql_get_result, testcase.api_response, testcase.sql_getlist, testcase=testcase)
         testcase.result = result
         assert result==True

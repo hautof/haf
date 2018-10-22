@@ -9,3 +9,4 @@ build/*
 dist/*
 haf.egg-info/*
 testcases/*
+thirdparty/*
