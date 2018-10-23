@@ -2,13 +2,6 @@
 
     The http api auto test framework.
 
-## links
-
-> [document](http://192.168.41.208:8080/autotestframework/doc/)
-> [jenkins url](http://192.168.41.208:8085/job/autotest_template/)
-
-
-
 ## How to get it
 
 ```shell
@@ -45,13 +38,17 @@
 
 ## FrameWork 
 
-* not complete
+### Design
 
-* http://git.zhan.com/edison.meng/autotestframework/wikis/FrameWork
+### Class
 
+### Doc
 
 ## Release Note
 
+### version 1.1.1
+
+* change to wheel 
 
 ### version 1.0.2
 
