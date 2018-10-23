@@ -1,8 +1,6 @@
 #encoding='utf-8'
 import os, sys, time
 
-sys.path.append("..")
-
 from haf.pylib.Log.LogController import LogController
 from haf.pylib.tools.PlatformTool import PlatformTool
 from haf.pylib.SQL.MysqlTool import MysqlTool

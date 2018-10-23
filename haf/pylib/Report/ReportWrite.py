@@ -1,7 +1,6 @@
-#encoding='utf-8'
-import os, sys, time
+#__*__ encoding='utf-8'
 
-sys.path.append("..")
+import os, sys, time
 
 from haf.pylib.Log.LogController import LogController
 from haf.pylib.tools.PlatformTool import PlatformTool
