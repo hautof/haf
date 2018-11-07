@@ -34,7 +34,7 @@ class CheckHttpResponse(object):
             if not result.__contains__(key):
                 return "result not has key : {}".format(key)
             if result[key] != expect[key] and key not in exclude:
-                return "result not equal expect at : {} <result: {} > != <expect: {} >".format(key, str(result[key]),str(expect[key]))
+                return "result not equal expect at : *{}* <result: {} > != <expect: {} >".format(key, str(result[key]),str(expect[key]))
         return True
         
     @staticmethod

@@ -88,6 +88,7 @@ class HttpController(object):
             return e
         except Exception as ee:
             logger.log_print ("error", str(ee), "get")
+            return ee
 
     @staticmethod
     def post(url, data=None, headers=None, **kwargs):
@@ -119,14 +120,14 @@ class HttpController(object):
             return response
         except ur.URLError as e:
             logger.log_print ("error", str(e), "post")
-            if e.code == 400 or e.code == 404:
-                return e
+            return e
         except urlerror.HTTPError as httpe:
             logger.log_print("error", str(httpe), "post-httperror")
-            if httpe.code == 400:
-                return httpe
+            #if httpe.code == 400:
+            return httpe
         except Exception as ee:
-            logger.log_print ("error", str(ee), "post")
+            logger.log_print ("error", str(ee), "post-ee")
+            return ee
 
     def put(self, url, data=None):
         try:  

@@ -16,6 +16,7 @@ from haf.setup.TestCaseReplace import TestCaseReplace
 #from haf.thirdparty.sqlcheck import sqlcheck
 import urllib.request
 import importlib
+import http
 
 
 class_name = "Run"
@@ -46,25 +47,29 @@ class Run(object):
         testcase.result = False
 
         testcase.finish_time = logger.log_getsystime()
-        Run.SqlInit_step(testcase, casestr = str(testcase), sqlscript = getattr(testcase, "sql_setup"), sqlconfig = getattr(testcase, "sql_config").host)
+        Run.SqlInit_step(testcase, casestr = str(testcase), sqlscript = testcase.sql_setup, sqlconfig = testcase.sql_config.host)
     
         testcase.finish_time = logger.log_getsystime()
-        result = Run.RunHttpRequest_step(testcase, casestr = str(testcase), url = getattr(testcase, "api_url"), data = getattr(testcase, "api_request_data"), protocol =  getattr(testcase, "api_protocol"))
+        result = Run.RunHttpRequest_step(testcase, casestr = str(testcase), request_url = testcase.api_url, request_header = testcase.api_request_header, request_data = testcase.api_request_data, request_protocol =  testcase.api_protocol)
         
         testcase.finish_time = logger.log_getsystime()
-        Run.CheckHttpBody_step(testcase, result, casestr = str(testcase), response = getattr(testcase, "api_response"), expect = getattr(testcase, "api_expect_response"), exclude = getattr(testcase, "api_response_exclude"))
+        Run.CheckHttpBody_step(testcase, result, casestr = str(testcase), response = testcase.api_response, response_code = testcase.api_request_result, response_header = testcase.api_response_header, expect = testcase.api_expect_response, exclude = testcase.api_response_exclude)
     
         testcase.finish_time = logger.log_getsystime()
-        Run.SqlGet_step(testcase, sql_script=testcase.sql_get, sql_expect=getattr(testcase, "expect_sql"))
+        Run.SqlGet_step(testcase, sql_script=testcase.sql_get, sql_expect = testcase.expect_sql)
 
         testcase.finish_time = logger.log_getsystime()
-        Run.SqlGetResultCheck_step(testcase, sql_get_result=testcase.sql_get_result, sql_expect=getattr(testcase, "expect_sql"))
+        Run.SqlGetResultCheck_step(testcase, sql_get_result=testcase.sql_get_result, sql_expect = testcase.expect_sql)
 
         testcase.finish_time = logger.log_getsystime()
-        Run.SqlTeardown_step(testcase, sqlscript = getattr(testcase, "sql_teardown"), sqlconfig = getattr(testcase, "sql_config").host)
+        Run.SqlTeardown_step(testcase, sqlscript = testcase.sql_teardown, sqlconfig = testcase.sql_config.host)
 
         testcase.finish_time = logger.log_getsystime()
         logger.log_print("info", "ok <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< " + parameters + " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", "run")
+
+    @staticmethod
+    def assert_that(result, expect):
+        assert result==expect
 
     @staticmethod
     @allure.step('Http Request')
@@ -78,12 +83,12 @@ class Run(object):
 
         :return: 返回请求的 结果
         '''
-        protocol = getattr(testcase, "api_protocol")
-        host_port = getattr(testcase, "api_host_port")
-        url = protocol + "://" + host_port + getattr(testcase, "api_url")
+        protocol = testcase.api_protocol
+        host_port = testcase.api_host_port
+        url = protocol + "://" + host_port + testcase.api_url
         logger.log_print("info", url)
-        data = getattr(testcase, "api_request_data")
-        header = getattr(testcase, "api_request_header")
+        data = testcase.api_request_data
+        header = testcase.api_request_header
 
         tcr = TestCaseReplace()
         header = tcr.switch(header)
@@ -92,22 +97,25 @@ class Run(object):
         setattr(testcase, "api_request_data", data)
 
         
-        if getattr(testcase, "api_method").lower() == "get":
+        if testcase.api_method.lower() == "get":
             result = HttpController.get(url, data, header)
-        elif getattr(testcase, "api_method").lower() == "post":
+        elif testcase.api_method.lower() == "post":
             result = HttpController.post(url, data, header)
-        elif getattr(testcase, "api_method").lower() == "put":
+        elif testcase.api_method.lower() == "put":
             result = HttpController.put(url, data)
         logger.log_print("info", result)
-        if isinstance(result,urllib.request.URLError):
+        if isinstance(result,urllib.request.URLError) or isinstance(result, urllib.request.HTTPError) or isinstance(result, urllib.request.HTTPHandler):
             testcase.api_response =  {}
             testcase.api_request_result = result.code
             testcase.api_response_header = result.info()
             testcase.result = False
         else:
+            logger.log_print("info", type(result))
             testcase.api_response =  JsonTool.Str2Json(result.read())
             testcase.api_request_result = result.code
             testcase.api_response_header = result.info()
+            Run.assert_that(isinstance(result, http.client.HTTPResponse), True)
+        Run.assert_that(testcase.api_request_result,200)
         return testcase.api_response
 
     @staticmethod
@@ -132,13 +140,13 @@ class Run(object):
         '''
         logger.log_print("info", "start", "CheckHttp")        
         result = result
-        expect = JsonTool.Str2Json(getattr(testcase, "api_expect_response"))
-        exclude = JsonTool.Str2List(getattr(testcase, "api_response_exclude"), ",")
+        expect = JsonTool.Str2Json(testcase.api_expect_response)
+        exclude = JsonTool.Str2List(testcase.api_response_exclude, ",")
         logger.log_print("info", str(result), "CheckHttp")
         check_result = CheckHttpResponse.CheckJson(result, expect, exclude)
         if len(expect.keys()) != 0:
             testcase.result = result
-        assert check_result==True
+        Run.assert_that(check_result,True)
 
         '''if check_result is True:  
             logger.log_print("info", "OK", "CheckHttp")

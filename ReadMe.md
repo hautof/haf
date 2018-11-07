@@ -1,6 +1,6 @@
 # haf
 
-    The http api auto test framework.
+    The http api auto test framework. 
 
 ## How to get it
 
@@ -45,6 +45,10 @@
 ### Doc
 
 ## Release Note
+
+### version 1.1.2
+
+* add assert_that func to Run to show more in allure
 
 ### version 1.1.1
 
