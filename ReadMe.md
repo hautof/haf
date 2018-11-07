@@ -46,7 +46,7 @@
 
 ## Release Note
 
-### version 1.1.2
+### version 1.1.3
 
 * add assert_that func to Run to show more in allure
 
