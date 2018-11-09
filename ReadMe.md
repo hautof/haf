@@ -2,6 +2,9 @@
 
     The http api auto test framework. 
 
+> based on pytest & allure
+> xlsx easy cases
+
 ## How to get it
 
 ```shell
@@ -10,7 +13,21 @@
 
 ## How to run
 
+### mkdir at testcases
 
+```shell
+    mkdir testcases
+```
+
+### create xlsx file 
+
+### move file.xlsx to testcases
+
+### run 
+
+```shell
+    python -m haf
+```
 
 ## 可能用到的知识
 

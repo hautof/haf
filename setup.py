@@ -41,7 +41,7 @@ package_extras.extend(package_files('{}/check'.format(PACKAGE_NAME)))
 
 setup(
     name = 'haf',
-    version = '1.1.3',
+    version = '1.1.4',
     author = 'wei.meng',
     author_email = 'mengwei1101@hotmail.com',    
     long_description = long_description,
