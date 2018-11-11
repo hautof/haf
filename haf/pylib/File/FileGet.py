@@ -18,13 +18,13 @@ class FileGet(object):
         self.ls = LogController.getLogger("FileGet")
         self.ls.log_print ("system", "[getfiles]------------")
 
-    def GetFile(self, protocol, remote, local, *args):
+    def GetFile(self, protocol:str, remote:str, local:str, *args):
         if protocol == "default":
             self.getfile_windows_copy(remote, local)
         elif protocol == "ftp":
             self.getfile_ftp(remote, local, *args);
         
-    def getfile_windows_copy(self,remote,local):
+    def getfile_windows_copy(self,remote:str,local:str):
         self.ls.log_print ("system", "[getfile] remote: " + str(remote))
         self.ls.log_print ("system", "[getfile] local : " + str(local))
         copycmd = "xcopy /yse %s  %s\\ "%(remote,local)
@@ -35,7 +35,7 @@ class FileGet(object):
             self.ls.log_print ("system", "[getfile] copy fail")
             exit(1)
 
-    def Getfile_filename(self,remote,local,filename):
+    def Getfile_filename(self,remote:str,local:str,filename:str):
         self.ls.log_print ("system", "[getfile] remote: " + str(remote + "\\" + filename))
         self.ls.log_print ("system", "[getfile] local : " + str(local + "\\" + filename))
         copycmd = "echo F | xcopy /yse %s  %s "%(remote +"\\" + filename,local +"\\" + filename)
@@ -46,7 +46,7 @@ class FileGet(object):
             self.ls.log_print ("system", "[getfile] copy fail")
 
 
-    def Getfile_1(self,remote,local):
+    def Getfile_1(self,remote:str,local:str):
         self.ls.log_print ("system", "[getfile] remote: " + str(remote))
         self.ls.log_print ("system", "[getfile] local : " + str(local))
         copycmd = "echo F | xcopy /yse %s  %s "%(remote,local)
@@ -56,7 +56,7 @@ class FileGet(object):
         else:
             self.ls.log_print ("system", "[getfile] copy fail")
 
-    def getfile_ftp(self,remote,local, *args):
+    def getfile_ftp(self,remote:str,local:str, *args):
         self.ls.log_print ("system", "[getfile_ftp] remote : " + str(remote))
         self.ls.log_print ("system", "[getfile_ftp] local  : " + str(local))
         if len(args) > 2:

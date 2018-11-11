@@ -16,7 +16,7 @@ class CheckHttpApiTestCase(object):
         self.logger = LogController.getLogger(self.class_name)
 
     @classmethod
-    def checkKwargs(self, httpapitestcase, *args, **kwargs):
+    def checkKwargs(self, httpapitestcase:HttpApiTestCase=None, *args, **kwargs) -> None:
         '''
         检查 args 数据
         '''

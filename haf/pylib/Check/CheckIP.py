@@ -8,7 +8,6 @@
 
 import re
 import os, sys, time, datetime, json, subprocess
-sys.path.append("../")
 from haf.pylib.Exception.ExceptionController import * 
 
 class CheckIP(object):
@@ -20,7 +19,7 @@ class CheckIP(object):
         return self.class_name
 
     @staticmethod
-    def checkIP(ipadd):
+    def checkIP(ipadd:str):
         if isinstance(ipadd, str):
             ip = ipadd
         else:
@@ -32,7 +31,7 @@ class CheckIP(object):
             raise NetworkIPIllegalException(ipadd + " is illegal!")
         
     @staticmethod
-    def run_cmd(cmd):
+    def run_cmd(cmd:str):
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         output = "\n".join(str(s) for s in p.stdout.readlines() if s not in [None])
         retval = p.wait()
@@ -41,7 +40,7 @@ class CheckIP(object):
         return True
 
     @staticmethod
-    def PingIP(ipadd):
+    def PingIP(ipadd:str):
         if Check.checkIP(ipadd):
             check_ping = False
             temp_int = 1

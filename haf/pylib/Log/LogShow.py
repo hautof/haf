@@ -16,7 +16,7 @@ class LogShow(object):
     '''
     Framework logger 默认类，使用 logging 
     '''
-    def __init__(self, logflag):
+    def __init__(self, logflag:str):
         self.class_name = 'LogShow'
         self.logflag = logflag
         self.log_set_rank()
@@ -111,7 +111,7 @@ class LogShow(object):
         self.log_save_to_one_file('./data/log')
 
     # save log local/name
-    def log_save_to_file(self, local, name):
+    def log_save_to_file(self, local:str, name:str):
         '''
         分类保存 log 到文件中
         '''
@@ -128,7 +128,7 @@ class LogShow(object):
             print(str(e))
     
     # save to local/log.log
-    def log_save_to_one_file(self, local):
+    def log_save_to_one_file(self, local:str):
         '''
         保存 log 到一个文件中
         '''

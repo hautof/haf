@@ -16,7 +16,7 @@ class CheckHttpResponse(object):
         pass
 
     @staticmethod
-    def CheckJson(result, expect, exclude):
+    def CheckJson(result:dict, expect:dict, exclude:list):
         '''
         检查 json
 

@@ -5,6 +5,7 @@ from datetime import datetime
 
 from haf.pylib.Log.LogController import LogController
 from haf.testcase.HttpApiTestCase import HttpApiTestCase
+from assertpy import assert_that
 
 class_name = "CheckSQLGet"
 logger = LogController.getLogger(class_name)
@@ -34,6 +35,7 @@ class CheckSQLGet(object):
                 print(e)
             return CheckSQLGet.CheckDateTime(sqlr, resr)
         else:
+            assert_that(type(sqlr)(resr)).is_equal_to(sqlr)
             return type(sqlr)(resr) == sqlr
         
 

@@ -22,7 +22,7 @@ class ReportPublic(object):
         pass
 
     @staticmethod
-    def public2tomcat(reportpath, tomcatpath):
+    def public2tomcat(reportpath:str, tomcatpath:str):
         '''
         发布到 tomcat 服务下
 

@@ -13,7 +13,8 @@ requires = [
             'xpinyin',
             'paramiko',
             'pytest-html',
-            'redis'
+            'redis',
+            'assertpy'
         ]
 
 with open('ReadMe.md', encoding='utf8') as f:

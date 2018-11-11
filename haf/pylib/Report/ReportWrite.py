@@ -18,7 +18,7 @@ class ReportWrite(object):
         pass
     
     @staticmethod
-    def createAllureReport(logpath, reportpath):
+    def createAllureReport(logpath:str, reportpath:str):
         '''
         生成 Allure 报告
 

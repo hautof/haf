@@ -14,7 +14,7 @@ class FileRead(object):
     def __str__(self):
         return self.class_name
 
-    def open(self, filename):
+    def open(self, filename:str):
         if not isinstance(filename, str):
             filename = str(filename)
         file_context = None

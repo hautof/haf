@@ -13,6 +13,7 @@ from haf.pylib.File.JsonTool import JsonTool
 from haf.check.CheckHttpResponse import CheckHttpResponse
 from haf.pylib.tools.debugprint import *
 from haf.setup.TestCaseReplace import TestCaseReplace
+from assertpy import assert_that
 #from haf.thirdparty.sqlcheck import sqlcheck
 import urllib.request
 import importlib
@@ -69,7 +70,7 @@ class Run(object):
 
     @staticmethod
     def assert_that(result, expect):
-        assert result==expect
+        assert_that(result).is_equal_to(expect)
 
     @staticmethod
     @allure.step('Http Request')

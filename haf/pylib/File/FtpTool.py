@@ -15,7 +15,7 @@ from haf.pylib.Check.CheckIP import CheckIP
 
 class FtpTool(object):
     
-    def __init__(self, ip, port=21, bufsize=1024, username=None, password=None):
+    def __init__(self, ip:str, port:int=21, bufsize:int=1024, username:str=None, password:str=None):
         self.class_name = "Ftp"
         self.ls = LogController.getLogger(self.class_name)
         if not CheckIP.checkIP(ip):
@@ -52,7 +52,7 @@ class FtpTool(object):
         except Exception as e:
             self.ls.log_print('error', str(e))
 
-    def getFile(self, remote, local):
+    def getFile(self, remote:str, local:str):
         try:
             fp = open(local, 'wb')
             self.ftp.retrbinary('RETR' + remote, fp.write, self.bufsize)
@@ -61,7 +61,7 @@ class FtpTool(object):
         except Exception as e:
             self.ls.log_print('error', str(e))
 
-    def putFile(self, local, remote):
+    def putFile(self, local:str, remote:str):
         try:
             fp = open(local, 'rb')
             self.ftp.storbinary('STOR'+remote, fp, self.bufsize)

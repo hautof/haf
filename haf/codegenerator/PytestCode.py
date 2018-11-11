@@ -17,7 +17,7 @@ class PytestCode(object):
         self.class_name = "PytestCode"
         self.logger = LogController.getLogger(self.class_name)
 
-    def generateCodeFile(self, testcases, codefilepath=None, **kwargs):
+    def generateCodeFile(self, testcases:dict, codefilepath=None, **kwargs):
         '''
         生成 python 文件
 
@@ -90,7 +90,7 @@ class Test_case_name:
 
         self.logger.log_print("info", "ok")
 
-    def generateCodeBlock(self, testcase):   
+    def generateCodeBlock(self, testcase:HttpApiTestCase):   
         '''
         根据每个 用例 生成 pytest 可识别的 方法
         '''

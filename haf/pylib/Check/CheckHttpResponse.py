@@ -13,7 +13,7 @@ class CheckHttpResponse(object):
         pass
 
     @staticmethod
-    def CheckJson(result, expect, exclude):
+    def CheckJson(result:dict, expect:dict, exclude:list):
         if isinstance(result, dict) and isinstance(expect, dict) and isinstance(exclude, list):
             pass
         else:

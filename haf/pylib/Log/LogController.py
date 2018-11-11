@@ -14,7 +14,7 @@ class LogController(object):
         return self.class_name
 
     @classmethod
-    def getLogger(self, logclass):
+    def getLogger(self, logclass:str):
         '''
         生成 logger
 

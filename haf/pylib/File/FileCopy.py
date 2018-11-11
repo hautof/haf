@@ -12,7 +12,7 @@ class FileCopy(object):
         pass
 
     @staticmethod
-    def copy(source, dist):
+    def copy(source:str, dist:str):
         logger.log_print("info", "copy " + source + " to " + dist)
         if PlatformTool.getPlatformIsLinux():
             os.system("cp -rf " + source + "/* " + dist + "/")
