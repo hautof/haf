@@ -18,8 +18,10 @@ class RedisTool(object):
     def __init__(self):
         pass
 
-    @staticmethod
-    def ConnectAndExecute(sqlconfig, sqlscript, **kwargs):
+    def __str__(self):
+        return "RedisTool"
+
+    def ConnectAndExecute(self, sqlconfig, sqlscript, **kwargs):
         '''
         连接到数据库并执行脚本
 
@@ -30,25 +32,29 @@ class RedisTool(object):
         '''
         
         sqlconfig = sqlconfig
-        connect_redis = None
+        self.connect_redis = None
         logger.log_print("info", "start connect to {}".format(str(sqlconfig.host)), "ConnectAndExecute")
         try:
-            connect_redis = redis.Redis(host=sqlconfig.host, port=sqlconfig.port, db=sqlconfig.database)
-            logger.log_print("info", "type is {}".format(str(connect_redis.type(sqlscript))), "ConnectAndExecute")
-            if "zset" in str(connect_redis.type(sqlscript)):
+            self.connect_redis = redis.Redis(host=sqlconfig.host, port=sqlconfig.port, db=sqlconfig.database)
+            logger.log_print("info", "type is {}".format(str(self.connect_redis.type(sqlscript))), "ConnectAndExecute")
+            if "zset" in str(self.connect_redis.type(sqlscript)):
                 start = kwargs["start"]
                 end = kwargs["end"]
                 if "rev" in kwargs:
-                    return connect_redis.zrevrange(sqlscript, start, end)
+                    return self.connect_redis.zrevrange(sqlscript, start, end)
                 else:
-                    return connect_redis.zrange(sqlscript, start, end)
-            elif "hash" in str(connect_redis.type(sqlscript)):
-                return connect_redis.hget(sqlscript)
+                    return self.connect_redis.zrange(sqlscript, start, end)
+            elif "hash" in str(self.connect_redis.type(sqlscript)):
+                return self.connect_redis.hget(sqlscript)
             else:
-                return connect_redis.get(sqlscript)
+                return self.connect_redis.get(sqlscript)
 
         except Exception as e:
             logger.log_print("error", str(e), "ConnectAndExecute")
+
+    def close(self):
+        if self.connect_redis is not None:
+            self.connect_redis.close()
 
 if __name__ == "__main__":
     sqlconfig = SQLConfig()

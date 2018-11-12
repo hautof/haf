@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% macro gen_headers(headers) -%}
+<div>
+    {% for k in headers.keys() | sort %}
+    {{ k }} : {{ headers[k] }}
+    <br/>
+    {% endfor %}
+</div>
+{%- endmacro %}
+
+
+{% macro gen_body(body) %}
+<div class="request body">
+    <pre>{{ body }}</pre>
+</div>
+{% endmacro %}
+
+
+{% macro gen_request(request) -%}
+<div>
+    <div class="request line">
+        {{ request.method.upper() }} {{ request.url }}
+    </div>
+
+    <div class="request head">
+        {{ gen_headers(request.headers) }}
+    </div>
+
+    <br/>
+
+    {% if request.body %}
+    {{ gen_body(request.body) }}
+    {% endif %}
+</div>
+{%- endmacro %}
+
+
+{% macro gen_response(response) -%}
+<div>
+    <div class="response elapsed">
+        {{ response.elapsed.total_seconds() }}s
+    </div>
+
+    <div class="response line">
+        {{ response.status_code }} {{ response.reason }}
+    </div>
+
+    <div class="response head">
+        {{ gen_headers(response.headers) }}
+    </div>
+
+    <br/>
+
+    {% if response.body %}
+    {{ gen_body(response.body) }}
+    {% endif %}
+</div>
+{%- endmacro %}
+
+
+{% macro gen_histories(histories) -%}
+    {% block histories scoped %}
+    <b>Http Requests:</b>
+    <table class="histories">
+        <thead style="background-color: #cccccc;">
+            <tr>
+                <th style="text-align: left">No.</th>
+                <th style="text-align: left">Content</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for request, response in histories %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>
+                    <b>Request</b>
+                    {{ gen_request(request) }}
+                    <br/>
+
+                    <b>Response:</b>
+                    {{ gen_response(response) }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endblock %}
+{%- endmacro %}
+
+
+{% macro gen_http_result(tc_record) -%}
+<a href="javascript:void(0)" onclick="toggleTestCaseResult('#tc-{{tc_record.id}} .tc-record-result');stopEventPropagation(event)">
+    <div>{{tc_record.get_status_name()}}</div>
+</a>
+<div class="tc-record-result" style="display: none;">
+    {% if tc_record.parameters %}
+        <div class="result-parameters" style="display: none;">
+            <b>Parameters:</b>
+            {{ gen_parameters(tc_record.parameters) }}
+        </div>
+    {% endif %}
+
+
+    {% if tc_record.checkpoints %}
+    {{ gen_checkpoints(tc_record.checkpoints) }}
+    {% endif %}
+
+    {% if tc_record.status == tc_record.Status.SKIPPED %}
+        <b>Reason:</b>
+        <div>{{ tc_record.error }}</div>
+    {% elif tc_record.error %}
+        <b>Exception:</b>
+        {{ gen_stacktrace(tc_record.error.traceback) }}
+    {% endif %}
+
+    {{ gen_histories(tc_record.histories) }}
+
+    {% if tc_record.rerun_causes %}
+        <br/>
+        {{ gen_rerun_causes(tc_record.rerun_causes) }}
+    {% endif %}
+
+    {% if tc_record.log_names %}
+        <br/>
+        {{ gen_log_names(tc_record.log_names) }}
+    {% endif %}
+</div>
+{%- endmacro %}
+
+
+{% block head %}
+{{ super() }}
+<style type="text/css">
+    table.histories {
+        margin: 0 2em 1em 2em !important;
+    }
+    table.histories th,
+    table.histories td {
+        font-size: 0.9em;
+    }
+</style>
+{% endblock %}
+
+
+{% block testsuite_columns %}
+<div style="float: right;">
+    <b>Columns:</b>
+    <input type="checkbox" name="number" checked onclick="onCheckColumn(this, '.column-number')"/>No.
+    <input type="checkbox" name="title" checked onclick="onCheckColumn(this, '.column-title')"/>Title
+    <input type="checkbox" name="path" onclick="onCheckColumn(this, '.column-path')"/>Path
+    <input type="checkbox" name="request" checked onclick="onCheckColumn(this, '.column-request')"/>Request.
+    <input type="checkbox" name="is_prerequisite" onclick="onCheckColumn(this, '.column-is-prerequisite')"/>Is Prerequisite
+    <input type="checkbox" name="start time" onclick="onCheckColumn(this, '.column-start-time')"/>Start Time
+    <input type="checkbox" name="finish time" onclick="onCheckColumn(this, '.column-finish-time')"/>Finish Time
+    <input type="checkbox" name="duration" checked onclick="onCheckColumn(this, '.column-duration')"/>Duration
+    <input type="checkbox" name="result" checked onclick="onCheckColumn(this, '.column-result')"/>Result
+</div>
+{% endblock %}
+
+
+{% block testsuite_table_head %}
+<tr>
+    <th class="column-number center-aligned">No.</th>
+    <th class="column-title left-aligned">Title</th>
+    <th class="column-path left-aligned" style="display:none;">Path</th>
+    <th class="column-request left-aligned">Request</th>
+    <th class="column-is-prerequisite center-aligned" style="display:none;">Is Prerequisite</th>
+    <th class="column-start-time center-aligned" style="display:none;">Start Time</th>
+    <th class="column-finish-time center-aligned" style="display:none;">Finish Time</th>
+    <th class="column-duration center-aligned">Duration</th>
+    <th class="column-result left-aligned">Result</th>
+</tr>
+{% endblock %}
+
+
+{% block testsuite_table_data scoped %}
+{% for tc_record in ts_record.records %}
+<tr id="tc-{{tc_record.id}}" class="tc-record {{tc_record.get_status_name()}}">
+    <td width="3%" class="column-number center-aligned">{{ loop.index }}</td>
+    <td width="25%" class="column-title">{{ tc_record.name }}</td>
+    <td width="10%" class="column-path" style="display:none;">{{ tc_record.path}}</td>
+    <td width="10%" class="column-request">{{ tc_record.request_line }}</td>
+    <td width="7%" class="column-is-prerequisite center-aligned" style="display:none;">{{ tc_record.is_prerequisite }}</td>
+    <td width="10%" class="column-start-time center-aligned" style="display:none;">{{ tc_record.start_time.__str__()[0:-3] if tc_record.start_time }}</td>
+    <td width="10%" class="column-finish-time center-aligned" style="display:none;">{{ tc_record.finish_time.__str__()[0:-3] if tc_record.finish_time }}</td>
+    <td width="5%" class="column-duration right-aligned">{{ '%.3f' | format(tc_record.duration) if tc_record.duration != None }}s</td>
+    <td class="column-result">
+        {{ gen_http_result(tc_record) }}
+    </td>
+</tr>
+{% endfor %}
+{% endblock %}

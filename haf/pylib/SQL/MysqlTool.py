@@ -16,9 +16,11 @@ class MysqlTool(object):
     '''
     def __init__(self):
         pass
+    
+    def __str__(self):
+        return "MysqlTool"
 
-    @staticmethod
-    def ConnectAndExecute(sqlconfig, sqlscript, **kwargs):
+    def ConnectAndExecute(self, sqlconfig, sqlscript, **kwargs):
         '''
         连接到数据库并执行脚本
 
@@ -29,11 +31,11 @@ class MysqlTool(object):
         '''
         
         sqlconfig = sqlconfig
-        connect_msql = None
+        self.connect_msql = None
         logger.log_print("info", "start connect to {}".format(str(sqlconfig.host)), "ConnectAndExecute")
         try:
-            connect_msql = pymysql.connect(sqlconfig.host, sqlconfig.username, sqlconfig.password, sqlconfig.database)
-            cursor_m = connect_msql.cursor()
+            self.connect_msql = pymysql.connect(sqlconfig.host, sqlconfig.username, sqlconfig.password, sqlconfig.database)
+            cursor_m = self.connect_msql.cursor()
             data = []
             if isinstance(sqlscript, list):
                 for ss in sqlscript:
@@ -45,8 +47,12 @@ class MysqlTool(object):
             return data
         except Exception as e:
             logger.log_print("error", str(e), "ConnectAndExecute")
-            if connect_msql is not None :
-                connect_msql.close()
+            if self.connect_msql is not None :
+                self.connect_msql.close()
+
+    def close(self):
+        if self.connect_msql is not None:
+            self.connect_msql.close()
 
 if __name__ == "__main__":
     connect_msql = pymysql.connect("192.168.41.68", "xztest", "nC0Dq1xDH6uq[K1of0V1", "corpus_qa")

@@ -27,6 +27,7 @@ class PytestCode(object):
         
         '''
         self.logger.log_print("info", "start")
+        self.logger.log_print("debug", testcases)
         if len(testcases) > 0:
             if not isinstance(testcases[0], HttpApiTestCase):
                 return False
@@ -55,8 +56,8 @@ class PytestCode(object):
             write_lines = """
 import pytest, os, sys, allure
 sys.path.append("../haf")
-from haf.run import Run
-#from haf.thirdparty.corpus_api.sqlcheck import sqlcheck
+from haf.runner import Run
+
 class Test_case_name:
         """
             write_lines = write_lines.replace("case_name", self.case_name)
@@ -73,8 +74,7 @@ class Test_case_name:
             write_lines = """
 import pytest, os, sys, allure
 sys.path.append("../haf")
-from haf.run import Run
-#from haf.thirdparty.corpus_api.sqlcheck import sqlcheck
+from haf.runner import Run
 class Test_case_name:
         """
             write_lines = write_lines.replace("case_name", self.case_name)
@@ -101,14 +101,16 @@ class Test_case_name:
     @allure.description("allure_description")
     @allure.story("allure_story")
     def test_pycode_template(self):
-        Run.run("testcase_parameters")
+        runner = Run("testcase_parameters")
+        runner.run()
         """
         else:
             pycode_template = """
     @allure.description("allure_description")
     @allure.story("allure_story")
     def test_pycode_template(self):
-        Run.run("testcase_parameters")
+        runner = Run("testcase_parameters")
+        runner.run()
         """
         if testcase.id is None and testcase.subid is None:
             return False
@@ -122,6 +124,5 @@ class Test_case_name:
         pycode_template = pycode_template.replace("allure_description", str(testcase.description))
         pycode_template = pycode_template.replace("allure_story", str(testcase.story))
         gl.set_value(params, testcase)
-
         return pycode_template
 

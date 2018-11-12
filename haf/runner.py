@@ -15,66 +15,71 @@ from haf.pylib.tools.debugprint import *
 from haf.setup.TestCaseReplace import TestCaseReplace
 from assertpy import assert_that
 #from haf.thirdparty.sqlcheck import sqlcheck
+from haf.testcase.HttpApiTestCase import HttpApiTestCase
+from multiprocessing import Process
 import urllib.request
 import importlib
 import http
 
 
 class_name = "Run"
-logger = LogController.getLogger(class_name)
+logger = LogController.getLogger(__name__)
 mst = SQLTool()
 
 class Run(object):
     '''
     pytest 执行文件的主执行程序
     '''
-    def __init__(self):
-        pass
+    def __init__(self, parameters):
+        Process.__init__(self)
+        self.parameters = parameters
 
-    @staticmethod
-    def run(parameters):
+    def run(self):
         '''
         每个 testcase 都会执行的程序
 
         * parameters: str 执行 的用例的名称， 用来获取对应的存取的实例
         
         '''
-        testcase = gl.get_value(parameters)
-        
-        logger.log_print("info", "start <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  " + parameters + " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", "run")
-        logger.log_print("info", parameters, "run")
+        testcase = self.parameters
+
+        if not isinstance(self.parameters, HttpApiTestCase):
+            testcase = gl.get_value(self.parameters)
+            testsuites = gl.getTestSuiteList()
+
+
+        logger.log_print("info", "start <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  " + str(self.parameters) + " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", "run")
+        logger.log_print("info", str(self.parameters), "run")
 
         testcase.start_time = logger.log_getsystime()
         testcase.result = False
 
         testcase.finish_time = logger.log_getsystime()
-        Run.SqlInit_step(testcase, casestr = str(testcase), sqlscript = testcase.sql_setup, sqlconfig = testcase.sql_config.host)
+        self.SqlInit_step(testcase, casestr = str(testcase), sqlscript = testcase.sql_setup, sqlconfig = testcase.sql_config.host)
     
         testcase.finish_time = logger.log_getsystime()
-        result = Run.RunHttpRequest_step(testcase, casestr = str(testcase), request_url = testcase.api_url, request_header = testcase.api_request_header, request_data = testcase.api_request_data, request_protocol =  testcase.api_protocol)
+        result = self.RunHttpRequest_step(testcase, casestr = str(testcase), request_url = testcase.api_url, request_header = testcase.api_request_header, request_data = testcase.api_request_data, request_protocol =  testcase.api_protocol)
         
         testcase.finish_time = logger.log_getsystime()
-        Run.CheckHttpBody_step(testcase, result, casestr = str(testcase), response = testcase.api_response, response_code = testcase.api_request_result, response_header = testcase.api_response_header, expect = testcase.api_expect_response, exclude = testcase.api_response_exclude)
+        self.CheckHttpBody_step(testcase, result, casestr = str(testcase), response = testcase.api_response, response_code = testcase.api_request_result, response_header = testcase.api_response_header, expect = testcase.api_expect_response, exclude = testcase.api_response_exclude)
     
         testcase.finish_time = logger.log_getsystime()
-        Run.SqlGet_step(testcase, sql_script=testcase.sql_get, sql_expect = testcase.expect_sql)
+        self.SqlGet_step(testcase, sql_script=testcase.sql_get, sql_expect = testcase.expect_sql)
 
         testcase.finish_time = logger.log_getsystime()
-        Run.SqlGetResultCheck_step(testcase, sql_get_result=testcase.sql_get_result, sql_expect = testcase.expect_sql)
+        self.SqlGetResultCheck_step(testcase, sql_get_result=testcase.sql_get_result, sql_expect = testcase.expect_sql)
 
         testcase.finish_time = logger.log_getsystime()
-        Run.SqlTeardown_step(testcase, sqlscript = testcase.sql_teardown, sqlconfig = testcase.sql_config.host)
+        self.SqlTeardown_step(testcase, sqlscript = testcase.sql_teardown, sqlconfig = testcase.sql_config.host)
 
         testcase.finish_time = logger.log_getsystime()
-        logger.log_print("info", "ok <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< " + parameters + " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", "run")
+        logger.log_print("info", "ok <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< " + str(self.parameters) + " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", "run")
 
-    @staticmethod
     def assert_that(result, expect):
         assert_that(result).is_equal_to(expect)
 
-    @staticmethod
     @allure.step('Http Request')
-    def RunHttpRequest_step(testcase, **kwargs):
+    def RunHttpRequest_step(self, testcase, **kwargs):
         '''
         执行 http 请求
 
@@ -126,9 +131,8 @@ class Run(object):
             if isinstance(getattr(testcase, attr), dict) and not attr.startswith("__") and not attr.endswith("__") and "othercasezhan" in getattr(testcase, attr):
                 tcr.switch(getattr(testcase, attr))
 
-    @staticmethod
     @allure.step('Check Http Response Body ')
-    def CheckHttpBody_step(testcase, result, **kwargs):
+    def CheckHttpBody_step(self, testcase, result, **kwargs):
         '''
         执行 http 请求结果检查
 
@@ -156,15 +160,13 @@ class Run(object):
             logger.log_print("info", "Failed", "CheckHttp")
             return check_result
            ''' 
-        
-    @staticmethod
-    def getIdSubidName(pv):
+
+    def getIdSubidName(self, pv):
         return getattr(pv, "id")
 
 
-    @staticmethod
     @allure.step("SQL Init")
-    def SqlInit_step(testcase, **kwargs):
+    def SqlInit_step(self, testcase, **kwargs):
         '''
         执行 sql init
 
@@ -178,9 +180,9 @@ class Run(object):
         testcase.sql_setup_result = mst.ConnectAndExecute(testcase.sql_config, testcase.sql_setup)
         logger.log_print("debug", str(testcase.sql_setup_result), "SQL Init")
     
-    @staticmethod
+
     @allure.step("SQL Teardown")
-    def SqlTeardown_step(testcase, **kwargs):
+    def SqlTeardown_step(self, testcase, **kwargs):
         '''
         执行 sql teardown
 
@@ -194,9 +196,8 @@ class Run(object):
         testcase.sql_teardown_result = mst.ConnectAndExecute(testcase.sql_config, testcase.sql_teardown)
         logger.log_print("debug", str(testcase.sql_teardown_result), "SQL Teardown")
 
-    @staticmethod
     @allure.step("SQL Get By Script")
-    def SqlGet_step(testcase, **kwargs):
+    def SqlGet_step(self, testcase, **kwargs):
         '''
         执行 sql get
         
@@ -209,11 +210,9 @@ class Run(object):
         logger.log_print("debug", str(testcase.sql_get), "SqlGet")
         testcase.sql_get_result = mst.ConnectAndExecute(testcase.sql_config, testcase.sql_get)
         logger.log_print("debug", str(testcase.sql_get_result), "SqlGet")
-    
-    
-    @staticmethod
+
     @allure.step("SQL Get Result Check")
-    def SqlGetResultCheck_step(testcase, **kwargs):
+    def SqlGetResultCheck_step(self, testcase, **kwargs):
         '''
         执行 sql get
         

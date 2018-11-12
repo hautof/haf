@@ -2,8 +2,8 @@ import os, sys, json ,time, pytest
 import allure
 import warnings
 
-from haf.SetUp import SetUp
-from haf.run import Run
+from haf.loader import SetUp
+from haf.runner import Run
 from haf.pylib.Log.LogController import LogController
 from haf.pylib.Report.ReportWrite import ReportWrite
 import haf.pylib.tools.globalvar as gl

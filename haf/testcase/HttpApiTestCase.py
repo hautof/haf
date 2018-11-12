@@ -36,6 +36,7 @@ class HttpApiTestCase(ApiTestCase):
         self.AttrNoneList.append("api_response_header")
         self.AttrNoneList.append("sql_setup_result")
         self.AttrNoneList.append("sql_teardown_result")
+        self.AttrNoneList.append("getName")
         self.api_request_header = None
         self.api_host_port = None
         self.api_method = None
@@ -104,6 +105,9 @@ class HttpApiTestCase(ApiTestCase):
             if not ( x.startswith("__") or x.endswith("__") ):
                 self.attrstr[x] = getattr(self, x)
         return str(self.attrstr)
+
+    def getName(self):
+        return "{}-{}.{}.{}".format( self.id, self.subid, self.name, self.subname)
 
         
 if __name__ == "__main__":

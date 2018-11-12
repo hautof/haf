@@ -2,8 +2,8 @@ import os, sys, json ,time, pytest
 import allure
 import warnings
 
-from haf.SetUp import SetUp
-from haf.run import Run
+from haf.loader import SetUp
+from haf.runner import Run
 from haf.pylib.Log.LogController import LogController
 from haf.pylib.Report.ReportWrite import ReportWrite
 import haf.pylib.tools.globalvar as gl
@@ -12,7 +12,8 @@ from haf.pylib.File.FileCopy import FileCopy
 from haf.setup.TestCaseReplace import TestCaseReplace
 from haf.pylib.tools.PlatformTool import PlatformTool
 from haf.pylib.File.JsonTool import JsonTool
-
+from haf.testcase.HttpApiTestCase import HttpApiTestCase
+from haf.testcase.TestSuite import TestSuite
 
 class FrameworkOfZhan(object):
     '''
@@ -32,6 +33,8 @@ class FrameworkOfZhan(object):
             self.reportpath = "./data/report/"
         
         gl._init()
+
+
 
     def runfromPy(self, filenames, allure=True, **kwargs):
         '''
@@ -132,7 +135,7 @@ class FrameworkOfZhan(object):
                 allure_path = self.logpath + filename_pure
 
                 if os.path.exists(report_path):
-                    for i in range(1,20):
+                    for i in range(1,2000):
                         if os.path.exists(report_path + "_" + str(i)):
                             i +=1
                         else:
@@ -140,12 +143,13 @@ class FrameworkOfZhan(object):
                             break
 
                 if os.path.exists(allure_path):
-                    for i in range(1,20):
+                    for i in range(1,2000):
                         if os.path.exists(allure_path + "_" + str(i)):
                             i +=1
                         else:
                             allure_path = allure_path + "_" + str(i)
                             break
+
             self.pytestrun(filename_pys, filenum, allure_path)
             if allure:
                 self.allurerun(allure_path, report_path, filename_pure)
@@ -160,6 +164,7 @@ class FrameworkOfZhan(object):
             onefilestr = "testcases/one.py"
             i = 0
             for filename in filenames: # 生成单个用例执行文件
+                testsuite = TestSuite()
                 if i == 0:
                     gl.set_value("onefile_first", True)
                     i = 1
@@ -167,7 +172,9 @@ class FrameworkOfZhan(object):
                 setup = SetUp()
                 filenum = 1
                 allure_path = self.logpath
-                setup.GenerateTestCasesFromXlsxFile(filename=filename, onefilestr=onefilestr, **kwargs)
+                testsuite.append_cases(setup.GenerateTestCasesFromXlsxFile(filename=filename, onefilestr=onefilestr, **kwargs))
+                testsuite.name = filename
+                gl.append(testsuite)
 
             filename_py= onefilestr
             filename_pure = "one"
@@ -176,7 +183,7 @@ class FrameworkOfZhan(object):
             allure_path = self.logpath + filename_pure
 
             if os.path.exists(report_path):
-                for i in range(1,20):
+                for i in range(1,2000):
                     if os.path.exists(report_path + "_" + str(i)):
                         i +=1
                     else:
@@ -184,25 +191,43 @@ class FrameworkOfZhan(object):
                         break
 
             if os.path.exists(allure_path):
-                for i in range(1,20):
+                for i in range(1,2000):
                     if os.path.exists(allure_path + "_" + str(i)):
                         i +=1
                     else:
                         allure_path = allure_path + "_" + str(i)
                         break
-            
-            self.pytestrun(filename_py, 1, allure_path)
 
-            if allure:
-                self.allurerun(allure_path, report_path, filename_pure)
-            
-            
-            if "public2tomcat" in kwargs and kwargs["public2tomcat"] is True:
-                #self.public2tomcat(report_path, kwargs["tomcatpath"])
-                self.public2tomcat("data/report/" + filename_pure, kwargs["tomcatpath"])
-            
-            if report_out_json:
-                self.createrjsonofreport()
+            if kwargs.get("runpytest"):
+                self.pytestrun(filename_py, 1, allure_path)
+
+                if allure:
+                    self.allurerun(allure_path, report_path, filename_pure)
+
+
+                if "public2tomcat" in kwargs and kwargs["public2tomcat"] is True:
+                    #self.public2tomcat(report_path, kwargs["tomcatpath"])
+                    self.public2tomcat("data/report/" + filename_pure, kwargs["tomcatpath"])
+
+                if report_out_json:
+                    self.createrjsonofreport()
+            else:
+                self.localrun()
+
+    def localrun(self):
+        testsuitelist = gl.getTestSuiteList()
+
+        for testsuite in testsuitelist:
+            if not isinstance(testsuite, TestSuite):
+                continue
+            for testcase in testsuite.test_cases:
+                try:
+                    if isinstance(testcase, HttpApiTestCase):
+                        runner = Run(testcase)
+                        runner.run()
+                except Exception as e:
+                    self.logger.log_print("debug", e)
+
 
     def pytestrun(self, filename, filenum, allure_path):
         '''
@@ -224,7 +249,6 @@ class FrameworkOfZhan(object):
             runparam += " --alluredir "  + allure_path 
             runparam += " --html "  + allure_path + "/mail.html"
             pytest.main(runparam)
-            
             gl.set_value("finish_time", self.logger.log_getsystime())
             return True
         except Exception as e:

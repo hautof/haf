@@ -39,3 +39,4 @@ class ReportWrite(object):
         print(cmdstr)
         os.system(cmdstr)
         return True
+    

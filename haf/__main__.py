@@ -1,6 +1,9 @@
 #encoding='utf-8'
+import ast
+
 from haf.framework_corpus_api import FrameworkOfZhan
 import os, sys
+import argparse
 """
 this is main.py
 执行整个框架的入口函数
@@ -25,14 +28,13 @@ def AutoRun(para):
         if f.endswith(".xlsx") and not f.startswith("~$"):
             filelist.append('testcases/' + f)
     foz = FrameworkOfZhan()
-    if para is None:
-        foz.runfromXlsx(filelist, public2tomcat=True, onefile=True, tomcatpath=r"D:\workspace\mine\python\autotestframework\base\binary\tomcat\webapps\zhan")
-    else:
-        foz.runfromXlsx(filelist, public2tomcat=True, onefile=True, tomcatpath=r"D:\workspace\mine\python\autotestframework\base\binary\tomcat\webapps\zhan", ids=para)
+    temp = {"ids":para.ids, "runpytest":para.runpytest}
 
+    foz.runfromXlsx(filelist, public2tomcat=True, onefile=True, pytest=True,
+                    tomcatpath=r"D:\workspace\mine\python\autotestframework\base\binary\tomcat\webapps\zhan",
+                    **temp)
 
 def RunPys():
-    
     filelist = []
     for f in os.listdir("testcases"):
         if f.endswith(".py") and not f.startswith("~$"):
@@ -40,17 +42,17 @@ def RunPys():
     foz = FrameworkOfZhan()
     foz.runfromPy(filelist, public2tomcat=True, tomcatpath=r"D:\workspace\\mine\\python\\autotestframework\\base\\binary\\tomcat\\webapps\\zhan\\")
 
-def main():
-    #LocalRun()
-    print(sys.argv)
-    len_argv = len(sys.argv)
-    if len_argv > 1:
-        para = sys.argv[1:]
-    else:
-        para = None
-    print(para)
-    AutoRun(para)
-    #RunPys()
 
+
+
+def main():
+    program = argparse.ArgumentParser()
+    program.add_argument("--runpytest", "-rpt", required=False, type=ast.literal_eval, help="true for run, false for not run")
+    program.add_argument("--ids", "-id", action="append", required=False, default=[], help="ids for testcases")
+
+    args = program.parse_args()
+
+    print(args)
+    AutoRun(args)
 
 main()

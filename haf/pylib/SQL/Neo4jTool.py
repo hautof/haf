@@ -19,8 +19,10 @@ class Neo4j(object):
     def __init__(self):
         pass
 
-    @staticmethod
-    def ConnectAndExecute(sqlconfig, sqlscript, **kwargs):
+    def __str__(self):
+        return "Neo4j"
+
+    def ConnectAndExecute(self, sqlconfig, sqlscript, **kwargs):
         '''
         连接到数据库并执行脚本
 
@@ -31,16 +33,20 @@ class Neo4j(object):
         '''
         
         sqlconfig = sqlconfig
-        connect_redis = None
+        self.connect_neo4j = None
         logger.log_print("info", "start connect to " + str(sqlconfig.host), "ConnectAndExecute")
         try:
-            connect_neo4j = Graph(host=sqlconfig.host, port=sqlconfig.port, username=sqlconfig.username, password=sqlconfig.passowrd, db=sqlconfig.database)
+            self.connect_neo4j = Graph(host=sqlconfig.host, port=sqlconfig.port, username=sqlconfig.username, password=sqlconfig.passowrd, db=sqlconfig.database)
             logger.log_print("info", "type is {}".format(str(connect_neo4j.type(sqlscript))), "ConnectAndExecute")
-            connect_neo4j.begin()
-            data = connect_neo4j.run(sqlscript)
+            self.connect_neo4j.begin()
+            data = self.connect_neo4j.run(sqlscript)
             return data.data()
         except Exception as e:
             logger.log_print("error", str(e), "ConnectAndExecute")
+
+    def close(self):
+        if self.connect_neo4j is not None:
+            self.connect_neo4j.close()
 
 if __name__ == "__main__":
     sqlconfig = SQLConfig()

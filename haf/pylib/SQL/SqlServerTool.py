@@ -17,8 +17,11 @@ class SqlServerTool(object):
     def __init__(self):
         pass
 
-    @staticmethod
-    def ConnectAndExecute(sqlconfig, sqlscript, **kwargs):
+    def __str__(self):
+        return "SqlServerTool"
+
+
+    def ConnectAndExecute(self, sqlconfig, sqlscript, **kwargs):
         '''
         连接到数据库并执行脚本
 
@@ -29,13 +32,13 @@ class SqlServerTool(object):
         '''
 
         sqlconfig = sqlconfig
-        connect_msql = None
+        self.connect_msql = None
         logger.log_print("info", "start connect to {}".format(str(sqlconfig.host)), "ConnectAndExecute")
         try:
             logger.log_print("info", "start connect to {}".format(str(sqlconfig.database)), "ConnectAndExecute")
-            connect_msql = pymssql.connect(sqlconfig.host, sqlconfig.username, sqlconfig.password, sqlconfig.database)
+            self.connect_msql = pymssql.connect(sqlconfig.host, sqlconfig.username, sqlconfig.password, sqlconfig.database)
 
-            cursor_m = connect_msql.cursor()
+            cursor_m = self.connect_msql.cursor()
             data = []
             if isinstance(sqlscript, list):
                 for ss in sqlscript:
@@ -50,19 +53,23 @@ class SqlServerTool(object):
                     logger.log_print("info", "start execute {}".format(sqlscript), "ConnectAndExecute")
                     cursor_m.execute(sqlscript)
                     data = cursor_m.fetchall()
-                    connect_msql.close()
+                    self.connect_msql.close()
                     
                     logger.log_print("info", "result {}".format(str(data)), "ConnectAndExecute")
 
                 else :
-                    connect_msql.close()
+                    self.connect_msql.close()
                     return False
-            connect_msql.close()
+            self.connect_msql.close()
             return data
         except Exception as e:
             logger.log_print("error", str(e), "ConnectAndExecute")
-            if connect_msql is not None :
-                connect_msql.close()
+            if self.connect_msql is not None :
+                self.connect_msql.close()
+
+    def close(self):
+        if self.connect_msql is not None:
+            self.connect_msql.close()
 
 if __name__ == "__main__":
     

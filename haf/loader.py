@@ -80,11 +80,11 @@ class SetUp(object):
                     continue
                 else:                    
                     testcasecontroller = TestCaseController()
-                    
                     testcase = HttpApiTestCase()
                     if CheckHttpApiTestCase.checkKwargs(testcase, rows_dict):
                         testcase = testcasecontroller.CreateHttpApiTestCase(rows_dict)
-                        if "ids" not in kwargs:
+                        if kwargs.get("ids") is None or kwargs.get("ids") == []:
+                            self.logger.log_print("info", "---> debug -1" + str(testcases))
                             testcases.append(testcase)
                         else:
                             ids = [str(id) for id in kwargs["ids"]]
@@ -92,14 +92,13 @@ class SetUp(object):
                                 testcases.append(testcase)
                                 self.logger.log_print("info", ".......................................................", str(testcase.id) + "." + str(testcase.subid))
                     break
-                
-        
+
         filename = filename.split(".")[-2]
         if "onefile" not in kwargs:
             self.pytestcode.generateCodeFile(testcases, filename=filename)
         else :
             self.pytestcode.generateCodeFile(testcases, filename=filename, **kwargs)
-        
+
         self.logger.log_print("info", "---> debug 0")
         if gl.get_value("testcases") is None:
             self.logger.log_print("info", "---> debug 1" + str(testcases))
