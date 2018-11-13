@@ -63,7 +63,6 @@ class HttpApiTestCase(ApiTestCase):
         '''
         构造器
         '''
-        self.logger.log_print("info", "start", "constructor")
         args_init = {}
         if len(args) > 0 and isinstance(args[0], dict):
             args_init = args[0]
@@ -96,7 +95,6 @@ class HttpApiTestCase(ApiTestCase):
         self.api_method = args_init.get("api_method")
         lofsql = [[y.replace(" ", "").strip() for y in x.split("|")]  for x in JsonTool.Str2List(args_init.get("sql_getlist"), ";")]
         self.sql_getlist = lofsql if len(lofsql) != 1 else lofsql[0]
-        self.logger.log_print("info", "ok", "constructor")
 
 
     def __str__(self):

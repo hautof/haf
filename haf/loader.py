@@ -84,7 +84,6 @@ class SetUp(object):
                     if CheckHttpApiTestCase.checkKwargs(testcase, rows_dict):
                         testcase = testcasecontroller.CreateHttpApiTestCase(rows_dict)
                         if kwargs.get("ids") is None or kwargs.get("ids") == []:
-                            self.logger.log_print("info", "---> debug -1" + str(testcases))
                             testcases.append(testcase)
                         else:
                             ids = [str(id) for id in kwargs["ids"]]
@@ -99,18 +98,14 @@ class SetUp(object):
         else :
             self.pytestcode.generateCodeFile(testcases, filename=filename, **kwargs)
 
-        self.logger.log_print("info", "---> debug 0")
         if gl.get_value("testcases") is None:
-            self.logger.log_print("info", "---> debug 1" + str(testcases))
             gl.set_value("testcases", testcases)
         else:
-            self.logger.log_print("info", "---> debug 2")
             cases = gl.get_value("testcases")
             for case in testcases:
                 cases.append(case)
             gl.set_value("testcases", gl.get_value("testcases"))
-        
-        self.logger.log_print("info", "---> debug x" + str(testcases))
+
         xlsx.close()
         return testcases
         

@@ -14,7 +14,8 @@ requires = [
             'paramiko',
             'pytest-html',
             'redis',
-            'assertpy'
+            'assertpy',
+            'argparse'
         ]
 
 with open('ReadMe.md', encoding='utf8') as f:
@@ -42,7 +43,7 @@ package_extras.extend(package_files('{}/check'.format(PACKAGE_NAME)))
 
 setup(
     name = 'haf',
-    version = '1.1.5',
+    version = '1.1.6',
     author = 'wei.meng',
     author_email = 'mengwei1101@hotmail.com',    
     long_description = long_description,

@@ -41,14 +41,19 @@ class Run(object):
         * parameters: str 执行 的用例的名称， 用来获取对应的存取的实例
         
         '''
+
+        case_name = None
         testcase = self.parameters
 
         if not isinstance(self.parameters, HttpApiTestCase):
             testcase = gl.get_value(self.parameters)
+            case_name = str(self.parameters)
             testsuites = gl.getTestSuiteList()
+        else:
+            case_name = testcase.getName()
 
 
-        logger.log_print("info", "start <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  " + str(self.parameters) + " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", "run")
+        logger.log_print("info", "start <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  {} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<".format(case_name), "run")
         logger.log_print("info", str(self.parameters), "run")
 
         testcase.start_time = logger.log_getsystime()
@@ -73,7 +78,7 @@ class Run(object):
         self.SqlTeardown_step(testcase, sqlscript = testcase.sql_teardown, sqlconfig = testcase.sql_config.host)
 
         testcase.finish_time = logger.log_getsystime()
-        logger.log_print("info", "ok <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< " + str(self.parameters) + " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<", "run")
+        logger.log_print("info", "ok <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< {} <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<".format(case_name), "run")
 
     def assert_that(result, expect):
         assert_that(result).is_equal_to(expect)

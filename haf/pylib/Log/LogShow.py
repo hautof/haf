@@ -21,7 +21,7 @@ class LogShow(object):
         self.logflag = logflag
         self.log_set_rank()
         #[%(funcName)s] 
-        logging.basicConfig(level = logging.DEBUG,format = '%(asctime)s %(levelname)s [%(name)s] %(message)s')
+        logging.basicConfig(level = logging.INFO,format = '%(asctime)s %(levelname)s [%(name)s] %(message)s')
         self.logger = logging.getLogger(logflag)
          
     def __str__(self):

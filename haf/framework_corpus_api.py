@@ -1,4 +1,7 @@
+import logging
 import os, sys, json ,time, pytest
+from contextlib import contextmanager
+
 import allure
 import warnings
 
@@ -212,11 +215,14 @@ class FrameworkOfZhan(object):
                 if report_out_json:
                     self.createrjsonofreport()
             else:
-                self.localrun()
+                FrameworkOfZhan.localrun()
 
-    def localrun(self):
+    @staticmethod
+    def localrun():
+        logger = logging.getLogger(__name__)
+
         testsuitelist = gl.getTestSuiteList()
-
+        logger.debug("local run ...")
         for testsuite in testsuitelist:
             if not isinstance(testsuite, TestSuite):
                 continue
@@ -226,7 +232,9 @@ class FrameworkOfZhan(object):
                         runner = Run(testcase)
                         runner.run()
                 except Exception as e:
-                    self.logger.log_print("debug", e)
+                    logger.debug(e)
+            logger.debug(testsuite.pass_count)
+            logger.debug(testsuite.fail_count)
 
 
     def pytestrun(self, filename, filenum, allure_path):

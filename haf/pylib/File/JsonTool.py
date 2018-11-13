@@ -18,7 +18,6 @@ class JsonTool(object):
         pass
         self.class_name = "JsonTool"
         self.json_res = {}
-        self.logtool = LogShow(self.class_name)
 
     def __str__(self):
         return self.class_name
@@ -118,7 +117,6 @@ class JsonTool(object):
             tempstr = strs.split(split)
             for t in tempstr:
                 t = t.strip()
-            logger.log_print("info", tempstr, "Str2List")
             return tempstr
         except Exception as e:
             logger.log_print("error", e, "Str2Json")

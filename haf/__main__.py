@@ -43,8 +43,6 @@ def RunPys():
     foz.runfromPy(filelist, public2tomcat=True, tomcatpath=r"D:\workspace\\mine\\python\\autotestframework\\base\\binary\\tomcat\\webapps\\zhan\\")
 
 
-
-
 def main():
     program = argparse.ArgumentParser()
     program.add_argument("--runpytest", "-rpt", required=False, type=ast.literal_eval, help="true for run, false for not run")

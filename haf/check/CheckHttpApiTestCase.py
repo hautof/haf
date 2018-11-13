@@ -35,10 +35,10 @@ class CheckHttpApiTestCase(object):
                         self.logger.log_print("error", "check args attr : %s is not found in xlsx file" % attr, "checkKwargs")
                         return False
                     else:
-                        self.logger.log_print("debug", "check args attr : %s is found in AttrNoneList" % attr, "checkKwargs")
+                        #self.logger.log_print("debug", "check args attr : %s is found in AttrNoneList" % attr, "checkKwargs")
                         continue
                 else:
-                    self.logger.log_print("debug", "check args attr : %s is found in xlsx file = %s" % (attr, arg.get(attr)), "checkKwargs")
+                    #self.logger.log_print("debug", "check args attr : %s is found in xlsx file = %s" % (attr, arg.get(attr)), "checkKwargs")
                     continue
         else:   
             for kwarg in kwargs:         

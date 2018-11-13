@@ -63,10 +63,16 @@
 
 ## Release Note
 
+### version 1.1.6
+
+* add argparse to make arg tool
+* local runner to replace pytest (dev)
+* testsuite support (dev)
+* testresult support (dev)
+
 ### version 1.1.5
 
 * add assertpy support
-
 
 ### version 1.1.3
 

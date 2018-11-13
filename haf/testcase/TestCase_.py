@@ -19,7 +19,6 @@ class TestCase_(object):
         '''
         初始化 测试用例基本内容
         '''
-        self.logger.log_print("info", "_init start", "_init")
         self.AttrNoneList = ["result", "error", "AttrNoneList", "class_name", "initTestCase", "logger"]
         self.id = ""
         self.name = ""

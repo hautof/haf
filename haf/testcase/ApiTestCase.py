@@ -21,7 +21,6 @@ class ApiTestCase(TestCase_):
         '''
         初始化 ApiTestCase
         '''
-        self.logger.log_print("info", "start", "_init")
         self.AttrNoneList.append("api_request_data")
         self.AttrNoneList.append("api_request_result")
         self.AttrNoneList.append("initApiTestCase")
