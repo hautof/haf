@@ -24,9 +24,12 @@ def AutoRun(para):
     自动读取所有的 testcases 文件
     '''
     filelist = []
-    for f in os.listdir("testcases"):
-        if f.endswith(".xlsx") and not f.startswith("~$"):
-            filelist.append('testcases/' + f)
+    if para.case.endswith(".xlsx"):
+        filelist.append(para.case)
+    else:
+        for f in os.listdir("testcases"):
+            if f.endswith(".xlsx") and not f.startswith("~$"):
+                filelist.append('testcases/' + f)
     foz = FrameworkOfZhan()
     temp = {"ids":para.ids, "runpytest":para.runpytest}
 
@@ -47,9 +50,14 @@ def main():
     program = argparse.ArgumentParser()
     program.add_argument("--runpytest", "-rpt", required=False, type=ast.literal_eval, help="true for run, false for not run")
     program.add_argument("--ids", "-id", action="append", required=False, default=[], help="ids for testcases")
+    program.add_argument("--case", "-c", required=True, default="testcases", help="the case's path")
 
     args = program.parse_args()
 
+    if not os.path.exists(args.case):
+        print("case [{}] do not exist! please check your input of case!".format(args.case))
+        sys.exit(1)
+        
     print(args)
     AutoRun(args)
 
