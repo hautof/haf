@@ -1,6 +1,8 @@
-# haf
-
+# haf    
+    
     The auto test framework. 
+    
+[![Build Status](https://travis-ci.org/tsbxmw/haf.svg?branch=master)](https://travis-ci.org/tsbxmw/haf)
 
 
 > based on pytest & allure
