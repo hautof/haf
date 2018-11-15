@@ -1,8 +1,9 @@
 # haf
 
-    The http api auto test framework. 
+    The auto test framework. 
 
 > based on pytest & allure
+
 > xlsx easy cases
 
 ## How to get it
@@ -26,7 +27,7 @@
 ### run 
 
 ```shell
-    python -m haf
+    python -m haf --case=testcases
 ```
 
 ## 可能用到的知识

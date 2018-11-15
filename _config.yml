@@ -1,0 +1,7 @@
+theme: jekyll-theme-modernist
+
+title: "AutoTest Framework"
+description: "make autotest easy and better"
+
+show_downloads: true
+google_analytics:
