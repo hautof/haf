@@ -1,15 +1,24 @@
-# encoding = utf-8
+# encoding='utf-8'
+
+from haf.config import *
 
 
-import haf.pylib.tools.globalvar as gl
-
-from haf.pylib.Log.LogController import LogController
-
-logger = LogController.getLogger(__name__)
-
-
-class TestResult(object):
+class BaseResult(object):
     def __init__(self):
-        self.start_time = None
-        self.finish_time = None
-        
+        self.message_type = MESSAGE_TYPE_RESULT
+        self._init_all()
+
+    def _init_all(self):
+        self.begin_time = None
+        self.end_time = None
+        self.use_time = None
+        self.result = None
+
+
+class HttpApiResult(BaseResult):
+    def __init__(self):
+        super().__init__()
+        self.message_type = MESSAGE_TYPE_RESULT
+
+    def _init_all(self):
+        self.sql = None
