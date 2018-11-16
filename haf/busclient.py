@@ -24,7 +24,7 @@ class BusClient(object):
         InfoManager.register("get_case")
         InfoManager.register("get_result")
         InfoManager.register("get_bench")
-        logger.debug("busclient {} ".format(1))
+        InfoManager.register("get_system")
         self.info_manager = InfoManager(address=('127.0.0.1', self.port), authkey=self.auth_key)
         self.info_manager.connect()
 
@@ -40,3 +40,5 @@ class BusClient(object):
     def get_bench(self):
         return self.info_manager.get_bench()
 
+    def get_system(self):
+        return self.info_manager.get_system()

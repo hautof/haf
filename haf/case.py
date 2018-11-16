@@ -1,5 +1,5 @@
 # encoding='utf-8'
-
+from haf.apihelper import Request, Response, Ids, Expect
 from haf.config import  *
 from haf.result import BaseResult, HttpApiResult
 
@@ -12,10 +12,10 @@ class BaseCase(object):
         self.name = None
         self.id = None
         self.subid = None
-        self.bentch = None
         self.type = None
         self.expect = None
-        self.result = BaseResult()
+        self.run = True
+        self.AttrNoneList = ["result", "error", "AttrNoneList", ]
 
 
 class HttpApiCase(BaseCase):
@@ -23,10 +23,25 @@ class HttpApiCase(BaseCase):
         super().__init__()
         self.type = CASE_TYPE_BASE
         self.message_type = MESSAGE_TYPE_CASE
-        self.result = HttpApiResult()
+        self._init_all()
 
     def _init_all(self):
-        self.request = None
-        self.response = None
-        self.sql = None
-        self.expect = None
+        self.ids = Ids()
+        self.run = True
+        self.request = Request()
+        self.expect = Expect()
+        self.response = Response()
+
+    def constructor(self, *args, **kwargs):
+        args_init = {}
+        if len(args) > 0 and isinstance(args[0], dict):
+            args_init = args[0]
+        else:
+            args_init = kwargs
+
+        self.ids.constructor(args_init)
+        self.run = args_init.get("run")
+        self.request.constructor(args_init)
+        self.response.constructor(args_init)
+        self.expect.constructor(args_init)
+

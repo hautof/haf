@@ -19,6 +19,8 @@ class HttpApiResult(BaseResult):
     def __init__(self):
         super().__init__()
         self.message_type = MESSAGE_TYPE_RESULT
+        self._init_all()
 
     def _init_all(self):
         self.sql = None
+        self.case = None
