@@ -2,9 +2,17 @@
 '''
 # BusClient
 '''
-from haf.config import BUS_DOMAIN, BUS_PORT, BUS_AUTH_KEY
-from haf.message import InfoManager
+from multiprocessing.managers import BaseManager
+from haf.config import *
+from haf.log import Log
 
+logger = Log.getLogger(__name__)
+
+
+class InfoManager(BaseManager): pass
+'''
+# InfoManager
+'''
 
 class BusClient(object):
     def __init__(self):
@@ -12,15 +20,13 @@ class BusClient(object):
         self.port = BUS_PORT
         self.auth_key = BUS_AUTH_KEY
         self.queue = None
-        self.add_method()
-        self.info_manager = InfoManager(address=('127.0.0.1', self.port), authkey=self.auth_key)
-        self.info_manager.connect()
-
-    def add_method(self):
         InfoManager.register("get_param")
         InfoManager.register("get_case")
         InfoManager.register("get_result")
         InfoManager.register("get_bench")
+        logger.debug("busclient {} ".format(1))
+        self.info_manager = InfoManager(address=('127.0.0.1', self.port), authkey=self.auth_key)
+        self.info_manager.connect()
 
     def get_case(self):
         return self.info_manager.get_case()

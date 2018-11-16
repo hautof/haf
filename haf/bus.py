@@ -5,16 +5,20 @@
 # system bus, using to transfer message from service to service
 #
 '''
-
-
+from multiprocessing.managers import BaseManager
 from queue import Queue
 from multiprocessing import Process
 from haf.config import BUS_DOMAIN, BUS_PORT, BUS_AUTH_KEY
-from haf.message import InfoManager, MessageDict
+from haf.message import MessageDict
+from haf.log import Log
 
-import logging
-logger = logging.getLogger(__name__)
+logger = Log.getLogger(__name__)
 
+class InfoManager(BaseManager): pass
+'''
+# InfoManager
+#
+'''
 
 class BusServer(Process):
     '''
@@ -30,31 +34,20 @@ class BusServer(Process):
         self.is_stop = False
         self.daemon = True
 
-    # register method to InfoManager
-    def add_method(self):
-        case = Queue()
-        InfoManager.register("get_case", callable=lambda: case)
-        param = Queue()
-        InfoManager.register("get_param", callable=lambda: param)
-        result = Queue()
-        InfoManager.register("get_result", callable=lambda: result)
-        bench = MessageDict()
-        InfoManager.register("get_bench", callable=lambda: bench)
-
     def start_manager_server(self):
         case = Queue()
-        InfoManager.register("get_case", callable=lambda: case)
         param = Queue()
-        InfoManager.register("get_param", callable=lambda: param)
         result = Queue()
-        InfoManager.register("get_result", callable=lambda: result)
         bench = MessageDict()
+        InfoManager.register("get_case", callable=lambda: case)
+        InfoManager.register("get_param", callable=lambda: param)
+        InfoManager.register("get_result", callable=lambda: result)
         InfoManager.register("get_bench", callable=lambda: bench)
         self.queue_manager = InfoManager(address=('', self.port), authkey=self.auth_key)
         self.server = self.queue_manager.get_server()
 
     def run(self):
-        self.add_method()
+        logger.debug("start Bus {}".format(self.pid))
         self.start_manager_server()
         self.server.serve_forever()
 

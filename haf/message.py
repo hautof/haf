@@ -1,17 +1,7 @@
 #encoding='utf-8'
 
-from multiprocessing.managers import BaseManager
-from queue import Queue
-
 from haf.case import HttpApiCase
 from haf.result import HttpApiResult
-
-
-class InfoManager(BaseManager): pass
-'''
-# InfoManager
-#
-'''
 
 
 class MessageDict(object):
