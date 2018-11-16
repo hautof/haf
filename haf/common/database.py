@@ -1,7 +1,7 @@
 # encoding='utf-8'
 
 from sqlalchemy.dialects.mysql import pymysql
-from haf.log import Log
+from haf.common.log import Log
 import pymysql
 
 logger = Log.getLogger(__name__)

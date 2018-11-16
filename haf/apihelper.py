@@ -1,4 +1,5 @@
 # encoding='utf-8'
+
 from haf.config import CASE_HTTP_API_METHOD_GET, CASE_HTTP_API_METHOD_POST
 
 
@@ -60,8 +61,5 @@ class Expect(object):
         self.sql_check_func = inputs.get("expect_sql")
         self.sql_body_check_key = inputs.get("sql_getlist", [])
 
-class ApiRunner(object):
-    def __init__(self):
-        pass
 
-    
+

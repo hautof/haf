@@ -9,9 +9,9 @@ import time
 from multiprocessing.managers import BaseManager
 from queue import Queue
 from multiprocessing import Process
-from haf.config import BUS_DOMAIN, BUS_PORT, BUS_AUTH_KEY, SIGNAL_STOP, SIGNAL_BUS_END
+from haf.config import BUS_DOMAIN, BUS_PORT, BUS_AUTH_KEY, SIGNAL_BUS_END
 from haf.message import MessageDict
-from haf.log import Log
+from haf.common.log import Log
 
 logger = Log.getLogger(__name__)
 

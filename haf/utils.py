@@ -1,9 +1,16 @@
 # encoding = 'utf-8'
-from gevent import os
+import os
+import urllib
 
-from haf.database import MysqlTool
-from haf.log import Log
-from openpyxl import Workbook, load_workbook
+from haf.apihelper import Request, Response
+from haf.common.database import MysqlTool
+from haf.common.log import Log
+from openpyxl import load_workbook
+
+from haf.config import CASE_HTTP_API_METHOD_GET, CASE_HTTP_API_METHOD_POST, CASE_HTTP_API_METHOD_PUT
+from haf.common.httprequest import HttpController
+
+from http.client import HTTPResponse
 
 logger = Log.getLogger(__name__)
 
@@ -87,4 +94,34 @@ class Utils(object):
             return result
         except Exception as e:
             logger.error(e)
+
+
+    @staticmethod
+    def http_request(request:Request) :
+        header = request.header
+        data = request.data
+        method = request.method
+        url = request.url
+
+        response = Response()
+        result = None
+        if method == CASE_HTTP_API_METHOD_GET:
+            result = HttpController.get(url, data, header)
+        elif method == CASE_HTTP_API_METHOD_POST:
+            result = HttpController.post(url, data, header)
+        if method == CASE_HTTP_API_METHOD_PUT:
+            result = HttpController.put(url, data, header)
+
+        if isinstance(result, HTTPResponse):
+            response.header = result.headers
+            response.body = result.read()
+            response.code = result.code
+        elif isinstance(result,urllib.request.URLError) or isinstance(result, urllib.request.HTTPError) or isinstance(result, urllib.request.HTTPHandler):
+            response.body =  {}
+            response.code = result.code
+            response.header = result.info()
+
+        return response
+
+
 

@@ -5,7 +5,7 @@ from multiprocessing import Process
 from haf.bench import HttpApiBench
 from haf.busclient import BusClient
 from haf.case import HttpApiCase
-from haf.log import Log
+from haf.common.log import Log
 from haf.config import *
 from haf.utils import Utils
 

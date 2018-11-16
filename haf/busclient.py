@@ -4,7 +4,7 @@
 '''
 from multiprocessing.managers import BaseManager
 from haf.config import *
-from haf.log import Log
+from haf.common.log import Log
 
 logger = Log.getLogger(__name__)
 

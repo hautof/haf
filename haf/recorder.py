@@ -3,7 +3,7 @@ import time
 from multiprocessing import Process
 
 from haf.busclient import BusClient
-from haf.log import Log
+from haf.common.log import Log
 from haf.result import HttpApiResult
 from haf.config import *
 
@@ -23,7 +23,7 @@ class Recorder(Process):
             if not results.empty() :
                 result = results.get()
                 if isinstance(result, HttpApiResult):
-                    logger.debug("recorder {} -- {}".format(self.pid, result))
+                    logger.debug("recorder {} -- {}".format(self.pid, result.result))
                 elif result == SIGNAL_RESULT_END:
                     self.end_handler()
                     break
