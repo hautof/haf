@@ -1,18 +1,19 @@
 # encoding = 'utf-8'
+import json
 import os
+import time
 import urllib
 
 from haf.apihelper import Request, Response
 from haf.common.database import MysqlTool
 from haf.common.log import Log
 from openpyxl import load_workbook
-
-from haf.config import CASE_HTTP_API_METHOD_GET, CASE_HTTP_API_METHOD_POST, CASE_HTTP_API_METHOD_PUT
+from haf.config import *
 from haf.common.httprequest import HttpController
-
 from http.client import HTTPResponse
 
 logger = Log.getLogger(__name__)
+
 
 class Utils(object):
 
@@ -41,15 +42,18 @@ class Utils(object):
             data = func_obj.connect_execute(sqlconfig, sqlscript, **kwargs)
             return data
         except Exception as e:
-            logger.log_print("debug", e)
+            logger.debug(e)
         finally:
-            logger.log_print("debug", func_obj)
+            logger.debug(func_obj)
             if func_obj is not None:
                 func_obj.close()
 
-
     @staticmethod
     def get_rows_from_xlsx(filename):
+        '''
+        :param filename: 文件名
+        :return:
+        '''
         if not filename.endswith("xlsx"):
             return {}
         if not os.path.exists(filename):
@@ -98,6 +102,13 @@ class Utils(object):
 
     @staticmethod
     def http_request(request:Request) :
+        '''
+        http request
+        :param request: Request
+        :return: Response
+        '''
+        logger.debug("Utils - {}.{}.{}".format(request.method, request.header, request.data))
+
         header = request.header
         data = request.data
         method = request.method
@@ -112,9 +123,13 @@ class Utils(object):
         if method == CASE_HTTP_API_METHOD_PUT:
             result = HttpController.put(url, data, header)
 
+        logger.debug(type(result))
         if isinstance(result, HTTPResponse):
             response.header = result.headers
-            response.body = result.read()
+            try:
+                response.body = json.loads(result.read())
+            except :
+                response.body = result.read()
             response.code = result.code
         elif isinstance(result,urllib.request.URLError) or isinstance(result, urllib.request.HTTPError) or isinstance(result, urllib.request.HTTPHandler):
             response.body =  {}
@@ -123,5 +138,29 @@ class Utils(object):
 
         return response
 
+    @staticmethod
+    def get_datetime_now():
+        '''
+        get datetime now to str
+        :return: time now str
+        '''
+        current_time = time.time()
+        local_time = time.localtime(current_time)
+        time_temp = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
+        secs = (current_time - int(current_time)) * 1000
+        timenow = "%s %03d" % (time_temp, secs)
+        return timenow
 
-
+    @staticmethod
+    def jsontool(input):
+        '''
+        deal with json object
+        :param input:
+        :return:
+        '''
+        try:
+            output = json.loads(input)
+            return output
+        except Exception as e:
+            logger.error(e)
+            return {"input":input}

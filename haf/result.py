@@ -24,3 +24,5 @@ class HttpApiResult(BaseResult):
     def _init_all(self):
         self.sql = None
         self.case = None
+        self.result_check_response = False
+        self.result_check_sql_response = False

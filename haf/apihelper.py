@@ -1,4 +1,6 @@
 # encoding='utf-8'
+import importlib
+import json
 
 from haf.config import CASE_HTTP_API_METHOD_GET, CASE_HTTP_API_METHOD_POST
 
@@ -12,9 +14,8 @@ class Request(object):
         self.protocol = ""
 
     def constructor(self, inputs:dict={}):
-        self.header = inputs.get("header", {})
-        self.data = inputs.get("data", {})
-        self.url = inputs.get("url", "")
+        self.header = json.loads(inputs.get("request_header"))
+        self.data = json.loads(inputs.get("request_data"))
         method = inputs.get("method", CASE_HTTP_API_METHOD_GET)
         if str(method) == "get":
             self.method = CASE_HTTP_API_METHOD_GET
@@ -22,6 +23,10 @@ class Request(object):
             self.method = CASE_HTTP_API_METHOD_POST
 
         self.protocol = inputs.get("protocl", "http")
+        self.host_port = inputs.get("host_port")
+
+        self.rul_part = inputs.get("url", "")
+        self.url = "{}://{}{}".format(self.protocol, self.host_port, self.rul_part)
 
 
 class Response(object):
@@ -57,9 +62,16 @@ class Expect(object):
         self.sql_body_check_key = []
 
     def constructor(self, inputs:dict={}):
-        self.response.constructor(inputs)
-        self.sql_check_func = inputs.get("expect_sql")
+        self.response.body = json.loads(inputs.get("expect_response"))
         self.sql_body_check_key = inputs.get("sql_getlist", [])
+        sql_check_func = inputs.get("expect_sql")
+        if "None" in sql_check_func or sql_check_func is None:
+            self.sql_check_func = None
+        else:
+            model_path, class_name, func_name = sql_check_func.rsplit('.', 2)
+            class_content = importlib.import_module(model_path)
+            self.sql_check_func = getattr(getattr(class_content, class_name), func_name)
+
 
 
 

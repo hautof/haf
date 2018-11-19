@@ -20,11 +20,13 @@ class BusClient(object):
         self.port = BUS_PORT
         self.auth_key = BUS_AUTH_KEY
         self.queue = None
+        #register the functions to InfoManager
         InfoManager.register("get_param")
         InfoManager.register("get_case")
         InfoManager.register("get_result")
         InfoManager.register("get_bench")
         InfoManager.register("get_system")
+        # connect to the bus
         self.info_manager = InfoManager(address=('127.0.0.1', self.port), authkey=self.auth_key)
         self.info_manager.connect()
 

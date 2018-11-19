@@ -25,7 +25,7 @@ class InfoManager(BaseManager): pass
 
 class BusServer(Process):
     '''
-    #　BusServer
+    # BusServer the bus server process
     '''
     def __init__(self):
         super().__init__()
@@ -38,20 +38,36 @@ class BusServer(Process):
         self.daemon = True
 
     def start_manager_server(self):
+        '''
+        start manager server
+
+        :return:
+        '''
+        # case queue, keep the case
         case = Queue()
+        # param queue, keep the queue
         param = Queue()
+        # result queue, keep the result
         result = Queue()
+        # bench dict, keep the bench
         bench = MessageDict()
+        # system queue, keep the signal of system
         system = Queue()
+        # register the functions to InfoManager
         InfoManager.register("get_case", callable=lambda: case)
         InfoManager.register("get_param", callable=lambda: param)
         InfoManager.register("get_result", callable=lambda: result)
         InfoManager.register("get_bench", callable=lambda: bench)
         InfoManager.register("get_system", callable=lambda: system)
+
         self.queue_manager = InfoManager(address=('', self.port), authkey=self.auth_key)
         self.server = self.queue_manager.get_server()
 
     def run(self):
+        '''
+        overwrite the run of Process
+        :return:
+        '''
         logger.debug("start Bus {}".format(self.pid))
         self.start_manager_server()
         self.server.serve_forever()
@@ -60,8 +76,7 @@ class BusServer(Process):
             if system_signal.get() == SIGNAL_BUS_END:
                 self.stop()
                 break
-            time.sleep(0.1)
-
+            time.sleep(1)
 
     def stop(self):
         logger.debug("end bus {}".format(self.pid))

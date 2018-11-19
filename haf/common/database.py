@@ -47,13 +47,13 @@ class MysqlTool(object):
         if self.connect_msql is not None:
             self.connect_msql.close()
 
+
 class SQLConfig(object):
     '''
-    sql config 实体
+    sql config
     '''
 
     def __init__(self):
-        self.class_name = "SQLConfig"
         self.host = None
         self.port = None
         self.username = None
@@ -67,10 +67,8 @@ class SQLConfig(object):
         '''
         构造器
         '''
-        logger.log_print("info", "start", "constructor ")
         if len(args) > 0:
             if isinstance(args[0], dict):
-                logger.log_print("info", str(args[0].get("host")), "constructor ")
                 config = args[0]
                 self.host = str(config.get("host"))
                 self.port = config.get("port")
@@ -80,4 +78,3 @@ class SQLConfig(object):
                 self.protocol = str(config.get("protocol"))
                 self.id = config.get("id")
                 self.sqlname = str(config.get("sql_name"))
-        logger.log_print("info", "ok", "constructor ")

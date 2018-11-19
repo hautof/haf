@@ -16,3 +16,8 @@ class HttpApiBench(BaseBench):
     def __init__(self):
         super().__init__()
         self.name = None
+
+    def _init_all(self):
+        self.cases = []
+        self.dbs = []
+

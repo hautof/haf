@@ -1,7 +1,9 @@
 # encoding='utf-8'
 from haf.apihelper import Request, Response, Ids, Expect
-from haf.config import  *
-from haf.result import BaseResult, HttpApiResult
+from haf.config import *
+from haf.common.log import Log
+
+logger = Log.getLogger(__name__)
 
 
 class BaseCase(object):
@@ -21,7 +23,7 @@ class BaseCase(object):
 class HttpApiCase(BaseCase):
     def __init__(self):
         super().__init__()
-        self.type = CASE_TYPE_BASE
+        self.type = CASE_TYPE_HTTPAPI
         self.message_type = MESSAGE_TYPE_CASE
         self._init_all()
 
@@ -33,15 +35,19 @@ class HttpApiCase(BaseCase):
         self.response = Response()
 
     def constructor(self, *args, **kwargs):
+        '''
+        :param args:
+        :param kwargs:
+        :return:
+        '''
         args_init = {}
         if len(args) > 0 and isinstance(args[0], dict):
             args_init = args[0]
         else:
             args_init = kwargs
-
+        #logger.debug(args_init)
         self.ids.constructor(args_init)
         self.run = args_init.get("run")
         self.request.constructor(args_init)
         self.response.constructor(args_init)
         self.expect.constructor(args_init)
-

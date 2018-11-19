@@ -51,10 +51,7 @@ class HttpController(object):
         '''
         try:
             url = url + HttpController.getdata(data)
-            logger.log_print("debug", '[url] ' + url, "get")
-            request = None
-            response = None
-            result = None
+            logger.debug('[url] ' + url)
             request = ur.Request(url=url, headers=headers, method="GET")
             if headers is not None:
                 for key in headers.keys():
@@ -64,23 +61,19 @@ class HttpController(object):
             if response is None:
                 return {"result": "None"}
             else:
-                logger.log_print("debug", str(response), "get-response")
+                logger.debug(str(response))
 
             return response
         except ur.URLError as e:
-            logger.log_print("error", str(e), "get")
+            logger.debug(str(e))
             return e
         except Exception as ee:
-            logger.log_print("error", str(ee), "get")
+            logger.debug("error")
             return ee
 
     @staticmethod
     def post(url, data=None, headers=None, **kwargs):
         try:
-            request = None
-            response = None
-            result = None
-
             if "application/json" in headers.values():
                 data = bytes(json.dumps(data), encoding='utf-8')
             else:
@@ -92,25 +85,22 @@ class HttpController(object):
             if response is None:
                 return {"result": "None"}
             else:
-                logger.log_print("debug", str(response), "post-resposne")
+                logger.debug(str(response))
 
             return response
         except ur.URLError as e:
-            logger.log_print("error", str(e), "post")
+            logger.error(str(e), "post")
             return e
         except urlerror.HTTPError as httpe:
-            logger.log_print("error", str(httpe), "post-httperror")
+            logger.error(str(httpe))
             # if httpe.code == 400:
             return httpe
         except Exception as ee:
-            logger.log_print("error", str(ee), "post-ee")
+            logger.error(str(ee))
             return ee
 
     def put(self, url, data=None):
         try:
-            request = None
-            response = None
-            result = None
             data = bytes(data, encoding='utf8') if data is not None else None
             request = ur.Request(url, headers=self.headers, data=data)
             request.get_method = lambda: 'PUT'
@@ -118,14 +108,13 @@ class HttpController(object):
             result = response.read()
             return result
         except ur.URLError as e:
-            logger.log_print("error", str(e), "put")
+            logger.error(str(e))
         except Exception as ee:
-            logger.log_print("error", str(ee), "put")
+            logger.error(str(ee))
 
     def delete(self, url, data=None):
         data = bytes(data, encoding='utf8') if data is not None else None
         try:
-            request, response, result = None, None, None
             request = ur.Request(url, headers=self.headers, data=data)
             request.get_method = lambda: 'DELETE'
             response = ur.urlopen(request, timeout=10)
@@ -133,6 +122,6 @@ class HttpController(object):
             data = data.encode() if data is not None else None
             return result
         except ur.URLError as e:
-            logger.log_print("error", str(e), "delete")
+            logger.error(str(e))
         except Exception as ee:
-            logger.log_print("error", str(ee), "delete")
+            logger.error(str(ee))

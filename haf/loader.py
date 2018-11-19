@@ -11,6 +11,7 @@ from haf.utils import Utils
 
 logger = Log.getLogger(__name__)
 
+
 class Loader(Process):
     def __init__(self):
         super().__init__()
@@ -19,40 +20,48 @@ class Loader(Process):
 
     def run(self):
         self.bus_client = BusClient()
-
         logger.debug("start loader {} ".format(self.pid))
 
         while True:
-            params_queue = self.bus_client.get_param()
-            if not params_queue.empty():
-                param = params_queue.get()
-                if param == SIGNAL_START:
-                    logger.debug("loader {} -- get {}".format(self.pid, "start from main"))
-                    break
-            time.sleep(0.1)
-
-        while True:
-            params_queue = self.bus_client.get_param()
-            if not params_queue.empty():
-                param = params_queue.get()
-                file_name = param.get("file_name")
-                if file_name is None:
-                    continue
-                inputs = LoadFromConfig.load_from_xlsx(file_name)
-
-                benchs = self.bus_client.get_bench()
-                print(benchs)
-                benchs.set("test", HttpApiBench())
-                for input in inputs.get("testcases"):
-                    case_queue = self.bus_client.get_case()
-                    case = HttpApiCase()
-                    case.constructor(input)
-                    logger.debug("loader {} -- put {}".format(self.pid, case))
-                    case_queue.put(case)
+            if self.get_parameter() == SIGNAL_START:
+                logger.debug("loader {} -- get {}".format(self.pid, "start from main"))
                 break
             time.sleep(0.1)
 
-        self.end_handler()
+        while True:
+            temp = self.get_parameter()
+            if temp == SIGNAL_STOP:
+                self.end_handler()
+                break
+
+            if temp is None:
+                time.sleep(0.1)
+                continue
+
+            file_name = temp.get("file_name")
+            inputs = LoadFromConfig.load_from_file(file_name)
+            benchs = self.bus_client.get_bench()
+            benchs.set(file_name, HttpApiBench())
+            for input in inputs.get("testcases"):
+                case = HttpApiCase()
+                case.constructor(input)
+                self.put_case(case)
+
+            time.sleep(0.1)
+
+    def get_parameter(self, param_key=None):
+        params_queue = self.bus_client.get_param()
+        if not params_queue.empty():
+            params = params_queue.get()
+            if param_key is not None:
+                return params.get(param_key)
+            return params
+        return None
+
+    def put_case(self, case):
+        logger.debug("loader {} -- put case {}.{}.{}".format(self.pid, case.ids.id, case.ids.subid, case.ids.name))
+        case_queue = self.bus_client.get_case()
+        case_queue.put(case)
 
     def end_handler(self):
         try:
@@ -63,7 +72,15 @@ class Loader(Process):
             logger.error(e)
         pass
 
+
 class LoadFromConfig(object):
+
+    @staticmethod
+    def load_from_file(file_name):
+        if file_name.endswith(".xlsx"):
+            return LoadFromConfig.load_from_xlsx(file_name)
+        elif file_name.endswith(".json"):
+            return LoadFromConfig.load_from_json(file_name)
 
     @staticmethod
     def load_from_xlsx(file_name):
