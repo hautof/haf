@@ -8,10 +8,7 @@
 
 
 import time, os, json, sys
-
+from haf.main import  main
 
 if __name__ == "__main__":
-    print ("this is just a null test file with travis")
-    print ("test the travis")
-    print ("test ok")
-    print ("actually, here just simple.")
+    main()

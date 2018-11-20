@@ -1,159 +1,99 @@
-import os, sys, time, json
-import pytest
+# encoding='utf-8'
+import time
+from multiprocessing import Process
 
-import haf.pylib.tools.globalvar as gl
-from haf.pylib.Log.LogController import LogController
-from haf.testcase.TestCaseController import TestCaseController, HttpApiTestCase
-from haf.pylib.File.FileRead import FileRead
-from haf.codegenerator.PytestCode import PytestCode
-from haf.pylib.SQL.SQLConfig import SQLConfig
-from haf.check.CheckHttpApiTestCase import CheckHttpApiTestCase
-from haf.setup.TestCaseReplace import TestCaseReplace
+from haf.bench import HttpApiBench
+from haf.busclient import BusClient
+from haf.case import HttpApiCase
+from haf.common.log import Log
+from haf.config import *
+from haf.utils import Utils
+
+logger = Log.getLogger(__name__)
 
 
-class SetUp(object):
-    '''
-    框架初始化主程序， 主要用来生成 testcase 和 可执行代码
-    '''
+class Loader(Process):
     def __init__(self):
-        '''
-        SetUp 初始化 logger 和 PytestCode
-        '''
-        self.class_name = "SetUp"
-        self.logger = LogController.getLogger(self.class_name)
-        self.pytestcode = PytestCode()
+        super().__init__()
+        self.bus_client = None
+        self.daemon = True
 
-    def __str__(self):
-        '''
-        SetUp str 函数，返回 class_name
-        '''
-        return self.class_name
+    def run(self):
+        self.bus_client = BusClient()
+        logger.debug("start loader {} ".format(self.pid))
 
-    def GenerateTestCasesFromXlsxFile(self, filename, sheetname="testcases", pytest=True, **kwargs):
-        '''
-        从 XLSX 文件 生成 TestCases(HttpApiTestCase)
-
-        :参数: 
-        * filename : str xlsx 文件路径
-        * sheetname : str 默认 testcases, xlsx 文件的表名
-        * pytest : bool 默认 True, 生成 pytest 可执行文件
-
-        :return: TestCases
-        '''
-        self.logger.log_print("info", " start ", "GenerateTestCasesFromXlsxFile")
-        self.logger.log_print("debug", filename, "GenerateTestCasesFromXlsxFile")
-
-
-        fr = FileRead()
-        xlsx = fr.open(filename)
-        sheetofcases = xlsx.readSheetbyName(sheetname) # 读取 testcases 表
-        sheetofconfigs = xlsx.readSheetbyName("config") # 读取 config 表
-        
-        rows = xlsx.getRows(sheetofcases)
-        testcases = []
-        getheader = True
-
-        keys = {}
-        key_index = 1
-        for row in rows:
-            for cell in row:
-                keys[str(key_index)] = cell.value
-                key_index += 1
-            break
-
-        for row in rows:
-            self.logger.log_print("info", ".......................................................")
-            rows_dict = {}
-            i = 1
-            for cell in row:
-                if keys[str(i)] == "sql_config" :
-                    if cell.value is None:
-                        rows_dict[keys[str(i)]] = None
-                    else:
-                        rows_dict[keys[str(i)]] = self.ReadSqlConfigBySqlId(xlsx.getRows(sheetofconfigs), cell.value) # 从 config 表中查找 id 当前行的 数据库配置
-                else:
-                    rows_dict[keys[str(i)]] = cell.value
-                i += 1
-            
-            for x in range(1,len(keys)):
-                if rows_dict[keys[str(x)]] is None:
-                    continue
-                else:                    
-                    testcasecontroller = TestCaseController()
-                    testcase = HttpApiTestCase()
-                    if CheckHttpApiTestCase.checkKwargs(testcase, rows_dict):
-                        testcase = testcasecontroller.CreateHttpApiTestCase(rows_dict)
-                        if kwargs.get("ids") is None or kwargs.get("ids") == []:
-                            testcases.append(testcase)
-                        else:
-                            ids = [str(id) for id in kwargs["ids"]]
-                            if str(testcase.id)+"."+str(testcase.subid) in kwargs["ids"]:
-                                testcases.append(testcase)
-                                self.logger.log_print("info", ".......................................................", str(testcase.id) + "." + str(testcase.subid))
-                    break
-
-        filename = filename.split(".")[-2]
-        if "onefile" not in kwargs:
-            self.pytestcode.generateCodeFile(testcases, filename=filename)
-        else :
-            self.pytestcode.generateCodeFile(testcases, filename=filename, **kwargs)
-
-        if gl.get_value("testcases") is None:
-            gl.set_value("testcases", testcases)
-        else:
-            cases = gl.get_value("testcases")
-            for case in testcases:
-                cases.append(case)
-            gl.set_value("testcases", gl.get_value("testcases"))
-
-        xlsx.close()
-        return testcases
-        
-    def ReadSqlConfigBySqlId(self, rows, sql_id):
-        '''
-        从 config 表中读取 id 为 sql_id 的数据库配置
-        
-        :参数: 
-        * rows : rows 表行
-        * sql_id : int 数据库 配置 id
-
-        :return: sql_config
-        '''
-
-        self.logger.log_print("info", " start ", "ReadSqlConfigBySqlId")
-        keys = {}
-        key_index = 1
-        find_by_id = False
-        sqlconfig = SQLConfig()
-        rows_dict = {}
-        for row in rows:
-            for cell in row:
-                keys[str(key_index)] = cell.value
-                key_index += 1
-            break
-
-        for row in rows:
-            i = 1
-            for cell in row:
-                rows_dict[keys[str(i)]] = cell.value
-                if keys[str(i)] == "id" and str(cell.value)==str(sql_id):
-                    find_by_id = True
-                i += 1
-            if find_by_id:
-                sqlconfig.constructor(rows_dict)
+        while True:
+            if self.get_parameter() == SIGNAL_START:
+                logger.debug("loader {} -- get {}".format(self.pid, "start from main"))
                 break
-        
-        self.logger.log_print("info", str(rows_dict), "ReadSqlConfigBySqlId")
-        self.logger.log_print("info", " ok ", "ReadSqlConfigBySqlId")
-        return sqlconfig
+            time.sleep(0.1)
+
+        while True:
+            temp = self.get_parameter()
+            if temp == SIGNAL_STOP:
+                self.end_handler()
+                break
+
+            if temp is None:
+                time.sleep(0.1)
+                continue
+
+            file_name = temp.get("file_name")
+            inputs = LoadFromConfig.load_from_file(file_name)
+            benchs = self.bus_client.get_bench()
+            benchs.set(file_name, HttpApiBench())
+            for input in inputs.get("testcases"):
+                case = HttpApiCase()
+                case.constructor(input)
+                self.put_case(case)
+
+            time.sleep(0.1)
+
+    def get_parameter(self, param_key=None):
+        params_queue = self.bus_client.get_param()
+        if not params_queue.empty():
+            params = params_queue.get()
+            if param_key is not None:
+                return params.get(param_key)
+            return params
+        return None
+
+    def put_case(self, case):
+        logger.debug("loader {} -- put case {}.{}.{}".format(self.pid, case.ids.id, case.ids.subid, case.ids.name))
+        case_queue = self.bus_client.get_case()
+        case_queue.put(case)
+
+    def end_handler(self):
+        try:
+            logger.debug("end loader {} ".format(self.pid))
+            case_queue = self.bus_client.get_case()
+            case_queue.put(SIGNAL_CASE_END)
+        except Exception as e:
+            logger.error(e)
+        pass
 
 
+class LoadFromConfig(object):
 
-if __name__ == "__main__":
-    su = SetUp()
-    testcases = su.GenerateTestCasesFromXlsxFile("../data/Template.xlsx")
-    testcase = testcases[0]
-    print (testcase.name)
-    print (testcase.id)
-    print (testcase.subid)
-    
+    @staticmethod
+    def load_from_file(file_name):
+        if file_name.endswith(".xlsx"):
+            return LoadFromConfig.load_from_xlsx(file_name)
+        elif file_name.endswith(".json"):
+            return LoadFromConfig.load_from_json(file_name)
+
+    @staticmethod
+    def load_from_xlsx(file_name):
+        if isinstance(file_name, str):
+            inputs = Utils.get_rows_from_xlsx(file_name)
+            return inputs
+        if isinstance(file_name, list):
+            pass
+
+    @staticmethod
+    def load_from_json(file_name):
+        if isinstance(file_name, str):
+            pass
+
+        if isinstance(file_name, list):
+            pass

@@ -7,19 +7,16 @@ install:
   - pip install xlrd
   - pip install xlwt
   - pip install pytest
-    #pytest-allure-adaptor
   - pip install allure-pytest
   - pip install requests
-  - pip install  openpyxl
-  - pip install  pymysql
-    #export PYMSSQL_BUILD_WITH_BUNDLED_FREETDS=1
-    #pymssql
-  - pip install  sphinx
-  - pip install  xpinyin
-  - pip install  paramiko
-  - pip install  pytest-html
-  - pip install  redis
-  - pip install  twine
-# command to run tests
+  - pip install openpyxl
+  - pip install pymysql
+  - pip install sphinx
+  - pip install xpinyin
+  - pip install paramiko
+  - pip install pytest-html
+  - pip install redis
+  - pip install twine
 script:
   - # or py.test for Python versions 3.5 and below
+  - python -m haf

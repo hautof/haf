@@ -15,7 +15,7 @@ requires = [
             'pytest-html',
             'redis',
             'assertpy',
-            'argparse'
+            'argparse',
         ]
 
 with open('ReadMe.md', encoding='utf8') as f:
