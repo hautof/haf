@@ -1,6 +1,5 @@
 # encoding='utf-8'
 
-from sqlalchemy.dialects.mysql import pymysql
 from haf.common.log import Log
 import pymysql
 
