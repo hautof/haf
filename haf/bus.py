@@ -7,7 +7,7 @@
 '''
 import time
 from multiprocessing.managers import BaseManager
-from queue import Queue
+from multiprocessing import Queue
 from multiprocessing import Process
 
 from haf.common.exception import FailBusException

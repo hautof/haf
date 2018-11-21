@@ -17,6 +17,7 @@ class BaseCase(object):
         self.type = None
         self.expect = None
         self.run = True
+        self.bench_name = ""
         self.AttrNoneList = ["result", "error", "AttrNoneList", ]
 
 
@@ -30,6 +31,7 @@ class HttpApiCase(BaseCase):
     def _init_all(self):
         self.ids = Ids()
         self.run = True
+        self.dependent = []
         self.bench_name = ""
         self.request = Request()
         self.expect = Expect()
@@ -50,6 +52,7 @@ class HttpApiCase(BaseCase):
         #logger.debug(args_init)
         self.ids.constructor(args_init)
         self.run = args_init.get("run")
+        self.dependent = [x for x in str(args_init.get("dependent")).split(";") if args_init.get("dependent") is not None]
         self.request.constructor(args_init)
         self.response.constructor(args_init)
         self.expect.constructor(args_init)

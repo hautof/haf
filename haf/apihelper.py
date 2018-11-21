@@ -60,12 +60,15 @@ class Ids(object):
 class SqlInfo(object):
     def __init__(self):
         self.scripts = {}
-        self.config = ""
+        self.config = None
+        self.config_id = ""
 
     def constructor(self, inputs:dict={}):
         self.scripts["sql_response"] = inputs.get("sql_response")
-        self.config = str(inputs.get("sql_config"))
+        self.config_id = str(inputs.get("sql_config")) if inputs.get("sql_config") is not None else ""
 
+    def bind_config(self, config:SQLConfig):
+        self.config = config
 
 class Expect(object):
     def __init__(self):

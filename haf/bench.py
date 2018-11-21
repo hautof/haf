@@ -26,15 +26,15 @@ class HttpApiBench(BaseBench):
 
     def add_case(self, case:HttpApiCase):
         key = "{}.{}".format(case.id, case.subid)
-        self.cases.update(key=case)
+        self.cases.update({key:case})
 
     def add_db(self, db:SQLConfig):
-        key = db.id
-        self.dbs.update(key=db)
+        key_db = str(db.id)
+        self.dbs.update({key_db:db})
 
-    def update_case(self, case:HttpApiCase):
+    def update_case(self, case: HttpApiCase):
         key = "{}.{}".format(case.id, case.subid)
-        self.cases.update(key=case)
+        self.cases.update({key: case})
 
     def get_case(self, key:str):
         return self.cases.get(key, None)

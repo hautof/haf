@@ -1,6 +1,6 @@
 # encoding='utf-8'
 import time
-from multiprocessing import Process
+from multiprocessing import Process, Manager
 
 from haf.common.database import SQLConfig
 
@@ -48,10 +48,10 @@ class Loader(Process):
 
                 suite = HttpApiSuite()
 
-                suite_name = ""
+                bench_name = ""
 
                 input = inputs.get("config")[0]
-                suite_name = input.get("name")
+                bench_name = input.get("name")
 
                 bench = HttpApiBench()
 
@@ -63,17 +63,14 @@ class Loader(Process):
                 for input in inputs.get("testcases"):
                     case = HttpApiCase()
                     case.constructor(input)
-                    case.bind_bench(suite_name)
+                    case.bind_bench(bench_name)
+                    case.sqlinfo.bind_config(bench.get_db(case.sqlinfo.config_id))
                     bench.add_case(case)
                     self.put_case(case)
 
                 time.sleep(0.1)
         except Exception:
             raise FailLoaderException
-
-    def get_bench(self):
-        benchs = self.bus_client.get_bench()
-        return benchs
 
     def get_parameter(self, param_key=None):
         params_queue = self.bus_client.get_param()
@@ -97,6 +94,7 @@ class Loader(Process):
         except Exception as e:
             logger.error(e)
         pass
+
 
 
 class LoadFromConfig(object):

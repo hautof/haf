@@ -7,6 +7,7 @@
 
 import logging
 import time
+from multiprocessing import Manager, Process, Value, Array
 
 from haf.bus import BusServer
 from haf.busclient import BusClient
@@ -22,12 +23,12 @@ logger = logging.getLogger(__name__)
 
 class Program(object):
     def __init__(self):
-
         pass
 
     def _start_bus(self):
        self.bus_server = BusServer()
        self.bus_server.start()
+       time.sleep(0.1)
 
     def _start_loader(self, count):
         for x in range(count):
@@ -39,7 +40,7 @@ class Program(object):
         for x in range(count):
             runner = Runner()
             runner.start()
-        time.sleep(1)
+        time.sleep(0.5)
 
     def _start_recorder(self, count):
         for x in range(count):
@@ -52,7 +53,7 @@ class Program(object):
         try:
             self._start_bus()
             self._start_loader(1)
-            self._start_runner(1)
+            self._start_runner(4)
             self._start_recorder(1)
             bus_client = BusClient()
             bus_client.get_param().put(SIGNAL_START)
@@ -61,7 +62,7 @@ class Program(object):
             while True:
                 system_signal = bus_client.get_system()
                 signal = system_signal.get()
-                if  signal == SIGNAL_RECORD_END or signal == SIGNAL_STOP:
+                if signal == SIGNAL_RECORD_END or signal == SIGNAL_STOP:
                     logger.debug("{} -- {}".format("main", "stop"))
                     bus_client.get_system().put(SIGNAL_BUS_END)
                     break
