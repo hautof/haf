@@ -2,6 +2,10 @@
 import time
 from multiprocessing import Process
 
+from haf.common.database import SQLConfig
+
+from haf.bench import HttpApiBench
+
 import haf
 
 from haf.apihelper import Request, Response
@@ -42,19 +46,17 @@ class Runner(Process):
 
     def run_case(self, local_case:HttpApiCase):
         result = HttpApiResult()
-        if local_case.type == CASE_TYPE_HTTPAPI:
-            logger.debug("runner {} -- get {}.{}-{}".format(self.pid, local_case.ids.id, local_case.ids.subid, local_case.ids.name))
-            result = ApiRunner.run(local_case)
         try:
-            begin_time = Utils.get_datetime_now()
             try:
                 if local_case.type == CASE_TYPE_HTTPAPI:
                     logger.debug("runner {} -- get {}.{}-{}".format(self.pid, local_case.ids.id, local_case.ids.subid, local_case.ids.name))
-                    result = ApiRunner.run(local_case)
+                    logger.debug(self.bus_client.get_bench().get(local_case.bench_name))
+                    logger.debug(local_case.bench_name)
+                    bench = self.bus_client.get_bench().get(local_case.bench_name)
+                    api_runner = ApiRunner(bench)
+                    result = api_runner.run(local_case)
             except Exception as runerror:
                 logger.error(runerror)
-            result.begin_time = begin_time
-            result.end_time = Utils.get_datetime_now()
             return result
         except Exception as e:
             logger.error(e)
@@ -73,9 +75,10 @@ class ApiRunner(object):
     '''
     ApiRunner
     '''
+    def __init__(self, bench:HttpApiBench):
+        self.bench = bench
 
-    @staticmethod
-    def run(case:HttpApiCase):
+    def run(self, case:HttpApiCase):
         '''
         run the HttpApiCase
         :param case: HttpApiCase
@@ -83,27 +86,28 @@ class ApiRunner(object):
         '''
         logger.debug("ApiRunner run - {}.{}-{}".format(case.ids.id, case.ids.subid, case.ids.name))
         result = HttpApiResult()
-        case.response = ApiRunner.request(case.request)
+        result.on_case_begin()
+        case.response = self.request(case.request)
+        case.expect.sql_response_result = self.sql_response(case.sqlinfo.scripts, self.bench.get_db(case.sqlinfo.config))
         result.case = case
-        result.result_check_response = ApiRunner.check_response(case.response, case.expect.response)
+        result.result_check_response = self.check_response(case.response, case.expect.response)
         result.result = result.result_check_response and result.result_check_sql_response
+        result.on_case_end()
         return result
 
-    @staticmethod
-    def request(request:Request):
+    def request(self, request:Request):
         return Utils.http_request(request)
 
-    @staticmethod
-    def sql_get(sql_script:str):
+    def sql_response(self, sql_script:str, sql_config:SQLConfig):
+        sql_result = Utils.sql_execute(sql_config, sql_script)
+        print(sql_result)
+        return sql_result
 
-        return True
-
-    @staticmethod
-    def check_response(response:Response, response_expect:Response):
+    def check_response(self, response:Response, response_expect:Response):
         result = True
         result = result and AssertHelper.assert_that(response.code, 200) and AssertHelper.assert_that(response.body, response_expect.body)
         return result
 
-    @staticmethod
-    def check_sql_response(response:Response, sql_result):
+    def check_sql_response(self, response:Response, sql_result):
         return True
+

@@ -11,6 +11,7 @@ from openpyxl import load_workbook
 from haf.config import *
 from haf.common.httprequest import HttpController
 from http.client import HTTPResponse
+import random
 
 logger = Log.getLogger(__name__)
 
@@ -62,12 +63,15 @@ class Utils(object):
         try:
             header = []
             config_header = []
+            dbconfig_header = []
             data = []
             config_data = []
+            dbconfig_data = []
 
             result = {}
             result["testcases"] = []
-            result["configs"] = []
+            result["dbconfig"] = []
+            result["config"] = []
 
             xlsx = load_workbook(filename)
             sheet_names = xlsx.sheetnames
@@ -76,9 +80,12 @@ class Utils(object):
                 return {}
             testcases = xlsx["testcases"].rows
             config = xlsx["config"].rows
+            dbconfig = xlsx["dbconfig"].rows
+
             for row in testcases:
                 header = [cell.value for cell in row if cell.value is not None]
                 break
+
             for row in testcases:
                 data.append([cell.value for cell in row])
 
@@ -89,11 +96,21 @@ class Utils(object):
             for row in config:
                 config_data.append([cell.value for cell in row])
 
+            for row in dbconfig:
+                dbconfig_header = [cell.value for cell in row if cell.value is not None]
+                break
+
+            for row in dbconfig:
+                dbconfig_data.append([cell.value for cell in row])
+
             for d in data:
                 result["testcases"].append(dict(zip(header, d)))
 
             for d in config_data:
-                result["configs"].append(dict(zip(config_header, d)))
+                result["config"].append(dict(zip(config_header, d)))
+
+            for d in dbconfig_data:
+                result["dbconfig"].append(dict(zip(dbconfig_header, d)))
 
             return result
         except Exception as e:
@@ -123,7 +140,7 @@ class Utils(object):
         if method == CASE_HTTP_API_METHOD_PUT:
             result = HttpController.put(url, data, header)
 
-        logger.debug(type(result))
+        logger.debug(result)
         if isinstance(result, HTTPResponse):
             response.header = result.headers
             try:
@@ -164,3 +181,10 @@ class Utils(object):
         except Exception as e:
             logger.error(e)
             return {"input":input}
+
+    @staticmethod
+    def get_random_name():
+        '''
+        :return:
+        '''
+        return str(random.randint(100000, 999999))

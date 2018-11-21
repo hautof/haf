@@ -1,5 +1,5 @@
 # encoding='utf-8'
-from haf.apihelper import Request, Response, Ids, Expect
+from haf.apihelper import Request, Response, Ids, Expect, SqlInfo
 from haf.config import *
 from haf.common.log import Log
 
@@ -30,9 +30,11 @@ class HttpApiCase(BaseCase):
     def _init_all(self):
         self.ids = Ids()
         self.run = True
+        self.bench_name = ""
         self.request = Request()
         self.expect = Expect()
         self.response = Response()
+        self.sqlinfo = SqlInfo()
 
     def constructor(self, *args, **kwargs):
         '''
@@ -51,3 +53,7 @@ class HttpApiCase(BaseCase):
         self.request.constructor(args_init)
         self.response.constructor(args_init)
         self.expect.constructor(args_init)
+        self.sqlinfo.constructor(args_init)
+
+    def bind_bench(self, bench_name):
+        self.bench_name = bench_name

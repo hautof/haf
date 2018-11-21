@@ -9,6 +9,8 @@ import time
 from multiprocessing.managers import BaseManager
 from queue import Queue
 from multiprocessing import Process
+
+from haf.common.exception import FailBusException
 from haf.config import BUS_DOMAIN, BUS_PORT, BUS_AUTH_KEY, SIGNAL_BUS_END
 from haf.message import MessageDict
 from haf.common.log import Log
@@ -50,7 +52,7 @@ class BusServer(Process):
         # result queue, keep the result
         result = Queue()
         # bench dict, keep the bench
-        bench = MessageDict()
+        bench = Queue()
         # system queue, keep the signal of system
         system = Queue()
         # register the functions to InfoManager
@@ -68,15 +70,18 @@ class BusServer(Process):
         overwrite the run of Process
         :return:
         '''
-        logger.debug("start Bus {}".format(self.pid))
-        self.start_manager_server()
-        self.server.serve_forever()
-        while True:
-            system_signal = self.queue_manager.get_system()
-            if system_signal.get() == SIGNAL_BUS_END:
-                self.stop()
-                break
-            time.sleep(1)
+        try:
+            logger.debug("start Bus {}".format(self.pid))
+            self.start_manager_server()
+            self.server.serve_forever()
+            while True:
+                system_signal = self.queue_manager.get_system()
+                if system_signal.get() == SIGNAL_BUS_END:
+                    self.stop()
+                    break
+                time.sleep(1)
+        except Exception:
+            raise FailBusException
 
     def stop(self):
         logger.debug("end bus {}".format(self.pid))

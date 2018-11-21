@@ -2,6 +2,8 @@
 import importlib
 import json
 
+from haf.common.database import SQLConfig
+
 from haf.config import CASE_HTTP_API_METHOD_GET, CASE_HTTP_API_METHOD_POST
 
 
@@ -55,11 +57,22 @@ class Ids(object):
         self.api_name = inputs.get("api_name")
 
 
+class SqlInfo(object):
+    def __init__(self):
+        self.scripts = {}
+        self.config = ""
+
+    def constructor(self, inputs:dict={}):
+        self.scripts["sql_response"] = inputs.get("sql_response")
+        self.config = str(inputs.get("sql_config"))
+
+
 class Expect(object):
     def __init__(self):
         self.response = Response()
         self.sql_check_func = ""
         self.sql_body_check_key = []
+        self.sql_response_result = {}
 
     def constructor(self, inputs:dict={}):
         self.response.body = json.loads(inputs.get("expect_response"))

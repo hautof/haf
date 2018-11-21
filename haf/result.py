@@ -1,7 +1,7 @@
 # encoding='utf-8'
 
 from haf.config import *
-
+from haf.utils import *
 
 class BaseResult(object):
     def __init__(self):
@@ -26,3 +26,11 @@ class HttpApiResult(BaseResult):
         self.case = None
         self.result_check_response = False
         self.result_check_sql_response = False
+
+    def on_case_begin(self):
+        self.begin_time = Utils.get_datetime_now()
+
+    def on_case_end(self):
+        self.end_time = Utils.get_datetime_now()
+
+

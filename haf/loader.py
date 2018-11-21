@@ -2,11 +2,15 @@
 import time
 from multiprocessing import Process
 
+from haf.common.database import SQLConfig
+
 from haf.bench import HttpApiBench
 from haf.busclient import BusClient
 from haf.case import HttpApiCase
+from haf.common.exception import FailLoaderException
 from haf.common.log import Log
 from haf.config import *
+from haf.suite import HttpApiSuite
 from haf.utils import Utils
 
 logger = Log.getLogger(__name__)
@@ -19,35 +23,57 @@ class Loader(Process):
         self.daemon = True
 
     def run(self):
-        self.bus_client = BusClient()
-        logger.debug("start loader {} ".format(self.pid))
+        try:
+            self.bus_client = BusClient()
+            logger.debug("start loader {} ".format(self.pid))
 
-        while True:
-            if self.get_parameter() == SIGNAL_START:
-                logger.debug("loader {} -- get {}".format(self.pid, "start from main"))
-                break
-            time.sleep(0.1)
-
-        while True:
-            temp = self.get_parameter()
-            if temp == SIGNAL_STOP:
-                self.end_handler()
-                break
-
-            if temp is None:
+            while True:
+                if self.get_parameter() == SIGNAL_START:
+                    logger.debug("loader {} -- get {}".format(self.pid, "start from main"))
+                    break
                 time.sleep(0.1)
-                continue
 
-            file_name = temp.get("file_name")
-            inputs = LoadFromConfig.load_from_file(file_name)
-            benchs = self.bus_client.get_bench()
-            benchs.set(file_name, HttpApiBench())
-            for input in inputs.get("testcases"):
-                case = HttpApiCase()
-                case.constructor(input)
-                self.put_case(case)
+            while True:
+                temp = self.get_parameter()
+                if temp == SIGNAL_STOP:
+                    self.end_handler()
+                    break
 
-            time.sleep(0.1)
+                if temp is None:
+                    time.sleep(0.1)
+                    continue
+
+                file_name = temp.get("file_name")
+                inputs = LoadFromConfig.load_from_file(file_name)
+
+                suite = HttpApiSuite()
+
+                suite_name = ""
+
+                input = inputs.get("config")[0]
+                suite_name = input.get("name")
+
+                bench = HttpApiBench()
+
+                for input in inputs.get("dbconfig"):
+                    db = SQLConfig()
+                    db.constructor(input)
+                    bench.add_db(db)
+
+                for input in inputs.get("testcases"):
+                    case = HttpApiCase()
+                    case.constructor(input)
+                    case.bind_bench(suite_name)
+                    bench.add_case(case)
+                    self.put_case(case)
+
+                time.sleep(0.1)
+        except Exception:
+            raise FailLoaderException
+
+    def get_bench(self):
+        benchs = self.bus_client.get_bench()
+        return benchs
 
     def get_parameter(self, param_key=None):
         params_queue = self.bus_client.get_param()

@@ -26,7 +26,7 @@ class MysqlTool(object):
         self.connect_msql = None
         try:
             self.connect_msql = pymysql.connect(sqlconfig.host, sqlconfig.username, sqlconfig.password,
-                                                sqlconfig.database)
+                                                sqlconfig.database, cursorclass = pymysql.cursors.DictCursor)
             cursor_m = self.connect_msql.cursor()
             data = []
             if isinstance(sqlscript, list):
@@ -62,18 +62,15 @@ class SQLConfig(object):
         self.id = None
         self.sqlname = None
 
-    def constructor(self, *args):
+    def constructor(self, inputs:dict={}):
         '''
         构造器
         '''
-        if len(args) > 0:
-            if isinstance(args[0], dict):
-                config = args[0]
-                self.host = str(config.get("host"))
-                self.port = config.get("port")
-                self.username = str(config.get("username"))
-                self.password = str(config.get("password"))
-                self.database = str(config.get("database"))
-                self.protocol = str(config.get("protocol"))
-                self.id = config.get("id")
-                self.sqlname = str(config.get("sql_name"))
+        self.host = str(inputs.get("host"))
+        self.port = inputs.get("port")
+        self.username = str(inputs.get("username"))
+        self.password = str(inputs.get("password"))
+        self.database = str(inputs.get("database"))
+        self.protocol = str(inputs.get("protocol"))
+        self.id = inputs.get("id")
+        self.sqlname = str(inputs.get("sql_name"))
