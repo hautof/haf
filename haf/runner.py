@@ -28,21 +28,19 @@ class Runner(Process):
         self.daemon = True
         self.bus_client = None
         self.benchs = {}
+        self.bench = None
 
     def load(self):
         pass
 
     def init_runner(self, case:BaseCase):
         self.bench = self.get_bench(case)
-        pass
 
     def get_bench(self, case:BaseCase):
-        bench = self.benchs.get(case.bench_name)
+        bench = self.benchs.get(case.bench_name, None)
         if bench is None :
             bench = HttpApiBench()
-            bench.add_case(case)
-        else:
-            bench.add_case(case)
+        bench.add_case(case)
         self.benchs[case.bench_name] = bench
         return bench
 
@@ -62,7 +60,6 @@ class Runner(Process):
                     if case == SIGNAL_CASE_END:
                         self.end_handler()
                         break
-                    self.init_runner(case)
                     self.run_case(case)
                 time.sleep(0.1)
         except Exception as e:
@@ -75,6 +72,7 @@ class Runner(Process):
             try:
                 if local_case.type == CASE_TYPE_HTTPAPI:
                     logger.info("runner {} -- get {}.{}-{}".format(self.pid, local_case.ids.id, local_case.ids.subid, local_case.ids.name))
+                    self.init_runner(local_case)
                     api_runner = ApiRunner(self.bench)
                     result = api_runner.run(local_case)
                     if isinstance(result, list):
@@ -114,16 +112,12 @@ class BaseRunner(object):
         if len(case.dependent) == 0:
             return True
         try:
+            print(self.bench.cases.keys())
             for dependence in case.dependent:
-                temp_result = False
-                for case_bench in self.bench.cases:
-                    check_result = "{}.{}.{}".format(case_bench.id, case_bench.subid, case_bench.name)
-                    if check_result not in dependence:
-                        continue
-                    else:
-                        temp_result = True
-                if not temp_result:
+                print(dependence)
+                if dependence not in self.bench.cases.keys():
                     return False
+
             return True
         except Exception:
             return False

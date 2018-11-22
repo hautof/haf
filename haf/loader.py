@@ -67,7 +67,6 @@ class Loader(Process):
                     case.constructor(input)
                     case.bind_bench(bench_name)
                     case.sqlinfo.bind_config(bench.get_db(case.sqlinfo.config_id))
-                    bench.add_case(case)
                     self.put_case(case)
 
                 time.sleep(0.1)
