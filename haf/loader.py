@@ -36,10 +36,11 @@ class Loader(Process):
             while True:
                 temp = self.get_parameter()
                 if temp == SIGNAL_STOP :
-                    case_queue = self.bus_client.get_case()
-                    if case_queue.empty():
-                        self.end_handler()
-                    break
+                    while True:
+                        case_queue = self.bus_client.get_case()
+                        if case_queue.empty():
+                            self.end_handler()
+                            return
 
                 if temp is None:
                     time.sleep(0.1)

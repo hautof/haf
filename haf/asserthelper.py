@@ -33,6 +33,7 @@ class AssertHelper(object):
                 assert_that(type(real)(expect)).is_equal_to(real)
                 return type(real)(expect) == real
         except AssertionError as ae:
+            logger.debug(ae)
             return ae
 
     @staticmethod

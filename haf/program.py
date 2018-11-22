@@ -53,7 +53,7 @@ class Program(object):
         try:
             self._start_bus()
             self._start_loader(1)
-            self._start_runner(1)
+            self._start_runner(4)
             self._start_recorder(1)
             bus_client = BusClient()
             bus_client.get_param().put(SIGNAL_START)
