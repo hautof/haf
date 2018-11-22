@@ -10,26 +10,31 @@ logger = Log.getLogger(__name__)
 class AssertHelper(object):
     @staticmethod
     def assert_that(real, expect):
-        #logger.debug("{} ?? {}".format(real, expect))
-        if real is None or expect is None:
-            return real == expect
-        elif isinstance(real, datetime):
-            try:
+        try:
+            #logger.info("{} ?? {}".format(real, expect))
+            if real is None or expect is None:
+                return real == expect
+            elif isinstance(real, datetime):
                 expect = datetime.strptime(expect, "%Y-%m-%d %H:%M:%S")
-            except Exception as e:
-                print(e)
-            return AssertHelper.check_datetime(real, expect)
-        elif isinstance(real, dict) and isinstance(expect, dict):
-            try:
+                return AssertHelper.check_datetime(real, expect)
+            elif isinstance(real, dict) and isinstance(expect, dict):
                 result = True
                 for temp in real.keys():
                     result = result and AssertHelper.assert_that(real.get(temp), expect.get(temp))
-            except Exception as e:
-                print(e)
-            return result
-        else:
-            assert_that(type(real)(expect)).is_equal_to(real)
-            return type(real)(expect) == real
+                return result
+            elif isinstance(real, list) and isinstance(expect, list):
+                result = True
+                for temp_real in real:
+                    result = result and temp_real in expect
+                for temp_expect in expect:
+                    result = result and temp_expect in real
+                return result
+            else:
+                assert_that(type(real)(expect)).is_equal_to(real)
+                return type(real)(expect) == real
+        except AssertionError as ae:
+            logger.debug(ae)
+            return ae
 
     @staticmethod
     def check_datetime(real, expect):

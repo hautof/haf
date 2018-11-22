@@ -1,12 +1,16 @@
 # encoding='utf-8'
 import time
-from multiprocessing import Process
+from multiprocessing import Process, Manager
+
+from haf.common.database import SQLConfig
 
 from haf.bench import HttpApiBench
 from haf.busclient import BusClient
 from haf.case import HttpApiCase
+from haf.common.exception import FailLoaderException
 from haf.common.log import Log
 from haf.config import *
+from haf.suite import HttpApiSuite
 from haf.utils import Utils
 
 logger = Log.getLogger(__name__)
@@ -19,35 +23,56 @@ class Loader(Process):
         self.daemon = True
 
     def run(self):
-        self.bus_client = BusClient()
-        logger.debug("start loader {} ".format(self.pid))
+        try:
+            self.bus_client = BusClient()
+            logger.info("start loader {} ".format(self.pid))
 
-        while True:
-            if self.get_parameter() == SIGNAL_START:
-                logger.debug("loader {} -- get {}".format(self.pid, "start from main"))
-                break
-            time.sleep(0.1)
-
-        while True:
-            temp = self.get_parameter()
-            if temp == SIGNAL_STOP:
-                self.end_handler()
-                break
-
-            if temp is None:
+            while True:
+                if self.get_parameter() == SIGNAL_START:
+                    logger.info("loader {} -- get {}".format(self.pid, "start from main"))
+                    break
                 time.sleep(0.1)
-                continue
 
-            file_name = temp.get("file_name")
-            inputs = LoadFromConfig.load_from_file(file_name)
-            benchs = self.bus_client.get_bench()
-            benchs.set(file_name, HttpApiBench())
-            for input in inputs.get("testcases"):
-                case = HttpApiCase()
-                case.constructor(input)
-                self.put_case(case)
+            while True:
+                temp = self.get_parameter()
+                if temp == SIGNAL_STOP :
+                    while True:
+                        case_queue = self.bus_client.get_case()
+                        if case_queue.empty():
+                            self.end_handler()
+                            return
 
-            time.sleep(0.1)
+                if temp is None:
+                    time.sleep(0.1)
+                    continue
+
+                file_name = temp.get("file_name")
+                inputs = LoadFromConfig.load_from_file(file_name)
+
+                suite = HttpApiSuite()
+
+                bench_name = ""
+
+                input = inputs.get("config")[0]
+                bench_name = input.get("name")
+
+                bench = HttpApiBench()
+
+                for input in inputs.get("dbconfig"):
+                    db = SQLConfig()
+                    db.constructor(input)
+                    bench.add_db(db)
+
+                for input in inputs.get("testcases"):
+                    case = HttpApiCase()
+                    case.constructor(input)
+                    case.bind_bench(bench_name)
+                    case.sqlinfo.bind_config(bench.get_db(case.sqlinfo.config_id))
+                    self.put_case(case)
+
+                time.sleep(0.1)
+        except Exception:
+            raise FailLoaderException
 
     def get_parameter(self, param_key=None):
         params_queue = self.bus_client.get_param()
@@ -59,18 +84,19 @@ class Loader(Process):
         return None
 
     def put_case(self, case):
-        logger.debug("loader {} -- put case {}.{}.{}".format(self.pid, case.ids.id, case.ids.subid, case.ids.name))
+        logger.info("loader {} -- put case {}.{}.{}".format(self.pid, case.ids.id, case.ids.subid, case.ids.name))
         case_queue = self.bus_client.get_case()
         case_queue.put(case)
 
     def end_handler(self):
         try:
-            logger.debug("end loader {} ".format(self.pid))
+            logger.info("end loader {} ".format(self.pid))
             case_queue = self.bus_client.get_case()
             case_queue.put(SIGNAL_CASE_END)
         except Exception as e:
             logger.error(e)
         pass
+
 
 
 class LoadFromConfig(object):

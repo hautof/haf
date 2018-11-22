@@ -16,6 +16,7 @@ requires = [
             'redis',
             'assertpy',
             'argparse',
+            'assertpy'
         ]
 
 with open('ReadMe.md', encoding='utf8') as f:

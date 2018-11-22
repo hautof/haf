@@ -51,7 +51,7 @@ class HttpController(object):
         '''
         try:
             url = url + HttpController.getdata(data)
-            logger.debug('[url] ' + url)
+            logger.info('[url] ' + url)
             request = ur.Request(url=url, headers=headers, method="GET")
             if headers is not None:
                 for key in headers.keys():
@@ -61,14 +61,14 @@ class HttpController(object):
             if response is None:
                 return {"result": "None"}
             else:
-                logger.debug(str(response))
+                logger.info(str(response))
 
             return response
         except ur.URLError as e:
-            logger.debug(str(e))
+            logger.info(str(e))
             return e
         except Exception as ee:
-            logger.debug("error")
+            logger.info("error")
             return ee
 
     @staticmethod
@@ -85,7 +85,7 @@ class HttpController(object):
             if response is None:
                 return {"result": "None"}
             else:
-                logger.debug(str(response))
+                logger.info(str(response))
 
             return response
         except ur.URLError as e:

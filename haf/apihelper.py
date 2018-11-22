@@ -2,6 +2,8 @@
 import importlib
 import json
 
+from haf.common.database import SQLConfig
+
 from haf.config import CASE_HTTP_API_METHOD_GET, CASE_HTTP_API_METHOD_POST
 
 
@@ -55,23 +57,47 @@ class Ids(object):
         self.api_name = inputs.get("api_name")
 
 
+class SqlInfo(object):
+    def __init__(self):
+        self.scripts = {}
+        self.config = None
+        self.config_id = ""
+        # for old cases
+        self.check_list = {}
+
+    def constructor(self, inputs:dict={}):
+        sql_response = inputs.get("sql_response")
+        if ";" in sql_response:
+            self.scripts["sql_response"] = sql_response.split(";")
+        else:
+            self.scripts["sql_response"] = [sql_response]
+
+        sql_check_list = inputs.get("sql_response_check_list")
+        self.check_list["sql_response"] = []
+        if ";" in sql_check_list:
+            for x in sql_check_list.split(";"):
+                self.check_list["sql_response"].append([y.replace(" ", "").strip() for y in x.split("|")])
+        else:
+            self.check_list["sql_response"].append([y.replace(" ", "").strip() for y in sql_check_list.split("|")])
+
+        self.config_id = str(inputs.get("sql_config")) if inputs.get("sql_config") is not None else ""
+
+    def bind_config(self, config:SQLConfig):
+        self.config = config
+
 class Expect(object):
     def __init__(self):
         self.response = Response()
         self.sql_check_func = ""
-        self.sql_body_check_key = []
+        self.sql_response_result = {}
 
     def constructor(self, inputs:dict={}):
         self.response.body = json.loads(inputs.get("expect_response"))
-        self.sql_body_check_key = inputs.get("sql_getlist", [])
         sql_check_func = inputs.get("expect_sql")
         if "None" in sql_check_func or sql_check_func is None:
             self.sql_check_func = None
         else:
-            model_path, class_name, func_name = sql_check_func.rsplit('.', 2)
-            class_content = importlib.import_module(model_path)
-            self.sql_check_func = getattr(getattr(class_content, class_name), func_name)
-
+            self.sql_check_func = sql_check_func.rsplit('.', 2)
 
 
 

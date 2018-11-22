@@ -10,9 +10,11 @@ logger = Log.getLogger(__name__)
 
 
 class InfoManager(BaseManager): pass
+
 '''
 # InfoManager
 '''
+
 
 class BusClient(object):
     def __init__(self):

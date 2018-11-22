@@ -2,50 +2,9 @@
 
 from haf.common.log import Log
 import pymysql
+from contextlib import contextmanager
 
 logger = Log.getLogger(__name__)
-
-
-class MysqlTool(object):
-    '''
-    Mysql 工具类
-    '''
-    def __init__(self):
-        pass
-
-    def connect_execute(self, sqlconfig, sqlscript, **kwargs):
-        '''
-        连接到数据库并执行脚本
-        :参数:
-
-        * sqlconfig ： sqlconfig 实例
-        * sqlscript : 执行的 sqlscript
-        '''
-
-        sqlconfig = sqlconfig
-        self.connect_msql = None
-        try:
-            self.connect_msql = pymysql.connect(sqlconfig.host, sqlconfig.username, sqlconfig.password,
-                                                sqlconfig.database)
-            cursor_m = self.connect_msql.cursor()
-            data = []
-            if isinstance(sqlscript, list):
-                for ss in sqlscript:
-                    if ss != None and ss != "None" and "None" not in ss and len(ss) > 5:
-                        logger.log_print("info", "start execute {}".format(ss), "ConnectAndExecute")
-                        cursor_m.execute(ss)
-                        data.append(cursor_m.fetchall())
-                        logger.log_print("info", "result {}".format(str(data)), "ConnectAndExecute")
-            return data
-        except Exception as e:
-            logger.log_print("error", str(e), "ConnectAndExecute")
-            if self.connect_msql is not None:
-                self.connect_msql.close()
-
-    def close(self):
-        if self.connect_msql is not None:
-            self.connect_msql.close()
-
 
 class SQLConfig(object):
     '''
@@ -62,18 +21,69 @@ class SQLConfig(object):
         self.id = None
         self.sqlname = None
 
-    def constructor(self, *args):
+    def constructor(self, inputs:dict={}):
         '''
         构造器
         '''
-        if len(args) > 0:
-            if isinstance(args[0], dict):
-                config = args[0]
-                self.host = str(config.get("host"))
-                self.port = config.get("port")
-                self.username = str(config.get("username"))
-                self.password = str(config.get("password"))
-                self.database = str(config.get("database"))
-                self.protocol = str(config.get("protocol"))
-                self.id = config.get("id")
-                self.sqlname = str(config.get("sql_name"))
+        self.host = str(inputs.get("host"))
+        self.port = inputs.get("port")
+        self.username = str(inputs.get("username"))
+        self.password = str(inputs.get("password"))
+        self.database = str(inputs.get("database"))
+        self.protocol = str(inputs.get("protocol"))
+        self.id = inputs.get("id")
+        self.sqlname = str(inputs.get("sql_name"))
+
+
+class MysqlTool(object):
+    '''
+    Mysql 工具类
+    '''
+    def __init__(self):
+        pass
+
+    def connect_execute(self, sqlconfig:SQLConfig, sqlscript:list, **kwargs):
+        '''
+        连接到数据库并执行脚本
+        :参数:
+
+        * sqlconfig ： sqlconfig 实例
+        * sqlscript : 执行的 sqlscript
+        '''
+
+        sqlconfig = sqlconfig
+        self.connect_msql = None
+        try:
+            if "dictcursor" in kwargs.keys() and kwargs.get("dictcursor") is True:
+                self.connect_msql = pymysql.connect(sqlconfig.host, sqlconfig.username, sqlconfig.password,
+                                                sqlconfig.database, cursorclass = pymysql.cursors.DictCursor)
+            else:
+                self.connect_msql = pymysql.connect(sqlconfig.host, sqlconfig.username, sqlconfig.password,
+                                                sqlconfig.database)
+            cursor_m = self.connect_msql.cursor()
+            data = []
+            if isinstance(sqlscript, list):
+                for ss in sqlscript:
+                    if ss != None and ss != "None" and "None" not in ss and len(ss) > 5:
+                        logger.info("start execute {}".format(ss))
+                        cursor_m.execute(ss)
+                        data.append(cursor_m.fetchall())
+                        logger.info("result {}".format(str(data)))
+            elif isinstance(sqlscript, str):
+                if sqlscript != None and sqlscript != "None" and "None" not in sqlscript and len(sqlscript) > 5:
+                    logger.info("start execute {}".format(sqlscript))
+                    cursor_m.execute(sqlscript)
+                    data.append(cursor_m.fetchall())
+                    logger.info("result {}".format(str(data)))
+
+            return data
+        except Exception as e:
+            logger.error(str(e))
+            if self.connect_msql.open:
+                self.connect_msql.close()
+            return []
+
+    def close(self):
+        if self.connect_msql is not None:
+            self.connect_msql.close()
+
