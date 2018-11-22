@@ -1,4 +1,6 @@
 # encoding='utf-8'
+import importlib
+import sys
 import time
 from multiprocessing import Process
 
@@ -15,6 +17,7 @@ from haf.config import *
 from haf.utils import Utils
 from haf.asserthelper import AssertHelper
 from haf.case import HttpApiCase, BaseCase
+import traceback
 
 logger = Log.getLogger(__name__)
 
@@ -38,11 +41,19 @@ class Runner(Process):
         if bench is None :
             bench = HttpApiBench()
             bench.add_case(case)
+        else:
+            bench.add_case(case)
+        self.benchs[case.bench_name] = bench
         return bench
+
+    def put_result(self, result:HttpApiResult):
+        logger.info("runner {} put result {} ".format(self.pid, result))
+        result_handler = self.bus_client.get_result()
+        result_handler.put(result)
 
     def run(self):
         try:
-            logger.debug("start runner {} ".format(self.pid))
+            logger.info("start runner {} ".format(self.pid))
             self.bus_client = BusClient()
             while True:
                 case_handler = self.bus_client.get_case()
@@ -52,9 +63,7 @@ class Runner(Process):
                         self.end_handler()
                         break
                     self.init_runner(case)
-                    result = self.run_case(case)
-                    result_handler = self.bus_client.get_result()
-                    result_handler.put(result)
+                    self.run_case(case)
                 time.sleep(0.1)
         except Exception as e:
             logger.error(e)
@@ -65,31 +74,36 @@ class Runner(Process):
         try:
             try:
                 if local_case.type == CASE_TYPE_HTTPAPI:
-                    logger.debug("runner {} -- get {}.{}-{}".format(self.pid, local_case.ids.id, local_case.ids.subid, local_case.ids.name))
+                    logger.info("runner {} -- get {}.{}-{}".format(self.pid, local_case.ids.id, local_case.ids.subid, local_case.ids.name))
                     api_runner = ApiRunner(self.bench)
                     result = api_runner.run(local_case)
-                    if result == CASE_CAN_NOT_RUN_HERE:
-                        self.put_case_back(local_case)
-
+                    if isinstance(result, list):
+                        if result[0] == CASE_CAN_NOT_RUN_HERE:
+                            self.put_case_back(local_case)
+                            return
+                        if result[0] == CASE_SKIP:
+                            result = result[1]
             except Exception as runerror:
-                logger.error(runerror)
-            return result
+                traceback.print_exc()
+                result.run_error = runerror
+            self.put_result(result)
         except Exception as e:
             logger.error(e)
             result.result = e
             return result
 
     def end_handler(self):
-        logger.debug("end runner {} ".format(self.pid))
+        logger.info("end runner {} ".format(self.pid))
         result_handler = self.bus_client.get_result()
         result_handler.put(SIGNAL_RESULT_END)
         case_handler = self.bus_client.get_case()
         case_handler.put(SIGNAL_CASE_END)
 
     def put_case_back(self, case):
-        logger.debug("runner {} put case {}.{}-{}".format(self.pid, case.ids.id, case.ids.subid, case.ids.name))
+        logger.info("runner {} put case {}.{}-{}".format(self.pid, case.ids.id, case.ids.subid, case.ids.name))
         case_handler = self.bus_client.get_case()
         case_handler.put(case)
+        time.sleep(1)
 
 
 class BaseRunner(object):
@@ -98,7 +112,7 @@ class BaseRunner(object):
 
     def check_case_run_here(self, case):
         if len(case.dependent) == 0:
-            return CASE_CAN_RUN_HERE
+            return True
         try:
             for dependence in case.dependent:
                 temp_result = False
@@ -109,10 +123,13 @@ class BaseRunner(object):
                     else:
                         temp_result = True
                 if not temp_result:
-                    return CASE_CAN_NOT_RUN_HERE
-            return CASE_CAN_RUN_HERE
+                    return False
+            return True
         except Exception:
-            return CASE_CAN_NOT_RUN_HERE
+            return False
+
+    def check_case_skip(self, case):
+        return case.run
 
 
 class ApiRunner(BaseRunner):
@@ -129,14 +146,21 @@ class ApiRunner(BaseRunner):
         :param case: HttpApiCase
         :return: result: HttpApiResult
         '''
-        if self.check_case_run_here(case) == CASE_CAN_NOT_RUN_HERE:
-            return CASE_CAN_NOT_RUN_HERE
-
-        logger.debug("ApiRunner run - {}.{}-{}".format(case.ids.id, case.ids.subid, case.ids.name))
         result = HttpApiResult()
         result.on_case_begin()
+        if not self.check_case_run_here(case) :
+            result.on_case_end()
+            return [CASE_CAN_NOT_RUN_HERE, result]
+        if not self.check_case_skip(case):
+            result.case = case
+            result.on_case_end()
+            result.result = CASE_SKIP
+            return [CASE_SKIP, result]
+
+        logger.info("ApiRunner run - {}.{}-{}".format(case.ids.id, case.ids.subid, case.ids.name))
         case.response = self.request(case.request)
-        case.expect.sql_response_result = self.sql_response(case.sqlinfo.scripts["sql_response"], self.bench.get_db(case.sqlinfo.config))
+        case.expect.sql_response_result = self.sql_response(case.sqlinfo.scripts["sql_response"], case.sqlinfo.config, case.sqlinfo.check_list["sql_response"])
+        result.result_check_sql_response = self.check_sql_response(case)
         result.case = case
         result.result_check_response = self.check_response(case.response, case.expect.response)
         result.result = result.result_check_response and result.result_check_sql_response
@@ -146,13 +170,14 @@ class ApiRunner(BaseRunner):
     def request(self, request:Request):
         return Utils.http_request(request)
 
-    def sql_response(self, sql_script:str, sql_config:SQLConfig):
-        print(sql_script)
-        print(sql_config)
+    def sql_response(self, sql_script:str, sql_config:SQLConfig, check_list:list):
         if sql_config is None or sql_script is None:
-            return True
-        sql_result = Utils.sql_execute(sql_config, sql_script)
-        print(sql_result)
+            return None
+
+        if check_list is None:
+            sql_result = Utils.sql_execute(sql_config, sql_script, dictcursor=True)
+        else:
+            sql_result = Utils.sql_execute(sql_config, sql_script)
         return sql_result
 
     def check_response(self, response:Response, response_expect:Response):
@@ -160,6 +185,25 @@ class ApiRunner(BaseRunner):
         result = result and AssertHelper.assert_that(response.code, 200) and AssertHelper.assert_that(response.body, response_expect.body)
         return result
 
-    def check_sql_response(self, response:Response, sql_result):
-        return True
+    def check_sql_response(self, case:HttpApiCase):
+        '''
+        check sql == response, use case's third function
+        :param case:
+        :return:
+        '''
+        if case.expect.sql_check_func is None or case.expect.sql_response_result is None:
+            return False
+        result = True
+        data = case.response.body
+        logger.info("check sql response : {}".format(case.expect.sql_check_func))
+        class_content = importlib.import_module(case.expect.sql_check_func[0])
+        check_func = getattr(getattr(class_content, case.expect.sql_check_func[1]), case.expect.sql_check_func[2])
+        logger.info("check func : {}".format(check_func))
+
+        if case.sqlinfo.check_list is not None:
+            result = check_func(case.expect.sql_response_result, data, case.sqlinfo.check_list["sql_response"])
+        else:
+            result = check_func(case.expect.sql_response_result, data)
+
+        return result
 

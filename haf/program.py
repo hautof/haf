@@ -53,7 +53,7 @@ class Program(object):
         try:
             self._start_bus()
             self._start_loader(1)
-            self._start_runner(4)
+            self._start_runner(1)
             self._start_recorder(1)
             bus_client = BusClient()
             bus_client.get_param().put(SIGNAL_START)
@@ -63,7 +63,7 @@ class Program(object):
                 system_signal = bus_client.get_system()
                 signal = system_signal.get()
                 if signal == SIGNAL_RECORD_END or signal == SIGNAL_STOP:
-                    logger.debug("{} -- {}".format("main", "stop"))
+                    logger.info("{} -- {}".format("main", "stop"))
                     bus_client.get_system().put(SIGNAL_BUS_END)
                     break
                 time.sleep(0.1)

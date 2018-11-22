@@ -71,7 +71,7 @@ class BusServer(Process):
         :return:
         '''
         try:
-            logger.debug("start Bus {}".format(self.pid))
+            logger.info("start Bus {}".format(self.pid))
             self.start_manager_server()
             self.server.serve_forever()
             while True:
@@ -84,7 +84,7 @@ class BusServer(Process):
             raise FailBusException
 
     def stop(self):
-        logger.debug("end bus {}".format(self.pid))
+        logger.info("end bus {}".format(self.pid))
         self.server.shutdown()
         self.is_stop = True
 

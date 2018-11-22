@@ -26,6 +26,10 @@ class HttpApiResult(BaseResult):
         self.case = None
         self.result_check_response = False
         self.result_check_sql_response = False
+        self.run_error = None
+        self.result = False
+        self.begin_time = None
+        self.end_time = None
 
     def on_case_begin(self):
         self.begin_time = Utils.get_datetime_now()

@@ -49,7 +49,7 @@ class HttpApiCase(BaseCase):
             args_init = args[0]
         else:
             args_init = kwargs
-        #logger.debug(args_init)
+        #logger.info(args_init)
         self.ids.constructor(args_init)
         self.run = args_init.get("run")
         self.dependent = [x for x in str(args_init.get("dependent")).split(";") if args_init.get("dependent") is not None]

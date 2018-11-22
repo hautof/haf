@@ -43,9 +43,9 @@ class Utils(object):
             data = func_obj.connect_execute(sqlconfig, sqlscript, **kwargs)
             return data
         except Exception as e:
-            logger.debug(e)
+            logger.info(e)
         finally:
-            logger.debug(func_obj)
+            logger.info(func_obj)
             if func_obj is not None:
                 func_obj.close()
 
@@ -124,7 +124,7 @@ class Utils(object):
         :param request: Request
         :return: Response
         '''
-        logger.debug("Utils - {}.{}.{}".format(request.method, request.header, request.data))
+        logger.info("Utils - {}.{}.{}".format(request.method, request.header, request.data))
 
         header = request.header
         data = request.data
@@ -140,7 +140,7 @@ class Utils(object):
         if method == CASE_HTTP_API_METHOD_PUT:
             result = HttpController.put(url, data, header)
 
-        logger.debug(result)
+        logger.info(result)
         if isinstance(result, HTTPResponse):
             response.header = result.headers
             try:

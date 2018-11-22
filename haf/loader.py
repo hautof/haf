@@ -25,18 +25,20 @@ class Loader(Process):
     def run(self):
         try:
             self.bus_client = BusClient()
-            logger.debug("start loader {} ".format(self.pid))
+            logger.info("start loader {} ".format(self.pid))
 
             while True:
                 if self.get_parameter() == SIGNAL_START:
-                    logger.debug("loader {} -- get {}".format(self.pid, "start from main"))
+                    logger.info("loader {} -- get {}".format(self.pid, "start from main"))
                     break
                 time.sleep(0.1)
 
             while True:
                 temp = self.get_parameter()
-                if temp == SIGNAL_STOP:
-                    self.end_handler()
+                if temp == SIGNAL_STOP :
+                    case_queue = self.bus_client.get_case()
+                    if case_queue.empty():
+                        self.end_handler()
                     break
 
                 if temp is None:
@@ -82,13 +84,13 @@ class Loader(Process):
         return None
 
     def put_case(self, case):
-        logger.debug("loader {} -- put case {}.{}.{}".format(self.pid, case.ids.id, case.ids.subid, case.ids.name))
+        logger.info("loader {} -- put case {}.{}.{}".format(self.pid, case.ids.id, case.ids.subid, case.ids.name))
         case_queue = self.bus_client.get_case()
         case_queue.put(case)
 
     def end_handler(self):
         try:
-            logger.debug("end loader {} ".format(self.pid))
+            logger.info("end loader {} ".format(self.pid))
             case_queue = self.bus_client.get_case()
             case_queue.put(SIGNAL_CASE_END)
         except Exception as e:

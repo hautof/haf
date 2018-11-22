@@ -11,7 +11,7 @@ class AssertHelper(object):
     @staticmethod
     def assert_that(real, expect):
         try:
-            #logger.debug("{} ?? {}".format(real, expect))
+            #logger.info("{} ?? {}".format(real, expect))
             if real is None or expect is None:
                 return real == expect
             elif isinstance(real, datetime):
