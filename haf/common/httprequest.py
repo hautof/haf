@@ -5,6 +5,7 @@ import urllib.request as ur
 import urllib.parse
 import urllib.error as urlerror
 from haf.common.log import Log
+import traceback
 
 logger = Log.getLogger(__name__)
 
@@ -42,37 +43,43 @@ class HttpController(object):
         return datastr[:-1]  # delete & at the last position
 
     @staticmethod
-    def get(url, data=None, headers=None):
+    def get(url, data=None, headers=None, **kwargs):
         '''
         http get 请求方法
         :参数:
         * url : 请求的 url
         :return: response.read() 返回的 请求内容
         '''
+        key = kwargs.get("key")
         try:
             url = url + HttpController.getdata(data)
-            logger.info('[url] ' + url)
+            logger.info('{} [url] {}'.format(key, url))
             request = ur.Request(url=url, headers=headers, method="GET")
             if headers is not None:
                 for key in headers.keys():
                     request.add_header(key, headers[key])
-            response = ur.urlopen(request)
+            response = ur.urlopen(request, timeout=10)
 
             if response is None:
                 return {"result": "None"}
             else:
-                logger.info(str(response))
+                logger.info("{} {}".format(key, str(response)))
 
             return response
         except ur.URLError as e:
-            logger.info(str(e))
+            logger.info("{}{}".format(key, str(e)))
+            logger.info("{}{}".format(key, traceback.format_exc()))
+            traceback.print_exc()
             return e
         except Exception as ee:
-            logger.info("error")
+            traceback.print_exc()
+            logger.info("{}{}".format(key, str(ee)))
+            logger.info("{}{}".format(key, traceback.format_exc()))
             return ee
 
     @staticmethod
     def post(url, data=None, headers=None, **kwargs):
+        key = kwargs.get("key")
         try:
             if "application/json" in headers.values():
                 data = bytes(json.dumps(data), encoding='utf-8')
@@ -85,21 +92,24 @@ class HttpController(object):
             if response is None:
                 return {"result": "None"}
             else:
-                logger.info(str(response))
+                logger.info("{} {}".format(key, str(response)))
 
             return response
         except ur.URLError as e:
-            logger.error(str(e), "post")
+            logger.error("{} {}".format(key, str(e)))
+            traceback.print_exc()
             return e
         except urlerror.HTTPError as httpe:
-            logger.error(str(httpe))
-            # if httpe.code == 400:
+            logger.error("{} {}".format(key, str(httpe)))
+            traceback.print_exc()
             return httpe
         except Exception as ee:
-            logger.error(str(ee))
+            logger.error("{} {}".format(key, str(ee)))
+            traceback.print_exc()
             return ee
 
-    def put(self, url, data=None):
+    def put(self, url, data=None, **kwargs):
+        key = kwargs.get("key")
         try:
             data = bytes(data, encoding='utf8') if data is not None else None
             request = ur.Request(url, headers=self.headers, data=data)
@@ -108,9 +118,11 @@ class HttpController(object):
             result = response.read()
             return result
         except ur.URLError as e:
-            logger.error(str(e))
+            traceback.print_exc()
+            logger.error("{} {}".format(key, str(e)))
         except Exception as ee:
-            logger.error(str(ee))
+            traceback.print_exc()
+            logger.error("{} {}".format(key, str(ee)))
 
     def delete(self, url, data=None):
         data = bytes(data, encoding='utf8') if data is not None else None

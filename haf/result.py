@@ -1,7 +1,8 @@
 # encoding='utf-8'
 
 from haf.config import *
-from haf.utils import *
+from haf.utils import Utils
+
 
 class BaseResult(object):
     def __init__(self):

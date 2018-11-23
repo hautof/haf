@@ -21,15 +21,17 @@ class Loader(Process):
         super().__init__()
         self.bus_client = None
         self.daemon = True
+        self.key = ""
 
     def run(self):
         try:
+            self.key = "{}$%loader$%".format(self.pid)
             self.bus_client = BusClient()
-            logger.info("start loader {} ".format(self.pid))
+            logger.info("{} start loader".format(self.key))
 
             while True:
                 if self.get_parameter() == SIGNAL_START:
-                    logger.info("loader {} -- get {}".format(self.pid, "start from main"))
+                    logger.info("{} -- get {}".format(self.key, "start from main"))
                     break
                 time.sleep(0.1)
 
@@ -64,6 +66,8 @@ class Loader(Process):
                     bench.add_db(db)
 
                 for input in inputs.get("testcases"):
+                    if input.get("id") is None or input.get("subid") is None:
+                        continue
                     case = HttpApiCase()
                     case.constructor(input)
                     case.bind_bench(bench_name)
@@ -84,13 +88,13 @@ class Loader(Process):
         return None
 
     def put_case(self, case):
-        logger.info("loader {} -- put case {}.{}.{}".format(self.pid, case.ids.id, case.ids.subid, case.ids.name))
+        logger.info("{} -- put case {}.{}.{}".format(self.key, case.ids.id, case.ids.subid, case.ids.name))
         case_queue = self.bus_client.get_case()
         case_queue.put(case)
 
     def end_handler(self):
         try:
-            logger.info("end loader {} ".format(self.pid))
+            logger.info("{} end loader  ".format(self.key))
             case_queue = self.bus_client.get_case()
             case_queue.put(SIGNAL_CASE_END)
         except Exception as e:

@@ -1,16 +1,16 @@
 # encoding='utf-8'
 import importlib
-import sys
 import time
 from multiprocessing import Process
 
 from haf.common.database import SQLConfig
 
 from haf.bench import HttpApiBench, BaseBench
-
+import haf.result
 from haf.apihelper import Request, Response
 from haf.busclient import BusClient
 from haf.common.exception import FailRunnerException
+from haf.common.lock import Lock
 from haf.result import HttpApiResult
 from haf.common.log import Log
 from haf.config import *
@@ -29,6 +29,9 @@ class Runner(Process):
         self.bus_client = None
         self.benchs = {}
         self.bench = None
+        self.key = ""
+        self.runner_key = ""
+        self.lock = False
 
     def load(self):
         pass
@@ -44,14 +47,28 @@ class Runner(Process):
         self.benchs[case.bench_name] = bench
         return bench
 
+    def get_lock(self):
+        return self.bus_client.get_lock().get()
+
+    def release_lock(self):
+        self.bus_client.get_lock().put(Lock)
+
     def put_result(self, result:HttpApiResult):
-        logger.info("runner {} put result {} ".format(self.pid, result))
-        result_handler = self.bus_client.get_result()
-        result_handler.put(result)
+        logger.info("{} : runner {} put result {}.{}.{} ".format(self.key, self.pid, result.case.ids.id, result.case.ids.subid,result.case.ids.name))
+        while True:
+            if self.get_lock() is None:
+                time.sleep(0.1)
+            else:
+                result_handler = self.bus_client.get_result()
+                result_handler.put(result)
+                self.release_lock()
+                break
+
 
     def run(self):
         try:
-            logger.info("start runner {} ".format(self.pid))
+            self.runner_key = "{}$%{}$%".format(self.pid, "runner")
+            logger.info("{} start runner".format(self.runner_key))
             self.bus_client = BusClient()
             while True:
                 case_handler = self.bus_client.get_case()
@@ -60,7 +77,9 @@ class Runner(Process):
                     if case == SIGNAL_CASE_END:
                         self.end_handler()
                         break
-                    self.run_case(case)
+                    result = self.run_case(case)
+                    if isinstance(result, HttpApiResult):
+                        self.put_result(result)
                 time.sleep(0.1)
         except Exception as e:
             logger.error(e)
@@ -71,7 +90,8 @@ class Runner(Process):
         try:
             try:
                 if local_case.type == CASE_TYPE_HTTPAPI:
-                    logger.info("runner {} -- get {}.{}-{}".format(self.pid, local_case.ids.id, local_case.ids.subid, local_case.ids.name))
+                    self.key = local_case.log_key
+                    logger.info("{} : runner {} -- get {}.{}-{}".format(self.key, self.pid, local_case.ids.id, local_case.ids.subid, local_case.ids.name))
                     self.init_runner(local_case)
                     api_runner = ApiRunner(self.bench)
                     result = api_runner.run(local_case)
@@ -81,24 +101,25 @@ class Runner(Process):
                             return
                         if result[0] == CASE_SKIP:
                             result = result[1]
+                    return result
             except Exception as runerror:
-                traceback.print_exc()
-                result.run_error = runerror
-            self.put_result(result)
+                logger.error(runerror)
+                result.run_error = traceback.format_exc()
+                return result
         except Exception as e:
             logger.error(e)
-            result.result = e
+            result.run_error = traceback.format_exc()
             return result
 
     def end_handler(self):
-        logger.info("end runner {} ".format(self.pid))
+        logger.info("{} : end runner".format(self.runner_key))
         result_handler = self.bus_client.get_result()
         result_handler.put(SIGNAL_RESULT_END)
         case_handler = self.bus_client.get_case()
         case_handler.put(SIGNAL_CASE_END)
 
     def put_case_back(self, case):
-        logger.info("runner {} put case {}.{}-{}".format(self.pid, case.ids.id, case.ids.subid, case.ids.name))
+        logger.info("{} : runner put case {}.{}-{}".format(self.runner_key, case.ids.id, case.ids.subid, case.ids.name))
         case_handler = self.bus_client.get_case()
         case_handler.put(case)
         time.sleep(1)
@@ -112,9 +133,7 @@ class BaseRunner(object):
         if len(case.dependent) == 0:
             return True
         try:
-            print(self.bench.cases.keys())
             for dependence in case.dependent:
-                print(dependence)
                 if dependence not in self.bench.cases.keys():
                     return False
 
@@ -133,6 +152,7 @@ class ApiRunner(BaseRunner):
     def __init__(self, bench:HttpApiBench):
         super().__init__(bench)
         self.bench = bench
+        self.key = ""
 
     def run(self, case:HttpApiCase):
         '''
@@ -140,6 +160,7 @@ class ApiRunner(BaseRunner):
         :param case: HttpApiCase
         :return: result: HttpApiResult
         '''
+        self.key = case.log_key
         result = HttpApiResult()
         result.on_case_begin()
         if not self.check_case_run_here(case) :
@@ -151,32 +172,35 @@ class ApiRunner(BaseRunner):
             result.result = CASE_SKIP
             return [CASE_SKIP, result]
 
-        logger.info("ApiRunner run - {}.{}-{}".format(case.ids.id, case.ids.subid, case.ids.name))
-        case.response = self.request(case.request)
-        case.expect.sql_response_result = self.sql_response(case.sqlinfo.scripts["sql_response"], case.sqlinfo.config, case.sqlinfo.check_list["sql_response"])
-        result.result_check_sql_response = self.check_sql_response(case)
-        result.case = case
-        result.result_check_response = self.check_response(case.response, case.expect.response)
-        result.result = result.result_check_response and result.result_check_sql_response
+        logger.info("{} : ApiRunner run - {}.{}-{}".format(case.log_key, case.ids.id, case.ids.subid, case.ids.name))
+        try:
+            case.response = self.request(case.request)
+            result.result_check_response = self.check_response(case.response, case.expect.response)
+            case.expect.sql_response_result = self.sql_response(case.sqlinfo.scripts["sql_response"], case.sqlinfo.config, case.sqlinfo.check_list["sql_response"])
+            result.result_check_sql_response = self.check_sql_response(case)
+            result.case = case
+            result.result = result.result_check_response and result.result_check_sql_response
+        except Exception as e:
+            result.run_error = e
         result.on_case_end()
         return result
 
     def request(self, request:Request):
-        return Utils.http_request(request)
+        return Utils.http_request(request, key=self.key)
 
     def sql_response(self, sql_script:str, sql_config:SQLConfig, check_list:list):
         if sql_config is None or sql_script is None:
             return None
 
         if check_list is None:
-            sql_result = Utils.sql_execute(sql_config, sql_script, dictcursor=True)
+            sql_result = Utils.sql_execute(sql_config, sql_script, dictcursor=True, key=self.key)
         else:
-            sql_result = Utils.sql_execute(sql_config, sql_script)
+            sql_result = Utils.sql_execute(sql_config, sql_script, key=self.key)
         return sql_result
 
     def check_response(self, response:Response, response_expect:Response):
         result = True
-        result = result and AssertHelper.assert_that(response.code, 200) and AssertHelper.assert_that(response.body, response_expect.body)
+        result = result and AssertHelper.assert_that(response.code, 200, key=self.key) and AssertHelper.assert_that(response.body, response_expect.body, key=self.key)
         return result
 
     def check_sql_response(self, case:HttpApiCase):
@@ -186,18 +210,17 @@ class ApiRunner(BaseRunner):
         :return:
         '''
         if case.expect.sql_check_func is None or case.expect.sql_response_result is None:
-            return False
+            return True
         result = True
         data = case.response.body
-        logger.info("check sql response : {}".format(case.expect.sql_check_func))
+        logger.info("{} : check sql response : {}".format(case.log_key, case.expect.sql_check_func))
         class_content = importlib.import_module(case.expect.sql_check_func[0])
         check_func = getattr(getattr(class_content, case.expect.sql_check_func[1]), case.expect.sql_check_func[2])
-        logger.info("check func : {}".format(check_func))
+        logger.info("{} : check func : {}".format(case.log_key, check_func))
 
         if case.sqlinfo.check_list is not None:
             result = check_func(case.expect.sql_response_result, data, case.sqlinfo.check_list["sql_response"])
         else:
             result = check_func(case.expect.sql_response_result, data)
-
         return result
 

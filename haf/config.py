@@ -36,3 +36,5 @@ CASE_RUN = 43
 RESULT_SUCCESS = 50
 RESULT_FAIL = 51
 RESULT_SKIP = 52
+
+LOG_PATH_DEFAULT = "D:\workspace\mine\python\haf\data"
