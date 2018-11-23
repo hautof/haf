@@ -56,6 +56,8 @@ class BusServer(Process):
         system = Queue()
         # log queue
         log = Queue()
+        # lock queue
+        lock = Queue()
 
         # register the functions to InfoManager
 
@@ -65,6 +67,7 @@ class BusServer(Process):
         InfoManager.register("get_bench", callable=lambda: bench)
         InfoManager.register("get_system", callable=lambda: system)
         InfoManager.register("get_log", callable=lambda : log)
+        InfoManager.register("get_lock", callable=lambda : lock)
 
         self.queue_manager = InfoManager(address=('', self.port), authkey=self.auth_key)
         self.server = self.queue_manager.get_server()

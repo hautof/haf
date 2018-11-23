@@ -66,6 +66,8 @@ class Loader(Process):
                     bench.add_db(db)
 
                 for input in inputs.get("testcases"):
+                    if input.get("id") is None or input.get("subid") is None:
+                        continue
                     case = HttpApiCase()
                     case.constructor(input)
                     case.bind_bench(bench_name)

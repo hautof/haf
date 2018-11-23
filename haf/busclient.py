@@ -32,6 +32,7 @@ class BusClient(metaclass=SingletonType):
         InfoManager.register("get_bench")
         InfoManager.register("get_system")
         InfoManager.register("get_log")
+        InfoManager.register("get_lock")
         # connect to the bus
         self.info_manager = InfoManager(address=('127.0.0.1', self.port), authkey=self.auth_key)
         self.info_manager.connect()
@@ -53,3 +54,6 @@ class BusClient(metaclass=SingletonType):
 
     def get_log(self):
         return self.info_manager.get_log()
+
+    def get_lock(self):
+        return self.info_manager.get_lock()

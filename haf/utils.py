@@ -156,6 +156,7 @@ class Utils(object):
             response.code = result.code if hasattr(result, "code") else None
             response.header = result.info() if hasattr(result, "info") else None
 
+        logger.info("{} {}".format(key, result))
         return response
 
     @staticmethod

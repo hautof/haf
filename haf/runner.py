@@ -6,10 +6,11 @@ from multiprocessing import Process
 from haf.common.database import SQLConfig
 
 from haf.bench import HttpApiBench, BaseBench
-
+import haf.result
 from haf.apihelper import Request, Response
 from haf.busclient import BusClient
 from haf.common.exception import FailRunnerException
+from haf.common.lock import Lock
 from haf.result import HttpApiResult
 from haf.common.log import Log
 from haf.config import *
@@ -30,6 +31,7 @@ class Runner(Process):
         self.bench = None
         self.key = ""
         self.runner_key = ""
+        self.lock = False
 
     def load(self):
         pass
@@ -45,10 +47,23 @@ class Runner(Process):
         self.benchs[case.bench_name] = bench
         return bench
 
+    def get_lock(self):
+        return self.bus_client.get_lock().get()
+
+    def release_lock(self):
+        self.bus_client.get_lock().put(Lock)
+
     def put_result(self, result:HttpApiResult):
         logger.info("{} : runner {} put result {}.{}.{} ".format(self.key, self.pid, result.case.ids.id, result.case.ids.subid,result.case.ids.name))
-        result_handler = self.bus_client.get_result()
-        result_handler.put(result)
+        while True:
+            if self.get_lock() is None:
+                time.sleep(0.1)
+            else:
+                result_handler = self.bus_client.get_result()
+                result_handler.put(result)
+                self.release_lock()
+                break
+
 
     def run(self):
         try:
@@ -86,10 +101,11 @@ class Runner(Process):
                             return
                         if result[0] == CASE_SKIP:
                             result = result[1]
+                    return result
             except Exception as runerror:
                 logger.error(runerror)
                 result.run_error = traceback.format_exc()
-                self.put_result(result)
+                return result
         except Exception as e:
             logger.error(e)
             result.run_error = traceback.format_exc()
@@ -159,10 +175,10 @@ class ApiRunner(BaseRunner):
         logger.info("{} : ApiRunner run - {}.{}-{}".format(case.log_key, case.ids.id, case.ids.subid, case.ids.name))
         try:
             case.response = self.request(case.request)
+            result.result_check_response = self.check_response(case.response, case.expect.response)
             case.expect.sql_response_result = self.sql_response(case.sqlinfo.scripts["sql_response"], case.sqlinfo.config, case.sqlinfo.check_list["sql_response"])
             result.result_check_sql_response = self.check_sql_response(case)
             result.case = case
-            result.result_check_response = self.check_response(case.response, case.expect.response)
             result.result = result.result_check_response and result.result_check_sql_response
         except Exception as e:
             result.run_error = e
@@ -194,7 +210,7 @@ class ApiRunner(BaseRunner):
         :return:
         '''
         if case.expect.sql_check_func is None or case.expect.sql_response_result is None:
-            return False
+            return True
         result = True
         data = case.response.body
         logger.info("{} : check sql response : {}".format(case.log_key, case.expect.sql_check_func))

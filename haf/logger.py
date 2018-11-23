@@ -26,7 +26,6 @@ class Logger(Process):
                 log = log_queue.get()
                 #print(log)
                 self.log_handler(log)
-                time.sleep(0.1)
             except Exception as e:
                 traceback.print_exc()
 
