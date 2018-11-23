@@ -54,6 +54,7 @@ class Program(object):
         l = Logger()
         l.start()
         time.sleep(0.1)
+        
 
     def _init_system_lock(self):
         self.bus_client.get_lock().put(Lock)
