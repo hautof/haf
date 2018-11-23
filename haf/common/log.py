@@ -19,8 +19,7 @@ class BaseLogger(metaclass=SingletonType):
         self.bus_client = None
 
     def debug(self, msg):
-        pass
-        #self.msg_write(str(msg))
+        self.msg_write(str(msg))
         #self.logger.debug(msg)
 
     def info(self, msg):

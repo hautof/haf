@@ -18,18 +18,19 @@ from haf.config import *
 from haf.common.exception import *
 from haf.logger import Logger
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')
 logger = logging.getLogger(__name__)
 
 
 class Program(object):
     def __init__(self):
+        self._start_bus()
         self._init_system_logger()
-
 
     def _start_bus(self):
        self.bus_server = BusServer()
        self.bus_server.start()
-       time.sleep(0.1)
+       time.sleep(1)
 
     def _start_loader(self, count):
         for x in range(count):
@@ -67,7 +68,6 @@ class Program(object):
 
     def run(self):
         try:
-            self._start_bus()
             self._start_loader(1)
             self._start_runner(2)
             self._start_recorder(1)
