@@ -7,12 +7,10 @@
 
 import logging
 import time
-from multiprocessing import Manager, Process, Value, Array
 
 from haf.bus import BusServer
 from haf.busclient import BusClient
 from haf.loader import Loader
-from haf.message import MessageDict
 from haf.recorder import Recorder
 from haf.runner import Runner
 from haf.config import *
@@ -53,7 +51,7 @@ class Program(object):
         try:
             self._start_bus()
             self._start_loader(1)
-            self._start_runner(4)
+            self._start_runner(2)
             self._start_recorder(1)
             bus_client = BusClient()
             bus_client.get_param().put(SIGNAL_START)

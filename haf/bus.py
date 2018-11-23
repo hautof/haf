@@ -5,6 +5,7 @@
 # system bus, using to transfer message from service to service
 #
 '''
+import logging
 import time
 from multiprocessing.managers import BaseManager
 from multiprocessing import Queue
@@ -12,10 +13,8 @@ from multiprocessing import Process
 
 from haf.common.exception import FailBusException
 from haf.config import BUS_DOMAIN, BUS_PORT, BUS_AUTH_KEY, SIGNAL_BUS_END
-from haf.message import MessageDict
-from haf.common.log import Log
 
-logger = Log.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class InfoManager(BaseManager): pass
@@ -55,12 +54,17 @@ class BusServer(Process):
         bench = Queue()
         # system queue, keep the signal of system
         system = Queue()
+        # log queue
+        log = Queue()
+
         # register the functions to InfoManager
+
         InfoManager.register("get_case", callable=lambda: case)
         InfoManager.register("get_param", callable=lambda: param)
         InfoManager.register("get_result", callable=lambda: result)
         InfoManager.register("get_bench", callable=lambda: bench)
         InfoManager.register("get_system", callable=lambda: system)
+        InfoManager.register("get_log", callable=lambda : log)
 
         self.queue_manager = InfoManager(address=('', self.port), authkey=self.auth_key)
         self.server = self.queue_manager.get_server()

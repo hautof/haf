@@ -25,6 +25,7 @@ class Recorder(Process):
             self.bus_client = BusClient()
             while True:
                 results = self.bus_client.get_result()
+                log_queue = self.bus_client.get_log()
                 if not results.empty() :
                     result = results.get()
                     if isinstance(result, HttpApiResult):
@@ -32,11 +33,13 @@ class Recorder(Process):
                             logger.info("recorder {} -- {}.{}.{} is {}".format(self.pid, result.case.ids.id, result.case.ids.subid, result.case.ids.name, result.result))
                         else:
                             logger.info("recorder {} == wrong result!")
+                            logger.info("recorder {}".format(result.run_error))
                         self.result_handler(result)
                     elif result == SIGNAL_RESULT_END:
                         self.end_handler()
                         break
-                time.sleep(0.1)
+                if not log_queue.empty():
+                    log = log_queue.get()
         except Exception:
             raise FailRecorderException
 

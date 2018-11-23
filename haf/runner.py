@@ -1,6 +1,5 @@
 # encoding='utf-8'
 import importlib
-import sys
 import time
 from multiprocessing import Process
 
@@ -45,7 +44,7 @@ class Runner(Process):
         return bench
 
     def put_result(self, result:HttpApiResult):
-        logger.info("runner {} put result {} ".format(self.pid, result))
+        logger.info("runner {} put result {}.{}.{} ".format(self.pid, result.case.ids.id, result.case.ids.subid,result.case.ids.name))
         result_handler = self.bus_client.get_result()
         result_handler.put(result)
 
@@ -60,7 +59,9 @@ class Runner(Process):
                     if case == SIGNAL_CASE_END:
                         self.end_handler()
                         break
-                    self.run_case(case)
+                    result = self.run_case(case)
+                    if isinstance(result, HttpApiResult):
+                        self.put_result(result)
                 time.sleep(0.1)
         except Exception as e:
             logger.error(e)
@@ -82,12 +83,12 @@ class Runner(Process):
                         if result[0] == CASE_SKIP:
                             result = result[1]
             except Exception as runerror:
-                traceback.print_exc()
-                result.run_error = runerror
+                logger.error(runerror)
+                result.run_error = traceback.format_exc()
             self.put_result(result)
         except Exception as e:
             logger.error(e)
-            result.result = e
+            result.run_error = traceback.format_exc()
             return result
 
     def end_handler(self):
@@ -112,9 +113,7 @@ class BaseRunner(object):
         if len(case.dependent) == 0:
             return True
         try:
-            print(self.bench.cases.keys())
             for dependence in case.dependent:
-                print(dependence)
                 if dependence not in self.bench.cases.keys():
                     return False
 
