@@ -37,6 +37,7 @@ class HttpApiCase(BaseCase):
         self.expect = Expect()
         self.response = Response()
         self.sqlinfo = SqlInfo()
+        self.log_key = ""
 
     def constructor(self, *args, **kwargs):
         '''
@@ -60,3 +61,7 @@ class HttpApiCase(BaseCase):
 
     def bind_bench(self, bench_name):
         self.bench_name = bench_name
+        self.generate_log_key()
+
+    def generate_log_key(self):
+        self.log_key = self.key = "{}$%{}.{}.{}$%".format(self.bench_name, self.ids.id, self.ids.subid, self.ids.name)

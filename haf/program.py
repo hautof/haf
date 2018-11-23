@@ -15,13 +15,19 @@ from haf.recorder import Recorder
 from haf.runner import Runner
 from haf.config import *
 from haf.common.exception import *
+from haf.logger import Logger
 
 logger = logging.getLogger(__name__)
 
 
 class Program(object):
     def __init__(self):
-        pass
+        self._init_system_logger()
+
+    def _init_system_logger(self):
+        l = Logger()
+        l.start()
+        time.sleep(0.1)
 
     def _start_bus(self):
        self.bus_server = BusServer()
@@ -51,7 +57,7 @@ class Program(object):
         try:
             self._start_bus()
             self._start_loader(1)
-            self._start_runner(2)
+            self._start_runner(4)
             self._start_recorder(1)
             bus_client = BusClient()
             bus_client.get_param().put(SIGNAL_START)

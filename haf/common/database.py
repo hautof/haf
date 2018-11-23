@@ -50,6 +50,7 @@ class MysqlTool(object):
         * sqlconfig ： sqlconfig 实例
         * sqlscript : 执行的 sqlscript
         '''
+        key = kwargs.get("key", "database$%common$%")
 
         sqlconfig = sqlconfig
         self.connect_msql = None
@@ -65,16 +66,16 @@ class MysqlTool(object):
             if isinstance(sqlscript, list):
                 for ss in sqlscript:
                     if ss != None and ss != "None" and "None" not in ss and len(ss) > 5:
-                        logger.info("start execute {}".format(ss))
+                        logger.info("{} start execute {}".format(key, ss))
                         cursor_m.execute(ss)
                         data.append(cursor_m.fetchall())
-                        logger.info("result {}".format(str(data)))
+                        logger.info("{} result {}".format(key, str(data)))
             elif isinstance(sqlscript, str):
                 if sqlscript != None and sqlscript != "None" and "None" not in sqlscript and len(sqlscript) > 5:
-                    logger.info("start execute {}".format(sqlscript))
+                    logger.info("{} start execute {}".format(key, sqlscript))
                     cursor_m.execute(sqlscript)
                     data.append(cursor_m.fetchall())
-                    logger.info("result {}".format(str(data)))
+                    logger.info("{} result {}".format(key, str(data)))
 
             return data
         except Exception as e:

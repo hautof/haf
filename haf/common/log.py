@@ -4,6 +4,7 @@ import logging
 from logging import handlers
 import time
 
+#from haf.busclient import BusClient
 from haf.busclient import BusClient
 from haf.common.sigleton import SingletonType
 
@@ -15,9 +16,12 @@ class BaseLogger(metaclass=SingletonType):
         logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')
         self.logger = logging.getLogger(self.logger_name)
         #local_handler = logging.handlers.QueueHandler()
+        self.bus_client = None
 
     def debug(self, msg):
-        self.logger.debug(msg)
+        pass
+        #self.msg_write(str(msg))
+        #self.logger.debug(msg)
 
     def info(self, msg):
         self.msg_write(str(msg))
@@ -38,23 +42,9 @@ class BaseLogger(metaclass=SingletonType):
         return object.__new__(cls)
 
     def msg_write(self, msg):
-        bus_client = BusClient()
-        log_queue = bus_client.get_log()
-        log_queue.put(msg)
-
-
-    @property
-    def now(self):
-        '''
-        get datetime now to str
-        :return: time now str
-        '''
-        current_time = time.time()
-        local_time = time.localtime(current_time)
-        time_temp = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
-        secs = (current_time - int(current_time)) * 1000
-        timenow = "%s %03d" % (time_temp, secs)
-        return timenow
+        if self.bus_client is None:
+            self.bus_client = BusClient()
+        self.bus_client.get_log().put(msg)
 
 
 class Log:

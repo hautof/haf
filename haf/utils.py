@@ -2,6 +2,7 @@
 import json
 import os
 import time
+import traceback
 import urllib
 
 from haf.apihelper import Request, Response
@@ -27,6 +28,7 @@ class Utils(object):
         * testcase ： testcase 实例
         * caseparam : 执行的 case 中对应的 脚本名称
         '''
+        key = kwargs.get("key")
         func_obj = None
         data = None
         try:
@@ -43,9 +45,9 @@ class Utils(object):
             data = func_obj.connect_execute(sqlconfig, sqlscript, **kwargs)
             return data
         except Exception as e:
-            logger.info(e)
+            logger.info("{} {}".format(key, e))
         finally:
-            logger.info(func_obj)
+            logger.info("{} {}".format(key, func_obj))
             if func_obj is not None:
                 func_obj.close()
 
@@ -58,7 +60,7 @@ class Utils(object):
         if not filename.endswith("xlsx"):
             return {}
         if not os.path.exists(filename):
-            logger.error("not fount file : {}".format(filename))
+            logger.error("{} not fount file : {}".format("system$%util$%", filename))
             raise FileNotFoundError
         try:
             header = []
@@ -118,13 +120,14 @@ class Utils(object):
 
 
     @staticmethod
-    def http_request(request:Request) :
+    def http_request(request:Request, **kwargs) :
         '''
         http request
         :param request: Request
         :return: Response
         '''
-        logger.info("Utils - {}.{}.{}".format(request.method, request.header, request.data))
+        #logger.info("Utils - {}.{}.{}".format(request.method, request.header, request.data))
+        key = kwargs.get("key")
 
         header = request.header
         data = request.data
@@ -134,13 +137,13 @@ class Utils(object):
         response = Response()
         result = None
         if method == CASE_HTTP_API_METHOD_GET:
-            result = HttpController.get(url, data, header)
+            result = HttpController.get(url, data, header, **kwargs)
         elif method == CASE_HTTP_API_METHOD_POST:
             result = HttpController.post(url, data, header)
         if method == CASE_HTTP_API_METHOD_PUT:
             result = HttpController.put(url, data, header)
 
-        logger.info(result)
+        logger.info("{} {}".format(key, result))
         if isinstance(result, HTTPResponse):
             response.header = result.headers
             try:
@@ -150,8 +153,8 @@ class Utils(object):
             response.code = result.code
         elif isinstance(result,urllib.request.URLError) or isinstance(result, urllib.request.HTTPError) or isinstance(result, urllib.request.HTTPHandler):
             response.body =  {}
-            response.code = result.code
-            response.header = result.info()
+            response.code = result.code if hasattr(result, "code") else None
+            response.header = result.info() if hasattr(result, "info") else None
 
         return response
 
@@ -179,7 +182,7 @@ class Utils(object):
             output = json.loads(input)
             return output
         except Exception as e:
-            logger.error(e)
+            traceback.print_exc()
             return {"input":input}
 
     @staticmethod
