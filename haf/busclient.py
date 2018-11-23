@@ -3,7 +3,7 @@
 '''
 # BusClient
 '''
-
+import contextlib
 import logging
 from multiprocessing.managers import BaseManager
 from haf.config import *
@@ -39,6 +39,7 @@ class BusClient(metaclass=SingletonType):
 
     def get_case(self):
         return self.info_manager.get_case()
+
 
     def get_param(self):
         return self.info_manager.get_param()
