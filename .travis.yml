@@ -1,6 +1,7 @@
 language: python
 python:
   - "3.6"
+  - "3.7"
 # command to install dependencies
 install:
   - pip install paramiko
@@ -20,4 +21,5 @@ install:
   - pip install assertpy
 script:
   - # or py.test for Python versions 3.5 and below
-  - python -m haf
+  - python -m haf -rc=1
+  - python -m haf -rc=2
