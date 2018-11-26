@@ -59,12 +59,12 @@ class Program(object):
     def _init_system_lock(self):
         self.bus_client.get_lock().put(Lock)
 
-    def start_main(self):
+    def start_main(self, args):
         self.bus_client.get_param().put(SIGNAL_START)
 
         self._init_system_lock()
 
-        self.bus_client.get_param().put({"file_name": "D:\workspace\mine\python\haf/testcases/test.xlsx"})
+        self.bus_client.get_param().put({"file_name": args.case})
         self.bus_client.get_param().put(SIGNAL_STOP)
 
     def run(self, args):
@@ -75,11 +75,8 @@ class Program(object):
             self._start_loader(1)
             self._start_runner(args.runner_count if args.runner_count else 1)
             self._start_recorder(1)
-
             self.bus_client = BusClient()
-
-            self.start_main()
-
+            self.start_main(args)
             self.wait_end_signal()
 
         except KeyboardInterrupt as key_inter:
