@@ -78,7 +78,7 @@ class Utils(object):
             xlsx = load_workbook(filename)
             sheet_names = xlsx.sheetnames
             if "testcases" not in sheet_names or "config" not in sheet_names:
-                logger.log("not fount sheet in {}".format(filename))
+                logger.log(f"not fount sheet in {filename}")
                 return {}
             testcases = xlsx["testcases"].rows
             config = xlsx["config"].rows
@@ -156,7 +156,7 @@ class Utils(object):
             response.code = result.code if hasattr(result, "code") else None
             response.header = result.info() if hasattr(result, "info") else None
 
-        logger.info("{} {}".format(key, result))
+        logger.info(f"{key} {result}")
         return response
 
     @staticmethod

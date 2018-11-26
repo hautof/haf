@@ -66,16 +66,16 @@ class MysqlTool(object):
             if isinstance(sqlscript, list):
                 for ss in sqlscript:
                     if ss != None and ss != "None" and "None" not in ss and len(ss) > 5:
-                        logger.info("{} start execute {}".format(key, ss))
+                        logger.info(f"{key} start execute {ss}")
                         cursor_m.execute(ss)
                         data.append(cursor_m.fetchall())
-                        logger.info("{} result {}".format(key, str(data)))
+                        logger.info(f"{key} result {str(data)}")
             elif isinstance(sqlscript, str):
                 if sqlscript != None and sqlscript != "None" and "None" not in sqlscript and len(sqlscript) > 5:
-                    logger.info("{} start execute {}".format(key, sqlscript))
+                    logger.info(f"{key} start execute {sqlscript}")
                     cursor_m.execute(sqlscript)
                     data.append(cursor_m.fetchall())
-                    logger.info("{} result {}".format(key, str(data)))
+                    logger.info(f"{key} result {str(data)}")
 
             return data
         except Exception as e:

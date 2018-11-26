@@ -22,8 +22,8 @@ class Recorder(Process):
 
     def run(self):
         try:
-            self.recorder_key = "{}$%{}$%".format(self.pid, "recorder")
-            logger.info("{} start recorder ".format(self.recorder_key))
+            self.recorder_key = f"{self.pid}$%recorder$%"
+            logger.info(f"{self.recorder_key} start recorder ")
             self.bus_client = BusClient()
             while True:
                 results = self.bus_client.get_result()
@@ -31,10 +31,10 @@ class Recorder(Process):
                     result = results.get()
                     if isinstance(result, HttpApiResult):
                         if isinstance(result.case, HttpApiCase):
-                            logger.info("{} recorder -- {}.{}.{} is {}".format(self.recorder_key, result.case.ids.id, result.case.ids.subid, result.case.ids.name, result.result))
+                            logger.info(f"{self.recorder_key} recorder -- {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {result.result}")
                         else:
-                            logger.info("{} recorder ! wrong result!".format(self.recorder_key))
-                            logger.info("{} recorder {}".format(self.recorder_key, result.run_error))
+                            logger.info(f"{self.recorder_key} recorder ! wrong result!")
+                            logger.info(f"{self.recorder_key} recorder {result.run_error}")
                         self.result_handler(result)
                     elif result == SIGNAL_RESULT_END:
                         self.end_handler()
@@ -44,10 +44,10 @@ class Recorder(Process):
             raise FailRecorderException
 
     def end_handler(self):
-        logger.info("{} end recorder".format(self.recorder_key))
+        logger.info(f"{self.recorder_key} end recorder")
         system_handler = self.bus_client.get_system()
         system_handler.put(SIGNAL_RECORD_END)
 
     def result_handler(self, result):
         self.results.append(result)
-        logger.info("{} from {} to {}, result is {}".format(self.recorder_key, result.begin_time, result.end_time, result.result))
+        logger.info(f"{self.recorder_key} from {result.begin_time} to {result.end_time}, result is {result.result}")

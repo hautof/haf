@@ -12,7 +12,7 @@ class AssertHelper(object):
     def assert_that(real, expect, **kwargs):
         key = kwargs.get("key", "assert$%test$%")
         try:
-            logger.debug("{} {} ?? {}".format(key, real, expect))
+            logger.debug(f"{key} {real} ?? {expect}")
             if real is None or expect is None:
                 return real == expect
             elif isinstance(real, datetime):
@@ -34,7 +34,7 @@ class AssertHelper(object):
                 assert_that(type(real)(expect)).is_equal_to(real)
                 return type(real)(expect) == real
         except AssertionError as ae:
-            logger.debug("{} {}".format(key, ae))
+            logger.debug(f"{key} {ae}")
             return ae
 
     @staticmethod

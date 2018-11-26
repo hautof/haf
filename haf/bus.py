@@ -91,7 +91,7 @@ class BusServer(Process):
             raise FailBusException
 
     def stop(self):
-        logger.info("end bus {}".format(self.pid))
+        logger.info(f"end bus {self.pid}")
         self.server.shutdown()
         self.is_stop = True
 

@@ -5,6 +5,8 @@ BUS_PORT = 9000
 BUS_DOMAIN = u"0.0.0.0"
 BUS_AUTH_KEY = bytes("hafbus", encoding='utf-8')
 
+COUNT_RUNNER = 1
+WEB_SERVER = False
 
 CASE_TYPE_BASE = 0
 CASE_TYPE_WEBUI = 1
