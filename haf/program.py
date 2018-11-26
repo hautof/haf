@@ -7,6 +7,7 @@
 
 import logging
 import time
+from multiprocessing import Process
 
 from haf.bus import BusServer
 from haf.busclient import BusClient
@@ -17,6 +18,7 @@ from haf.runner import Runner
 from haf.config import *
 from haf.common.exception import *
 from haf.logger import Logger
+from haf.ext.webserver.app import web_server
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')
 logger = logging.getLogger(__name__)
@@ -55,9 +57,9 @@ class Program(object):
         l.start()
         time.sleep(0.1)
 
-
     def _init_system_lock(self):
         self.bus_client.get_lock().put(Lock)
+        self.bus_client.get_web_lock().put(Lock)
 
     def start_main(self, args):
         self.bus_client.get_param().put(SIGNAL_START)
@@ -65,7 +67,11 @@ class Program(object):
         self._init_system_lock()
 
         self.bus_client.get_param().put({"file_name": args.case})
-        self.bus_client.get_param().put(SIGNAL_STOP)
+        if args.web_server:
+            ws = Process(target=web_server)
+            ws.start()
+        else:
+            self.bus_client.get_param().put(SIGNAL_STOP)
 
     def run(self, args):
         try:

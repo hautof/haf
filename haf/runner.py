@@ -32,6 +32,7 @@ class Runner(Process):
         self.key = ""
         self.runner_key = ""
         self.lock = False
+        self.runner = {"runing":""}
 
     def load(self):
         pass
@@ -47,23 +48,38 @@ class Runner(Process):
         self.benchs[case.bench_name] = bench
         return bench
 
-    def get_lock(self):
-        return self.bus_client.get_lock().get()
+    def get_lock(self, key):
+        if key == "result":
+            return self.bus_client.get_lock().get()
+        elif key == "web":
+            return self.bus_client.get_web_lock().get()
 
-    def release_lock(self):
-        self.bus_client.get_lock().put(Lock)
+    def release_lock(self, key):
+        if key == "result":
+            self.bus_client.get_lock().put(Lock)
+        elif key == "web":
+            self.bus_client.get_web_lock().put(Lock)
 
     def put_result(self, result:HttpApiResult):
         logger.info(f"{self.key} : runner {self.pid} put result{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}")
         while True:
-            if self.get_lock() is None:
+            if self.get_lock("result") is None:
                 time.sleep(0.1)
             else:
                 result_handler = self.bus_client.get_result()
                 result_handler.put(result)
-                self.release_lock()
+                self.release_lock("result")
                 break
 
+    def put_web_message(self):
+        while True:
+            if self.get_lock("web") is None:
+                time.sleep(0.1)
+            else:
+                web_queue = self.bus_client.get_publish_runner()
+                web_queue.put(self.runner)
+                self.release_lock("web")
+                break
 
     def run(self):
         try:
@@ -95,6 +111,7 @@ class Runner(Process):
                     self.init_runner(local_case)
                     api_runner = ApiRunner(self.bench)
                     result = api_runner.run(local_case)
+                    # TODO add put web message here
                     if isinstance(result, list):
                         if result[0] == CASE_CAN_NOT_RUN_HERE:
                             self.put_case_back(local_case)

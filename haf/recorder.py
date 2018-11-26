@@ -17,7 +17,7 @@ class Recorder(Process):
         super().__init__()
         self.bus_client = None
         self.daemon = True
-        self.results = []
+        self.results = {}
         self.recorder_key = ""
 
     def run(self):
@@ -45,9 +45,19 @@ class Recorder(Process):
 
     def end_handler(self):
         logger.info(f"{self.recorder_key} end recorder")
+        self.json_result_handler()
         system_handler = self.bus_client.get_system()
         system_handler.put(SIGNAL_RECORD_END)
 
     def result_handler(self, result):
-        self.results.append(result)
+        if self.results.get(result.case.bench_name) is None:
+            self.results[result.case.bench_name] = []
+        self.results[result.case.bench_name].append(result)
         logger.info(f"{self.recorder_key} from {result.begin_time} to {result.end_time}, result is {result.result}")
+
+    def publish_results(self):
+        publish_result = self.bus_client.get_publish_result()
+        publish_result.put(self.results)
+
+    def json_result_handler(self):
+        pass

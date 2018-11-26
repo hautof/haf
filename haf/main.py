@@ -19,7 +19,6 @@ def main():
                                                                  if is True, would create web server to offer the api and html service;
                                                                 """)
 
-
     args = arg_program.parse_args()
     main_program = Program()
 
