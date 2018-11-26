@@ -100,7 +100,7 @@ class Program(object):
             system_signal = self.bus_client.get_system()
             signal = system_signal.get()
             if signal == SIGNAL_RECORD_END or signal == SIGNAL_STOP:
-                logger.info("{} -- {}".format("main", "stop"))
+                logger.info("main -- stop")
                 self.bus_client.get_system().put(SIGNAL_BUS_END)
                 break
             time.sleep(0.1)

@@ -28,7 +28,7 @@ class Request(object):
         self.host_port = inputs.get("host_port")
 
         self.rul_part = inputs.get("url", "")
-        self.url = "{}://{}{}".format(self.protocol, self.host_port, self.rul_part)
+        self.url = f"{self.protocol}://{self.host_port}{self.rul_part}"
 
 
 class Response(object):

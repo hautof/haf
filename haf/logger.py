@@ -28,49 +28,56 @@ class Logger(Process):
                 self.log_handler(log)
             except Exception as e:
                 traceback.print_exc()
+    def split_log(self, log):
+        try:
+            return log.rsplit("$%", 2)
+        except Exception as ee:
+            return f"log$%error$%{log}"
+
 
     def log_handler(self, log):
-        if "$%loader$%" in log:
-            self.loader_handler(log)
-        elif "$%runner$%" in log:
-            self.runner_handler(log)
-        elif "$%recorder$%" in log:
-            self.recorder_handler(log)
-        elif "$%system$%" in log:
-            self.system_handler(log)
+        temp1, temp2, msg = self.split_log(log)
+        if "loader" in temp2:
+            self.loader_handler(temp1, msg)
+        elif "runner" in temp2:
+            self.runner_handler(temp1, msg)
+        elif "recorder" in temp2:
+            self.recorder_handler(temp1, msg)
+        elif "system" in temp2:
+            self.system_handler(temp1, temp2, msg)
+        elif "error" in temp2:
+            self.error_handler(temp1, msg)
         else:
-            self.case_handler(log)
+            self.case_handler(temp1, temp2, msg)
 
 
-    def loader_handler(self, log):
-        sid, loader, msg = log.rsplit("$%", 2)
-        self.write("loader", sid, log)
+    def loader_handler(self,temp1, msg):
+        self.write("loader", temp1, msg)
 
 
-    def runner_handler(self, log):
-        sid, runner, msg = log.rsplit("$%", 2)
-        self.write("runner", sid, log)
+    def runner_handler(self, temp1, msg):
+        self.write("runner", temp1, msg)
 
-    def case_handler(self, log):
-        dir, case, msg = log.rsplit("$%", 2)
-        self.write(dir, case, log)
+    def case_handler(self, temp1, temp2, msg):
+        self.write(temp1, temp2, msg)
 
-    def recorder_handler(self, log):
-        sid, recorder, msg = log.rsplit("$%", 2)
-        self.write("recorder", sid, log)
+    def recorder_handler(self, temp1, msg):
+        self.write("recorder", temp1, msg)
 
-    def system_handler(self, log):
-        a, b, msg = log.rsplit("$%", 2)
-        self.write("system", "{}.{}".format(a, b), log)
+    def system_handler(self, temp1, temp2, msg):
+        self.write("system", f"{temp1}.{temp2}", msg)
+
+    def error_handler(self, temp1, msg):
+        self.write("error", temp1, msg)
 
 
     def write(self, dir, filename, msg):
-        dir = "{}/{}".format(LOG_PATH_DEFAULT, dir)
+        dir = f"{LOG_PATH_DEFAULT}/{dir}"
         if not os.path.exists(dir):
             os.makedirs(dir)
-        full_name = "{}/{}.log".format(dir, filename)
+        full_name = f"{dir}/{filename}.log"
         with open(full_name, 'a+') as f:
-            f.write("{}\n".format(msg))
+            f.write(f"{msg}\n")
             f.close()
 
 

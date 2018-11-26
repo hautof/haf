@@ -54,7 +54,7 @@ class Runner(Process):
         self.bus_client.get_lock().put(Lock)
 
     def put_result(self, result:HttpApiResult):
-        logger.info("{} : runner {} put result {}.{}.{} ".format(self.key, self.pid, result.case.ids.id, result.case.ids.subid,result.case.ids.name))
+        logger.info(f"{self.key} : runner {self.pid} put result{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}")
         while True:
             if self.get_lock() is None:
                 time.sleep(0.1)
@@ -67,8 +67,8 @@ class Runner(Process):
 
     def run(self):
         try:
-            self.runner_key = "{}$%{}$%".format(self.pid, "runner")
-            logger.info("{} start runner".format(self.runner_key))
+            self.runner_key = f"{self.pid}$%runner$%"
+            logger.info(f"{self.runner_key} start runner")
             self.bus_client = BusClient()
             while True:
                 case_handler = self.bus_client.get_case()
@@ -91,7 +91,7 @@ class Runner(Process):
             try:
                 if local_case.type == CASE_TYPE_HTTPAPI:
                     self.key = local_case.log_key
-                    logger.info("{} : runner {} -- get {}.{}-{}".format(self.key, self.pid, local_case.ids.id, local_case.ids.subid, local_case.ids.name))
+                    logger.info(f"{self.key} : runner {self.pid} -- get {local_case.ids.id}.{local_case.ids.subid}-{local_case.ids.name}")
                     self.init_runner(local_case)
                     api_runner = ApiRunner(self.bench)
                     result = api_runner.run(local_case)
@@ -119,7 +119,7 @@ class Runner(Process):
         case_handler.put(SIGNAL_CASE_END)
 
     def put_case_back(self, case):
-        logger.info("{} : runner put case {}.{}-{}".format(self.runner_key, case.ids.id, case.ids.subid, case.ids.name))
+        logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name}")
         case_handler = self.bus_client.get_case()
         case_handler.put(case)
         time.sleep(1)
@@ -172,7 +172,7 @@ class ApiRunner(BaseRunner):
             result.result = CASE_SKIP
             return [CASE_SKIP, result]
 
-        logger.info("{} : ApiRunner run - {}.{}-{}".format(case.log_key, case.ids.id, case.ids.subid, case.ids.name))
+        logger.info(f"{case.log_key} : ApiRunner run - {case.ids.id}.{case.ids.subid}-{case.ids.name}")
         try:
             case.response = self.request(case.request)
             result.result_check_response = self.check_response(case.response, case.expect.response)
@@ -213,10 +213,10 @@ class ApiRunner(BaseRunner):
             return True
         result = True
         data = case.response.body
-        logger.info("{} : check sql response : {}".format(case.log_key, case.expect.sql_check_func))
+        logger.info(f"{case.log_key} : check sql response : {case.expect.sql_check_func}")
         class_content = importlib.import_module(case.expect.sql_check_func[0])
         check_func = getattr(getattr(class_content, case.expect.sql_check_func[1]), case.expect.sql_check_func[2])
-        logger.info("{} : check func : {}".format(case.log_key, check_func))
+        logger.info(f"{case.log_key} : check func : {check_func}")
 
         if case.sqlinfo.check_list is not None:
             result = check_func(case.expect.sql_response_result, data, case.sqlinfo.check_list["sql_response"])

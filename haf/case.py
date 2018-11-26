@@ -26,6 +26,7 @@ class HttpApiCase(BaseCase):
         super().__init__()
         self.type = CASE_TYPE_HTTPAPI
         self.message_type = MESSAGE_TYPE_CASE
+        self.log_key = ""
         self._init_all()
 
     def _init_all(self):
@@ -64,4 +65,4 @@ class HttpApiCase(BaseCase):
         self.generate_log_key()
 
     def generate_log_key(self):
-        self.log_key = self.key = "{}$%{}.{}.{}$%".format(self.bench_name, self.ids.id, self.ids.subid, self.ids.name)
+        self.log_key = self.key = f"{self.bench_name}$%{self.ids.id}.{self.ids.subid}.{self.ids.name}$%"
