@@ -26,13 +26,14 @@ logger = logging.getLogger(__name__)
 
 class Program(object):
     def __init__(self):
+        self.bus_client = None
         pass
 
     def _start_bus(self, local=True):
         if local:
-           self.bus_server = BusServer()
-           self.bus_server.start()
-           time.sleep(1)
+            self.bus_server = BusServer()
+            self.bus_server.start()
+            time.sleep(1)
 
     def _start_loader(self, count):
         for x in range(count):
@@ -47,10 +48,9 @@ class Program(object):
         time.sleep(0.5)
 
     def _start_recorder(self, count):
-        for x in range(count):
-            recorder = Recorder()
-            recorder.start()
-            time.sleep(0.1)
+        recorder = Recorder(count)
+        recorder.start()
+        time.sleep(0.1)
 
     def _init_system_logger(self):
         l = Logger()
@@ -60,6 +60,7 @@ class Program(object):
     def _init_system_lock(self):
         self.bus_client.get_lock().put(Lock)
         self.bus_client.get_web_lock().put(Lock)
+        self.bus_client.get_case_lock().put(Lock)
 
     def start_main(self, args):
         self.bus_client.get_param().put(SIGNAL_START)
@@ -69,19 +70,21 @@ class Program(object):
         if args.web_server:
             ws = Process(target=web_server)
             ws.start()
-        else:
-            self.bus_client.get_param().put(SIGNAL_STOP)
+
+        self.bus_client.get_param().put(SIGNAL_STOP)
 
     def run(self, args):
         try:
+            runner_count = args.runner_count if args.runner_count else 1
+
             self._start_bus(local=True if not args.bus_server else False)
             self._init_system_logger()
             self._start_loader(1)
-            self._start_runner(args.runner_count if args.runner_count else 1)
-            self._start_recorder(1)
+            self._start_runner(runner_count)
+            self._start_recorder(runner_count)
             self.bus_client = BusClient()
             self.start_main(args)
-            self.wait_end_signal()
+            self.wait_end_signal(args)
         except KeyboardInterrupt as key_inter:
             logger.error(key_inter)
         except FailLoaderException as loader_inter:
@@ -94,8 +97,7 @@ class Program(object):
             logger.error(frame_inter)
 
 
-
-    def wait_end_signal(self):
+    def wait_end_signal(self, args):
         try:
             while True:
                 system_signal = self.bus_client.get_system()
@@ -106,9 +108,9 @@ class Program(object):
                     break
                 time.sleep(0.1)
             time.sleep(1)
-
+            if args.web_server:
+                time.sleep(30)
         except KeyboardInterrupt as key_inter:
-            #logger.error(key_inter)
             self.bus_client.get_param().put(SIGNAL_STOP)
 
 

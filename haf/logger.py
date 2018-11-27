@@ -1,5 +1,6 @@
 # encoding='utf-8'
 import os
+import sys
 import time
 import traceback
 from multiprocessing import Process
@@ -18,15 +19,12 @@ class Logger(Process):
     def run(self):
         self.bus_client = BusClient()
         while True:
-            try:
-                log_queue = self.bus_client.get_log()
-                if log_queue.empty():
-                    time.sleep(1)
-                    continue
-                log = log_queue.get()
-                self.log_handler(log)
-            except Exception as e:
-                traceback.print_exc()
+            log_queue = self.bus_client.get_log()
+            if log_queue.empty():
+                time.sleep(1)
+                continue
+            log = log_queue.get()
+            self.log_handler(log)
 
     def split_log(self, log):
         try:
@@ -35,7 +33,13 @@ class Logger(Process):
             return f"log$%error$%{log}"
 
     def log_handler(self, log):
-        temp1, temp2, msg = self.split_log(log)
+        try:
+            temp1, temp2, msg = self.split_log(log)
+        except :
+            temp1 = "error"
+            temp2 = "error"
+            msg = log
+
         if "loader" in temp2:
             self.loader_handler(temp1, msg)
         elif "runner" in temp2:

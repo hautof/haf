@@ -60,6 +60,8 @@ class BusServer(Process):
         lock = Queue()
         # web lock queue
         web_lock = Queue()
+        # case lock queue
+        case_lock = Queue()
         # result queue to web server
         publish_result = Queue()
         # loader queue to web server
@@ -78,6 +80,7 @@ class BusServer(Process):
         InfoManager.register("get_log", callable=lambda: log)
         InfoManager.register("get_lock", callable=lambda: lock)
         InfoManager.register("get_web_lock", callable=lambda: web_lock)
+        InfoManager.register("get_case_lock", callable=lambda: case_lock)
         InfoManager.register("get_publish_result", callable=lambda: publish_result)
         InfoManager.register("get_publish_runner", callable=lambda: publish_runner)
         InfoManager.register("get_publish_loader", callable=lambda: publish_loader)

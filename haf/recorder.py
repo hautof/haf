@@ -14,11 +14,13 @@ logger = Log.getLogger(__name__)
 
 
 class Recorder(Process):
-    def __init__(self):
+    def __init__(self, runner_count):
         super().__init__()
         self.bus_client = None
         self.daemon = True
         self.results = EndResult()
+        self.runner_count = runner_count
+        self.signal_end_count = 0
         self.recorder_key = ""
 
     def on_recorder_start(self):
@@ -45,8 +47,10 @@ class Recorder(Process):
                             logger.info(f"{self.recorder_key} recorder {result.run_error}")
                         self.result_handler(result)
                     elif result == SIGNAL_RESULT_END:
-                        self.end_handler()
-                        break
+                        self.signal_end_count += 1
+                        if self.runner_count == self.signal_end_count:
+                            self.end_handler()
+                            break
                 time.sleep(0.1)
         except Exception:
             raise FailRecorderException
@@ -62,28 +66,28 @@ class Recorder(Process):
     def on_case_pass(self, suite_name):
         self.results.passed += 1
         if suite_name not in self.results.summary :
-            self.results.summary[suite_name] = {"passed":1, "skip":0, "failed":0, "error":0}
+            self.results.summary[suite_name] = {"passed": 1, "skip": 0, "failed": 0, "error": 0}
         else:
             self.results.summary[suite_name]["passed"] += 1
 
     def on_case_skip(self, suite_name):
         self.results.skip += 1
         if suite_name not in self.results.summary :
-            self.results.summary[suite_name] = {"passed":0, "skip":1, "failed":0, "error":0}
+            self.results.summary[suite_name] = {"passed": 0, "skip": 1, "failed": 0, "error": 0}
         else:
             self.results.summary[suite_name]["skip"] += 1
 
     def on_case_fail(self, suite_name):
         self.results.failed += 1
         if suite_name not in self.results.summary :
-            self.results.summary[suite_name] = {"passed":0, "skip":0, "failed":1, "error":0}
+            self.results.summary[suite_name] = {"passed": 0, "skip": 0, "failed": 1, "error": 0}
         else:
             self.results.summary[suite_name]["failed"] += 1
 
     def on_case_error(self, suite_name):
         self.results.error += 1
         if suite_name not in self.results.summary :
-            self.results.summary[suite_name] = {"passed":0, "skip":0, "failed":0, "error":1}
+            self.results.summary[suite_name] = {"passed": 0, "skip": 0, "failed": 0, "error": 1}
         else:
             self.results.summary[suite_name]["error"] += 1
 

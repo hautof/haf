@@ -28,7 +28,7 @@ class HttpApiResult(BaseResult):
 
     def _init_all(self):
         self.case = None
-        self.result_check_response = False
+        self.result_check_response = []
         self.result_check_sql_response = False
         self.run_error = None
         self.result = False
