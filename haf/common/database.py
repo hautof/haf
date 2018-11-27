@@ -6,6 +6,7 @@ from contextlib import contextmanager
 
 logger = Log.getLogger(__name__)
 
+
 class SQLConfig(object):
     '''
     sql config
@@ -33,6 +34,18 @@ class SQLConfig(object):
         self.protocol = str(inputs.get("protocol"))
         self.id = inputs.get("id")
         self.sqlname = str(inputs.get("sql_name"))
+
+    def __str__(self):
+        return {
+            "host": self.host,
+            "port": self.port,
+            "username": self.username,
+            "password": self.password,
+            "database": self.database,
+            "protocol": self.protocol,
+            "id": self.id,
+            "sql_name": self.sqlname
+        }
 
 
 class MysqlTool(object):

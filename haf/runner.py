@@ -92,7 +92,7 @@ class Runner(Process):
                     "bench_name" : result.case.bench_name,
                     "begin" : result.begin_time,
                     "end" : result.end_time,
-                    "result" : result.result
+                    "result" : RESULT_GROUP.get(str(result.result))
                 }
             })
         elif isinstance(result, HttpApiCase):
@@ -149,10 +149,12 @@ class Runner(Process):
             except Exception as runerror:
                 logger.error(runerror)
                 result.run_error = traceback.format_exc()
+                result.result = RESULT_ERROR
                 return result
         except Exception as e:
             logger.error(e)
             result.run_error = traceback.format_exc()
+            result.result = RESULT_ERROR
             return result
 
     def end_handler(self):
@@ -223,7 +225,7 @@ class ApiRunner(BaseRunner):
             case.expect.sql_response_result = self.sql_response(case.sqlinfo.scripts["sql_response"], case.sqlinfo.config, case.sqlinfo.check_list["sql_response"])
             result.result_check_sql_response = self.check_sql_response(case)
             result.case = case
-            result.result = result.result_check_response and result.result_check_sql_response
+            result.result = RESULT_PASS if result.result_check_response and result.result_check_sql_response is True else RESULT_FAIL
         except Exception as e:
             result.run_error = e
         result.on_case_end()
@@ -237,9 +239,9 @@ class ApiRunner(BaseRunner):
             return None
 
         if check_list is None:
-            sql_result = Utils.sql_execute(sql_config, sql_script, dictcursor=True, key=self.key)
+            sql_result = RESULT_PASS if Utils.sql_execute(sql_config, sql_script, dictcursor=True, key=self.key) is True else RESULT_FAIL
         else:
-            sql_result = Utils.sql_execute(sql_config, sql_script, key=self.key)
+            sql_result = RESULT_PASS if Utils.sql_execute(sql_config, sql_script, key=self.key) is True else RESULT_FAIL
         return sql_result
 
     def check_response(self, response:Response, response_expect:Response):

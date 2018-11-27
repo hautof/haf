@@ -1,9 +1,8 @@
 # encoding='utf-8'
+
 import importlib
 import json
-
 from haf.common.database import SQLConfig
-
 from haf.config import CASE_HTTP_API_METHOD_GET, CASE_HTTP_API_METHOD_POST
 
 
@@ -14,6 +13,8 @@ class Request(object):
         self.url = ""
         self.method = ""
         self.protocol = ""
+        self.host_port = ""
+        self.url_part = ""
 
     def constructor(self, inputs:dict={}):
         self.header = json.loads(inputs.get("request_header"))
@@ -27,8 +28,18 @@ class Request(object):
         self.protocol = inputs.get("protocl", "http")
         self.host_port = inputs.get("host_port")
 
-        self.rul_part = inputs.get("url", "")
-        self.url = f"{self.protocol}://{self.host_port}{self.rul_part}"
+        self.url_part = inputs.get("url", "")
+        self.url = f"{self.protocol}://{self.host_port}{self.url_part}"
+
+    def deserialize(self):
+        return {
+            "header": self.header,
+            "data": self.data,
+            "url": self.url,
+            "method": self.method,
+            "protocol": self.protocol,
+            "host_port": self.host_port
+        }
 
 
 class Response(object):
@@ -41,6 +52,13 @@ class Response(object):
         self.header = inputs.get("header", {})
         self.body = inputs.get("body", {})
         self.code = inputs.get("code", {})
+
+    def deserialize(self):
+        return {
+            "header": str(self.header),
+            "body": str(self.body),
+            "code": self.code
+        }
 
 
 class Ids(object):
@@ -55,6 +73,14 @@ class Ids(object):
         self.subid = inputs.get("subid")
         self.name = inputs.get("name")
         self.api_name = inputs.get("api_name")
+
+    def deserialize(self):
+        return {
+            "id": self.id,
+            "subid": self.subid,
+            "name": self.name,
+            "api_name": self.api_name
+        }
 
 
 class SqlInfo(object):
@@ -85,6 +111,14 @@ class SqlInfo(object):
     def bind_config(self, config:SQLConfig):
         self.config = config
 
+    def deserialize(self):
+        return {
+            "scripts": self.scripts,
+            "config": self.config.deserialize() if self.config is not None else None,
+            "config_id": self.config_id,
+            "check_list": self.check_list
+        }
+
 
 class Expect(object):
     def __init__(self):
@@ -100,5 +134,10 @@ class Expect(object):
         else:
             self.sql_check_func = sql_check_func.rsplit('.', 2)
 
-
+    def deserialize(self):
+        return {
+            "response": self.response.deserialize(),
+            "sql_check_func": str(self.sql_check_func),
+            "sql_response_result": self.sql_response_result
+        }
 

@@ -66,3 +66,15 @@ class HttpApiCase(BaseCase):
 
     def generate_log_key(self):
         self.log_key = self.key = f"{self.bench_name}$%{self.ids.id}.{self.ids.subid}.{self.ids.name}$%"
+
+    def deserialize(self):
+        return {
+            "ids": self.ids.deserialize(),
+            "run": self.run,
+            "dependent": self.dependent,
+            "bench_name": self.bench_name,
+            "request": self.request.deserialize(),
+            "response": self.response.deserialize(),
+            "expect": self.expect.deserialize(),
+            "sqlinfo": self.sqlinfo.deserialize()
+        }
