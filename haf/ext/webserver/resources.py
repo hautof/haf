@@ -6,6 +6,7 @@ from haf.busclient import BusClient
 from haf import globalenv
 
 globalenv._init()
+globalenv.set_global("runners", {})
 
 class ResultResource(Resource):
     def __init__(self):
@@ -23,11 +24,12 @@ class RunnerResource(Resource):
 
     def get(self):
         get_queue = self.bus_client.get_publish_runner()
-
+        runners = globalenv.get_global("runners")
         if not get_queue.empty():
             runner = get_queue.get()
-            globalenv.set_global("runner", runner)
-        return globalenv.get_global("runner")
+            runners[runner.get("key")] = runner
+            globalenv.set_global("runners", runners)
+        return globalenv.get_global("runners")
 
 
 class LoaderResource(Resource):

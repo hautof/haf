@@ -122,6 +122,8 @@ class LoadFromConfig(object):
             return LoadFromConfig.load_from_xlsx(file_name)
         elif file_name.endswith(".json"):
             return LoadFromConfig.load_from_json(file_name)
+        elif file_name.endswith(".yml"):
+            return LoadFromConfig.load_from_yml(file_name)
 
     @staticmethod
     def load_from_xlsx(file_name):
@@ -133,6 +135,14 @@ class LoadFromConfig(object):
 
     @staticmethod
     def load_from_json(file_name):
+        if isinstance(file_name, str):
+            pass
+
+        if isinstance(file_name, list):
+            pass
+
+    @staticmethod
+    def load_from_yml(file_name):
         if isinstance(file_name, str):
             pass
 

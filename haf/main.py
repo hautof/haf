@@ -18,7 +18,10 @@ def main():
     sub_run_arg_program.add_argument("--web-server", "-ws", type=bool, help="""default is not run;
                                                                  if is True, would create web server to offer the api and html service;
                                                                 """)
-
+    sub_run_arg_program.add_argument("--report-html", "-rh", type=bool, required=True, default=True, help="""default is True,to generate html report""")
+    sub_run_arg_program.add_argument("--report-output-dir", "-rod", type=str, required=False, default="", help="""default is "", using to generate report to this path""")
+    sub_run_arg_program.add_argument("--report-template", "-rt", type=str, required=False, default="base", help="""default using base to generate report;
+                                                                                                                    customer template is support too""")
     args = arg_program.parse_args()
     main_program = Program()
 

@@ -118,6 +118,15 @@ class Utils(object):
         except Exception as e:
             logger.error(e)
 
+    @staticmethod
+    def load_from_json(file_name):
+        #TODO add load from json
+        pass
+
+    @staticmethod
+    def load_from_yml(file_name):
+        #TODO add load from yml
+        pass
 
     @staticmethod
     def http_request(request:Request, **kwargs) :
@@ -126,7 +135,6 @@ class Utils(object):
         :param request: Request
         :return: Response
         '''
-        #logger.info("Utils - {}.{}.{}".format(request.method, request.header, request.data))
         key = kwargs.get("key")
 
         header = request.header

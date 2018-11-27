@@ -85,6 +85,7 @@ class SqlInfo(object):
     def bind_config(self, config:SQLConfig):
         self.config = config
 
+
 class Expect(object):
     def __init__(self):
         self.response = Response()
