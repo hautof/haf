@@ -8,15 +8,17 @@
 ### new features
 
 
-- based on ~~ pytest & allure~~ local test runner now
+- based on local test runner 
 
-- support xlsx,json,yml,py easy cases
+- support xlsx,json,yml,py cases
 
-- report generate
+- report generate with html-template
 
-- multy processes
+- multi-processes on different machines
 
-- multy runner on different machine
+- multi-runners
+
+- web-server support restful api based on flask
 
 
 
@@ -45,14 +47,14 @@
     mkdir testcases
 ```
 
-- create xlsx file with template in template
+- create xlsx file with template in testcases/test.xlsx
 
 - move file.xlsx to testcases
 
-- run 
+- run wit 4 runners and web-server
 
 ```shell
-    python -m haf --case=testcases
+    python -m haf run -rc=4 -ws=True --case=testcases/file.xlsx
 ```
 
 
@@ -68,28 +70,4 @@
 
 ### Release Note
 
-> version 1.1.6
-* add argparse to make arg tool
-* local runner to replace pytest (dev)
-* testsuite support (dev)
-* testresult support (dev)
-
-> version 1.1.5
-* add assertpy support
-
-> version 1.1.3
-* add assert_that func to Run to show more in allure
-
-> version 1.1.1
-* change to wheel 
-
-> version 1.0.2
-* upload to pypi
-
-> version 0.5
-* 增加 report allure 2.5 setup 支持
-* 增加 report 的 发布
-
-> version 0.4
-* complete basic function with xlsx file 
-* add python doc support at doc 
+[release note](https://github.com/tsbxmw/haf/tree/dev-2.0.0/releasenote.md)

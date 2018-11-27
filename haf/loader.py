@@ -22,6 +22,7 @@ class Loader(Process):
         self.bus_client = None
         self.daemon = True
         self.key = ""
+        self.loader = {"all":0}
 
     def run(self):
         try:
@@ -36,6 +37,7 @@ class Loader(Process):
                 time.sleep(0.1)
 
             while True:
+
                 temp = self.get_parameter()
                 if temp == SIGNAL_STOP :
                     while True:
@@ -72,8 +74,11 @@ class Loader(Process):
                     case.constructor(input)
                     case.bind_bench(bench_name)
                     case.sqlinfo.bind_config(bench.get_db(case.sqlinfo.config_id))
+                    self.add_case()
                     self.put_case(case)
+                    self.put_web_message()
 
+                self.put_web_message()
                 time.sleep(0.1)
         except Exception:
             raise FailLoaderException
@@ -86,6 +91,13 @@ class Loader(Process):
                 return params.get(param_key)
             return params
         return None
+
+    def add_case(self):
+        self.loader["all"] += 1
+
+    def put_web_message(self):
+        web_queue = self.bus_client.get_publish_loader()
+        web_queue.put(self.loader)
 
     def put_case(self, case):
         logger.info(f"{self.key} -- put case {case.ids.id}.{case.ids.subid}.{case.ids.name}")
@@ -102,7 +114,6 @@ class Loader(Process):
         pass
 
 
-
 class LoadFromConfig(object):
 
     @staticmethod
@@ -111,6 +122,8 @@ class LoadFromConfig(object):
             return LoadFromConfig.load_from_xlsx(file_name)
         elif file_name.endswith(".json"):
             return LoadFromConfig.load_from_json(file_name)
+        elif file_name.endswith(".yml"):
+            return LoadFromConfig.load_from_yml(file_name)
 
     @staticmethod
     def load_from_xlsx(file_name):
@@ -122,6 +135,14 @@ class LoadFromConfig(object):
 
     @staticmethod
     def load_from_json(file_name):
+        if isinstance(file_name, str):
+            pass
+
+        if isinstance(file_name, list):
+            pass
+
+    @staticmethod
+    def load_from_yml(file_name):
         if isinstance(file_name, str):
             pass
 

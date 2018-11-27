@@ -32,6 +32,7 @@ class Runner(Process):
         self.key = ""
         self.runner_key = ""
         self.lock = False
+        self.runner = {"get": 0, "skip": 0, "run": {}, "done":[], "key": 0}
 
     def load(self):
         pass
@@ -47,27 +48,68 @@ class Runner(Process):
         self.benchs[case.bench_name] = bench
         return bench
 
-    def get_lock(self):
-        return self.bus_client.get_lock().get()
+    def get_lock(self, key):
+        if key == "result":
+            return self.bus_client.get_lock().get()
+        elif key == "web":
+            return self.bus_client.get_web_lock().get()
 
-    def release_lock(self):
-        self.bus_client.get_lock().put(Lock)
+    def release_lock(self, key):
+        if key == "result":
+            self.bus_client.get_lock().put(Lock)
+        elif key == "web":
+            self.bus_client.get_web_lock().put(Lock)
 
     def put_result(self, result:HttpApiResult):
         logger.info(f"{self.key} : runner {self.pid} put result{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}")
         while True:
-            if self.get_lock() is None:
+            if self.get_lock("result") is None:
                 time.sleep(0.1)
             else:
                 result_handler = self.bus_client.get_result()
                 result_handler.put(result)
-                self.release_lock()
+                self.release_lock("result")
                 break
 
+    def put_web_message(self):
+        while True:
+            if self.get_lock("web") is None:
+                time.sleep(0.1)
+            else:
+                web_queue = self.bus_client.get_publish_runner()
+                web_queue.put(self.runner)
+                self.release_lock("web")
+                break
+
+    def result_handler(self, result):
+        if isinstance(result, HttpApiResult):
+            if result.case.run == CASE_SKIP:
+                self.runner["skip"] += 1
+            self.runner["run"] = {}
+            self.runner["done"].append({
+                f"{result.case.ids.id}.{result.case.ids.subid}-{result.case.ids.name}":
+                {
+                    "bench_name" : result.case.bench_name,
+                    "begin" : result.begin_time,
+                    "end" : result.end_time,
+                    "result" : result.result
+                }
+            })
+        elif isinstance(result, HttpApiCase):
+            self.runner["run"] = {
+                f"{result.ids.id}.{result.ids.subid}-{result.ids.name}":
+                {
+                    "bench_name":result.bench_name
+                }
+            }
+
+        logger.info(f"{self.key} : runner {self.pid} -- put web message {self.runner}")
+        self.put_web_message()
 
     def run(self):
         try:
             self.runner_key = f"{self.pid}$%runner$%"
+            self.runner["key"] = f"{self.pid}"
             logger.info(f"{self.runner_key} start runner")
             self.bus_client = BusClient()
             while True:
@@ -92,6 +134,7 @@ class Runner(Process):
                 if local_case.type == CASE_TYPE_HTTPAPI:
                     self.key = local_case.log_key
                     logger.info(f"{self.key} : runner {self.pid} -- get {local_case.ids.id}.{local_case.ids.subid}-{local_case.ids.name}")
+                    self.result_handler(local_case)
                     self.init_runner(local_case)
                     api_runner = ApiRunner(self.bench)
                     result = api_runner.run(local_case)
@@ -101,6 +144,7 @@ class Runner(Process):
                             return
                         if result[0] == CASE_SKIP:
                             result = result[1]
+                    self.result_handler(result)
                     return result
             except Exception as runerror:
                 logger.error(runerror)

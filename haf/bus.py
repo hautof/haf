@@ -9,7 +9,7 @@ import logging
 import time
 from multiprocessing.managers import BaseManager
 from queue import Queue
-from multiprocessing import Process
+from multiprocessing import Process, Pipe
 
 from haf.common.exception import FailBusException
 from haf.config import BUS_DOMAIN, BUS_PORT, BUS_AUTH_KEY, SIGNAL_BUS_END
@@ -58,6 +58,15 @@ class BusServer(Process):
         log = Queue()
         # lock queue
         lock = Queue()
+        # web lock queue
+        web_lock = Queue()
+        # result queue to web server
+        publish_result = Queue()
+        # loader queue to web server
+        publish_loader = Queue()
+        # runner queue to web server
+        publish_runner = Queue()
+
 
         # register the functions to InfoManager
 
@@ -66,8 +75,12 @@ class BusServer(Process):
         InfoManager.register("get_result", callable=lambda: result)
         InfoManager.register("get_bench", callable=lambda: bench)
         InfoManager.register("get_system", callable=lambda: system)
-        InfoManager.register("get_log", callable=lambda : log)
-        InfoManager.register("get_lock", callable=lambda : lock)
+        InfoManager.register("get_log", callable=lambda: log)
+        InfoManager.register("get_lock", callable=lambda: lock)
+        InfoManager.register("get_web_lock", callable=lambda: web_lock)
+        InfoManager.register("get_publish_result", callable=lambda: publish_result)
+        InfoManager.register("get_publish_runner", callable=lambda: publish_runner)
+        InfoManager.register("get_publish_loader", callable=lambda: publish_loader)
 
         self.queue_manager = InfoManager(address=('', self.port), authkey=self.auth_key)
         self.server = self.queue_manager.get_server()

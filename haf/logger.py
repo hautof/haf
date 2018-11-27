@@ -24,16 +24,15 @@ class Logger(Process):
                     time.sleep(1)
                     continue
                 log = log_queue.get()
-                #print(log)
                 self.log_handler(log)
             except Exception as e:
                 traceback.print_exc()
+
     def split_log(self, log):
         try:
             return log.rsplit("$%", 2)
         except Exception as ee:
             return f"log$%error$%{log}"
-
 
     def log_handler(self, log):
         temp1, temp2, msg = self.split_log(log)
@@ -50,10 +49,8 @@ class Logger(Process):
         else:
             self.case_handler(temp1, temp2, msg)
 
-
     def loader_handler(self,temp1, msg):
         self.write("loader", temp1, msg)
-
 
     def runner_handler(self, temp1, msg):
         self.write("runner", temp1, msg)
@@ -70,7 +67,6 @@ class Logger(Process):
     def error_handler(self, temp1, msg):
         self.write("error", temp1, msg)
 
-
     def write(self, dir, filename, msg):
         dir = f"{LOG_PATH_DEFAULT}/{dir}"
         if not os.path.exists(dir):
@@ -79,7 +75,6 @@ class Logger(Process):
         with open(full_name, 'a+') as f:
             f.write(f"{msg}\n")
             f.close()
-
 
     @property
     def now(self):
@@ -93,8 +88,6 @@ class Logger(Process):
         secs = (current_time - int(current_time)) * 1000
         timenow = "%s %03d" % (time_temp, secs)
         return timenow
-
-
 
     def end_handler(self):
         result_handler = self.bus_client.get_result()
