@@ -21,7 +21,8 @@ install:
   - pip install flask
   - pip install flask_restful
   - pip install jinja2
+  - pip install coupling
 script:
   - # or py.test for Python versions 3.5 and below
-  - python -m haf run -rc=1 -case=./testcases/test.xlsx -rh=True
-  - python -m haf run -rc=2 -case=./testcases/test.xlsx -rh=True
+  - python -m haf run -rc=1 -case=./testcases/test.xlsx -rh=True -rod=./testcases/report.html
+  - python -m haf run -rc=2 -case=./testcases/test.xlsx -rh=True -rod=./testcases/report1.html
