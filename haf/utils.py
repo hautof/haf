@@ -181,6 +181,17 @@ class Utils(object):
         return timenow
 
     @staticmethod
+    def get_case_name():
+        '''
+        get datetime now to str
+        :return: time now str
+        '''
+        current_time = time.time()
+        local_time = time.localtime(current_time)
+        time_temp = time.strftime("%Y-%m-%d-%H.%M", local_time)
+        return time_temp
+
+    @staticmethod
     def jsontool(input):
         '''
         deal with json object

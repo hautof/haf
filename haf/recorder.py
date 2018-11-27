@@ -1,4 +1,5 @@
 # encoding='utf-8'
+import json
 import time
 from multiprocessing import Process
 
@@ -9,18 +10,21 @@ from haf.common.log import Log
 from haf.result import HttpApiResult, EndResult, Detail
 from haf.config import *
 from haf.utils import Utils
+from haf.ext.jinjia2report.report import Jinjia2Report
 
 logger = Log.getLogger(__name__)
 
 
 class Recorder(Process):
-    def __init__(self, runner_count):
+    def __init__(self, runner_count:int=1, report_path:str="", case_name:str=""):
         super().__init__()
         self.bus_client = None
         self.daemon = True
-        self.results = EndResult()
+        self.results = EndResult(f"AutoTest-{case_name}")
         self.runner_count = runner_count
         self.signal_end_count = 0
+        self.report_path = report_path
+        self.case_name = case_name
         self.recorder_key = ""
 
     def on_recorder_start(self):
@@ -55,9 +59,14 @@ class Recorder(Process):
         except Exception:
             raise FailRecorderException
 
+    def generate_report(self):
+        Jinjia2Report.report(self.results, self.report_path)
+
+
     def end_handler(self):
         self.on_recorder_stop()
         self.publish_results()
+        self.generate_report()
         logger.info(f"{self.recorder_key} end recorder")
         self.json_result_handler()
         system_handler = self.bus_client.get_system()
@@ -65,31 +74,39 @@ class Recorder(Process):
 
     def on_case_pass(self, suite_name):
         self.results.passed += 1
+        self.results.all += 1
         if suite_name not in self.results.summary :
-            self.results.summary[suite_name] = {"passed": 1, "skip": 0, "failed": 0, "error": 0}
+            self.results.summary[suite_name] = {"passed": 1, "skip": 0, "failed": 0, "error": 0, "all": 1}
         else:
             self.results.summary[suite_name]["passed"] += 1
+            self.results.summary[suite_name]["all"] += 1
 
     def on_case_skip(self, suite_name):
         self.results.skip += 1
+        self.results.all += 1
         if suite_name not in self.results.summary :
-            self.results.summary[suite_name] = {"passed": 0, "skip": 1, "failed": 0, "error": 0}
+            self.results.summary[suite_name] = {"passed": 0, "skip": 1, "failed": 0, "error": 0, "all": 1}
         else:
             self.results.summary[suite_name]["skip"] += 1
+            self.results.summary[suite_name]["all"] += 1
 
     def on_case_fail(self, suite_name):
         self.results.failed += 1
+        self.results.all += 1
         if suite_name not in self.results.summary :
-            self.results.summary[suite_name] = {"passed": 0, "skip": 0, "failed": 1, "error": 0}
+            self.results.summary[suite_name] = {"passed": 0, "skip": 0, "failed": 1, "error": 0, "all": 1}
         else:
             self.results.summary[suite_name]["failed"] += 1
+            self.results.summary[suite_name]["all"] += 1
 
     def on_case_error(self, suite_name):
         self.results.error += 1
+        self.results.all += 1
         if suite_name not in self.results.summary :
-            self.results.summary[suite_name] = {"passed": 0, "skip": 0, "failed": 0, "error": 1}
+            self.results.summary[suite_name] = {"passed": 0, "skip": 0, "failed": 0, "error": 1, "all": 1}
         else:
             self.results.summary[suite_name]["error"] += 1
+            self.results.summary[suite_name]["all"] += 1
 
     def check_case_result(self, result:HttpApiResult):
         suite_name = result.case.bench_name
@@ -130,4 +147,4 @@ class Recorder(Process):
         publish_result.put(self.results.deserialize())
 
     def json_result_handler(self):
-        pass
+        return json.dumps(self.results.deserialize())

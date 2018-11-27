@@ -19,6 +19,7 @@ from haf.config import *
 from haf.common.exception import *
 from haf.logger import Logger
 from haf.ext.webserver.app import web_server
+from haf.utils import Utils
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')
 logger = logging.getLogger(__name__)
@@ -27,6 +28,7 @@ logger = logging.getLogger(__name__)
 class Program(object):
     def __init__(self):
         self.bus_client = None
+        self.case_name = Utils.get_case_name()
         pass
 
     def _start_bus(self, local=True):
@@ -47,13 +49,13 @@ class Program(object):
             runner.start()
         time.sleep(0.5)
 
-    def _start_recorder(self, count):
-        recorder = Recorder(count)
+    def _start_recorder(self, count:int=1, report_path:str=""):
+        recorder = Recorder(count, report_path, self.case_name)
         recorder.start()
         time.sleep(0.1)
 
     def _init_system_logger(self):
-        l = Logger()
+        l = Logger(self.case_name)
         l.start()
         time.sleep(0.1)
 
@@ -81,7 +83,7 @@ class Program(object):
             self._init_system_logger()
             self._start_loader(1)
             self._start_runner(runner_count)
-            self._start_recorder(runner_count)
+            self._start_recorder(runner_count, args.report_output_dir)
             self.bus_client = BusClient()
             self.start_main(args)
             self.wait_end_signal(args)

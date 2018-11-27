@@ -5,34 +5,18 @@ from coupling.dict import AttrDict
 from jinja2 import Environment, PackageLoader, FileSystemLoader
 
 
-if __name__ == "__main__":
-    path = os.path.dirname(__file__)
-    print(path)
-    j2r = FileSystemLoader("../resource/report/")
-    j2r_e = Environment(loader=j2r, trim_blocks=True, lstrip_blocks=True, autoescape=True)
-    j2r_t = j2r_e.get_template("base.html")
-    result = {
-        "begin_time":"",
-        "end_time":"",
-        "duration":"",
-        "pass":0,
-        "fail":0,
-        "skip":0,
-        "error":0,
-        "details":[
-            {
-                "suite_name":"",
-                "cases":[
-                    {},
-                    {}
-                ]
+class Jinjia2Report(object):
+    def __init__(self):
+        pass
 
-            },
-            {}
-        ]
-    }
-    stream = j2r_t.stream(navigation=[1,2,3], a_variable="123123123")
-    stream.dump()
+    @staticmethod
+    def report(results:dict, report_path:str):
+        local_dir = os.path.dirname(__file__)
+        j2r = FileSystemLoader(f"{local_dir}/../resource/report/")
+        j2r_e = Environment(loader=j2r, trim_blocks=True, lstrip_blocks=True, autoescape=True)
+        j2r_t = j2r_e.get_template("base.html")
+        stream = j2r_t.stream(results = results)
+        stream.dump(report_path)
 
 
 

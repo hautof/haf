@@ -76,7 +76,7 @@ class Detail(object):
 
 class EndResult(BaseResult):
 
-    def __init__(self):
+    def __init__(self, name:str=""):
         super().__init__()
         self.begin_time = ""
         self.end_time = ""
@@ -85,9 +85,12 @@ class EndResult(BaseResult):
         self.failed = 0
         self.skip = 0
         self.error = 0
+        self.all = 0
         self.suite_name = []
         self.summary = {}
         self.details = {}
+        self.name = name
+        self.version = PLATFORM_VERSION
 
     def deserialize(self):
         return {
