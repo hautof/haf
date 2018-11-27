@@ -20,7 +20,7 @@ install:
   - pip install assertpy
   - pip install flask
   - pip install flask_restful
-  - pip install jinjia2
+  - pip install jinja2
 script:
   - # or py.test for Python versions 3.5 and below
   - python -m haf run -rc=1 -case=./testcases/test.xlsx -rh=True
