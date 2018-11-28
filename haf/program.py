@@ -72,7 +72,6 @@ class Program(object):
         if args.web_server:
             ws = Process(target=web_server)
             ws.start()
-
         self.bus_client.get_param().put(SIGNAL_STOP)
 
     def run(self, args):
@@ -102,16 +101,15 @@ class Program(object):
     def wait_end_signal(self, args):
         try:
             while True:
-                system_signal = self.bus_client.get_system()
-                signal = system_signal.get()
-                if signal == SIGNAL_RECORD_END or signal == SIGNAL_STOP:
-                    logger.info("main -- stop")
-                    self.bus_client.get_system().put(SIGNAL_BUS_END)
-                    break
-                time.sleep(0.1)
+                if not args.web_server:
+                    system_signal = self.bus_client.get_system()
+                    signal = system_signal.get()
+                    if signal == SIGNAL_RECORD_END or signal == SIGNAL_STOP:
+                        logger.info("main -- stop")
+                        self.bus_client.get_system().put(SIGNAL_BUS_END)
+                        break
+                    time.sleep(0.1)
             time.sleep(1)
-            if args.web_server:
-                time.sleep(30)
         except KeyboardInterrupt as key_inter:
             self.bus_client.get_param().put(SIGNAL_STOP)
 

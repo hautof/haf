@@ -32,6 +32,9 @@ class Recorder(Process):
 
     def on_recorder_stop(self):
         self.results.end_time = Utils.get_datetime_now()
+        for suite_name in self.results.summary.keys():
+            for key in ("begin_time", "end_time", "duration"):
+                self.results.summary[suite_name][key] = getattr(self.results.details.get(suite_name), key)
 
     def run(self):
         try:
@@ -45,7 +48,7 @@ class Recorder(Process):
                     result = results.get()
                     if isinstance(result, HttpApiResult):
                         if isinstance(result.case, HttpApiCase):
-                            logger.info(f"{self.recorder_key} recorder -- {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {result.result}")
+                            logger.info(f"{self.recorder_key} recorder--{result.case.bench_name}.{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {result.result}")
                         else:
                             logger.info(f"{self.recorder_key} recorder ! wrong result!")
                             logger.info(f"{self.recorder_key} recorder {result.run_error}")
@@ -61,7 +64,6 @@ class Recorder(Process):
 
     def generate_report(self):
         Jinjia2Report.report(self.results, self.report_path)
-
 
     def end_handler(self):
         self.on_recorder_stop()

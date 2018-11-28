@@ -1,74 +1,159 @@
-
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
+
     {% block head %}
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
-    <title>{{ title or results.name }}</title>
-
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <title>{{results.name}}</title>
     <style type="text/css">
-        {% include "base.css" %}
     </style>
-
-    {% endblock %}
+	{% endblock %}
 </head>
 <body>
-  <div id="header">
-        {% block header %}
-            <div id="info">
-                Start Time: {{ results.begin_time }}<br/>
-                Duration: {{ results.duration }}<br/>
-            </div>
-            <h1>{{ title or results.name }}</h1>
-        {% endblock %}
-  </div>
-  <div id="content">
-        {% block overview %}
-        <table id="overview">
-            <thead style="background-color: #cccccc;">
-                <tr id="overview-head-row" onclick="toggleChart(this, 'overview-chart-row', 'overview-chart-div', 'overview-total')">
-                    <th colspan="9" class="left-aligned">
-                        Overview
-                        <span class="operation">
-                            <a href="javascript:void(0)">Show Chart</a>
-                        </span>
-                    </th>
-                </tr>
+<div class="container">
+	<div class="row clearfix">
+		<div class="col-md-12 column">
+			<div class="jumbotron well">
+				<div>
+					<center><h2> {{results.name}} </h2></center>
+					<br>
+				</div>
+				<table class="table">
+						<thead>
+							<tr >
+								<th>Platform</th>
+								<th>Begin Time</th>
+								<th>End Time</th>
+								<th>Duration Time</th>
+								<th>Pass</th>
+								<th>Fail</th>
+								<th>Error</th>
+								<th>Skip</th>
+								<th>All</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr >
+								<td>
+									{{results.version}}
+								</td>
+								<td>
+									{{results.begin_time}}
+								</td>
+								<td>
+									{{results.end_time}}
+								</td>
+								<td>
+									{{results.duration}}
+								</td>
+								<td>
+									{{results.passed}}
+								</td>
+								<td>
+									{{results.failed}}
+								</td>
+								<td>
+									{{results.error}}
+								</td>
+								<td>
+									{{results.skip}}
+								</td>
+								<td>
+									{{results.all}}
+								</td>
+							</tr>
+						</tbody>
+				</table>
+			</div>
 
-                {% if _chart_position_ == "head" %}
-                <tr id="overview-chart-row" style="display: none;">
-                    <th colspan="9" class="left-aligned">
-                        <div id="overview-chart-div"></div>
-                    </th>
-                </tr>
-                {% endif %}
-
-                <tr>
-                    <th class="left-aligned">TestSuite</th>
-                    <th>Count</th>
-                    <th>NotRun</th>
-                    <th>Passed</th>
-                    <th>Warning</th>
-                    <th>Skipped</th>
-                    <th>Failed</th>
-                    <th>Erroneous</th>
-                    <th>Pass Rate</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% set totals = {"failed":0, "passed": 0, "skip":0, "all": 0, "error": 0} %}
-                {% for suite_name in results.suite_name %}
-                <tr id="overview-{{suite_name}}" onclick="updateChart(this, 'overview-chart-div', 'TestSuite: {{suite_name}}', '{{suite_name}}')">
-                    {% for key in totals.keys() %}
-                    {% set _dummy = totals.update({key: totals[key]+results.summary.get(suite_name).get(key, 0)}) %}
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-      {% endblock %}
-  </div>
+			<div class="jumbotron well">
+				<h3>
+					Suites Summary
+				</h3>
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Suite Name</th>
+							<th>Begin Time</th>
+							<th>End Time</th>
+							<th>Duration Time</th>
+							<th>Pass</th>
+							<th>Fail</th>
+							<th>Error</th>
+							<th>Skip</th>
+							<th>All</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for suite_summary in results.summary.keys() %}
+						<tr>
+						<td>{{suite_summary}}</td>
+						<td>{{results.summary.get(suite_summary).get("begin_time")}}</td>
+						<td>{{results.summary.get(suite_summary).get("end_time")}}</td>
+						<td>{{results.summary.get(suite_summary).get("duration")}}</td>
+						<td>{{results.summary.get(suite_summary).get("passed")}}</td>
+						<td>{{results.summary.get(suite_summary).get("failed")}}</td>
+						<td>{{results.summary.get(suite_summary).get("error")}}</td>
+						<td>{{results.summary.get(suite_summary).get("skip")}}</td>
+						<td>{{results.summary.get(suite_summary).get("all")}}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="row clearfix">
+		{% block suites %}
+		{% for suite in results.details.keys() %}
+		<div class="col-md-12 column">
+			<div class="row clearfix">
+				<div class="col-md-12 column">
+					<nav class="navbar navbar-default" role="navigation">
+						<div class="navbar-header">
+							 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button> <a class="navbar-brand" href="#">{{suite}}</a>
+						</div>
+					</nav>
+				</div>
+			</div>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Case Id</th>
+						<th>Begin</th>
+						<th>End</th>
+						<th>Duration</th>
+						<th>DependenceCase</th>
+						<th>Request</th>
+						<th>Response</th>
+						<th>SQL Check</th>
+						<th>Result</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for case in results.details.get(suite).cases %}
+					<tr class="info">
+						<td>{{'{}.{}.{}'.format(case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}</td>
+						<td>{{case.begin_time}}</td>
+						<td>{{case.end_time}}</td>
+						<td>{{case.case.duration}}</td>
+						<td>{{case.case.dependent}}</td>
+						<td>{{case.case.request}}</td>
+						<td>{{case.case.response}}</td>
+						<td>{{case.case.sqlinfo}}</td>
+						<td>{{case.result}}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		{% endfor %}
+		{% endblock %}
+	</div>
+</div>
 </body>
 </html>

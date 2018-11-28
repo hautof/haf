@@ -40,6 +40,7 @@ class HttpApiCase(BaseCase):
         self.response = Response()
         self.sqlinfo = SqlInfo()
         self.log_key = ""
+        self.error = None
 
     def constructor(self, *args, **kwargs):
         '''

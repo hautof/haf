@@ -199,6 +199,9 @@ class BaseRunner(object):
     def check_case_run(self, case): # if skip, return False
         return case.run == CASE_RUN
 
+    def check_case_error(self, case):
+        return case.error == CASE_ERROR
+
 
 class ApiRunner(BaseRunner):
     '''
