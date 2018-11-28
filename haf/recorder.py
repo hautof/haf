@@ -1,4 +1,5 @@
 # encoding='utf-8'
+import json
 import time
 from multiprocessing import Process
 
@@ -6,22 +7,35 @@ from haf.busclient import BusClient
 from haf.case import HttpApiCase
 from haf.common.exception import FailRecorderException
 from haf.common.log import Log
-from haf.result import HttpApiResult
+from haf.result import HttpApiResult, EndResult, Detail
 from haf.config import *
+from haf.utils import Utils
+from haf.ext.jinjia2report.report import Jinjia2Report
 
 logger = Log.getLogger(__name__)
 
 
 class Recorder(Process):
-    def __init__(self):
+    def __init__(self, runner_count:int=1, report_path:str="", case_name:str=""):
         super().__init__()
         self.bus_client = None
         self.daemon = True
-        self.results = {}
+        self.results = EndResult(f"AutoTest-{case_name}")
+        self.runner_count = runner_count
+        self.signal_end_count = 0
+        self.report_path = report_path
+        self.case_name = case_name
         self.recorder_key = ""
+
+    def on_recorder_start(self):
+        self.results.begin_time = Utils.get_datetime_now()
+
+    def on_recorder_stop(self):
+        self.results.end_time = Utils.get_datetime_now()
 
     def run(self):
         try:
+            self.on_recorder_start()
             self.recorder_key = f"{self.pid}$%recorder$%"
             logger.info(f"{self.recorder_key} start recorder ")
             self.bus_client = BusClient()
@@ -37,27 +51,100 @@ class Recorder(Process):
                             logger.info(f"{self.recorder_key} recorder {result.run_error}")
                         self.result_handler(result)
                     elif result == SIGNAL_RESULT_END:
-                        self.end_handler()
-                        break
+                        self.signal_end_count += 1
+                        if self.runner_count == self.signal_end_count:
+                            self.end_handler()
+                            break
                 time.sleep(0.1)
         except Exception:
             raise FailRecorderException
 
+    def generate_report(self):
+        Jinjia2Report.report(self.results, self.report_path)
+
+
     def end_handler(self):
+        self.on_recorder_stop()
+        self.publish_results()
+        self.generate_report()
         logger.info(f"{self.recorder_key} end recorder")
         self.json_result_handler()
         system_handler = self.bus_client.get_system()
         system_handler.put(SIGNAL_RECORD_END)
 
-    def result_handler(self, result):
-        if self.results.get(result.case.bench_name) is None:
-            self.results[result.case.bench_name] = []
-        self.results[result.case.bench_name].append(result)
+    def on_case_pass(self, suite_name):
+        self.results.passed += 1
+        self.results.all += 1
+        if suite_name not in self.results.summary :
+            self.results.summary[suite_name] = {"passed": 1, "skip": 0, "failed": 0, "error": 0, "all": 1}
+        else:
+            self.results.summary[suite_name]["passed"] += 1
+            self.results.summary[suite_name]["all"] += 1
+
+    def on_case_skip(self, suite_name):
+        self.results.skip += 1
+        self.results.all += 1
+        if suite_name not in self.results.summary :
+            self.results.summary[suite_name] = {"passed": 0, "skip": 1, "failed": 0, "error": 0, "all": 1}
+        else:
+            self.results.summary[suite_name]["skip"] += 1
+            self.results.summary[suite_name]["all"] += 1
+
+    def on_case_fail(self, suite_name):
+        self.results.failed += 1
+        self.results.all += 1
+        if suite_name not in self.results.summary :
+            self.results.summary[suite_name] = {"passed": 0, "skip": 0, "failed": 1, "error": 0, "all": 1}
+        else:
+            self.results.summary[suite_name]["failed"] += 1
+            self.results.summary[suite_name]["all"] += 1
+
+    def on_case_error(self, suite_name):
+        self.results.error += 1
+        self.results.all += 1
+        if suite_name not in self.results.summary :
+            self.results.summary[suite_name] = {"passed": 0, "skip": 0, "failed": 0, "error": 1, "all": 1}
+        else:
+            self.results.summary[suite_name]["error"] += 1
+            self.results.summary[suite_name]["all"] += 1
+
+    def check_case_result(self, result:HttpApiResult):
+        suite_name = result.case.bench_name
+        if result.result == RESULT_SKIP:
+            self.on_case_skip(suite_name)
+        elif result.result == RESULT_PASS:
+            self.on_case_pass(suite_name)
+        elif result.result == RESULT_FAIL:
+            self.on_case_fail(suite_name)
+        elif result.result == RESULT_ERROR:
+            self.on_case_error(suite_name)
+
+    def add_result_to_suite(self, result:HttpApiResult):
+        if result.case.bench_name not in self.results.suite_name:
+            self.results.suite_name.append(result.case.bench_name)
+            case = result.case
+            suite = Detail(case.bench_name)
+            suite.begin_time = result.begin_time
+            suite.end_time = result.end_time
+            suite.cases.append(result)
+        else:
+            for suite in self.results.details.values():
+                if suite.suite_name == result.case.bench_name:
+                    suite = suite
+                    break
+            suite.end_time = result.end_time
+            suite.cases.append(result)
+        self.results.details[result.case.bench_name] = suite
+
+    def result_handler(self, result:HttpApiResult):
         logger.info(f"{self.recorder_key} from {result.begin_time} to {result.end_time}, result is {result.result}")
+        self.add_result_to_suite(result)
+        self.check_case_result(result)
+        self.publish_results()
 
     def publish_results(self):
         publish_result = self.bus_client.get_publish_result()
-        publish_result.put(self.results)
+        publish_result.put(self.results.deserialize())
 
     def json_result_handler(self):
-        pass
+        return json.dumps(self.results.deserialize())

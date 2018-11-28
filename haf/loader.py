@@ -22,7 +22,7 @@ class Loader(Process):
         self.bus_client = None
         self.daemon = True
         self.key = ""
-        self.loader = {"all":0}
+        self.loader = {"all":0, "error":0, "error_info":{}}
 
     def run(self):
         try:
@@ -70,11 +70,16 @@ class Loader(Process):
                 for input in inputs.get("testcases"):
                     if input.get("id") is None or input.get("subid") is None:
                         continue
+
                     case = HttpApiCase()
-                    case.constructor(input)
-                    case.bind_bench(bench_name)
-                    case.sqlinfo.bind_config(bench.get_db(case.sqlinfo.config_id))
-                    self.add_case()
+                    try:
+                        case.constructor(input)
+                        case.bind_bench(bench_name)
+                        case.sqlinfo.bind_config(bench.get_db(case.sqlinfo.config_id))
+                    except Exception as e:
+                        case.run = CASE_SKIP
+                        case.error_msg = str(e)
+                    self.add_case(case)
                     self.put_case(case)
                     self.put_web_message()
 
@@ -92,8 +97,11 @@ class Loader(Process):
             return params
         return None
 
-    def add_case(self):
+    def add_case(self, case):
         self.loader["all"] += 1
+        if case.error_msg != "":
+            self.loader["error"] += 1
+            self.loader["error_info"][f"{case.ids.id}.{case.ids.subid}.{case.ids.name}"] = case.error_msg
 
     def put_web_message(self):
         web_queue = self.bus_client.get_publish_loader()
@@ -136,14 +144,17 @@ class LoadFromConfig(object):
     @staticmethod
     def load_from_json(file_name):
         if isinstance(file_name, str):
+            # TODO
             pass
 
         if isinstance(file_name, list):
+            # TODO
             pass
 
     @staticmethod
     def load_from_yml(file_name):
         if isinstance(file_name, str):
+            # TODO
             pass
 
         if isinstance(file_name, list):

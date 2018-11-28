@@ -18,6 +18,7 @@ class BaseCase(object):
         self.expect = None
         self.run = True
         self.bench_name = ""
+        self.error_msg = ""
         self.AttrNoneList = ["result", "error", "AttrNoneList", ]
 
 
@@ -31,7 +32,7 @@ class HttpApiCase(BaseCase):
 
     def _init_all(self):
         self.ids = Ids()
-        self.run = True
+        self.run = CASE_RUN
         self.dependent = []
         self.bench_name = ""
         self.request = Request()
@@ -53,7 +54,7 @@ class HttpApiCase(BaseCase):
             args_init = kwargs
         #logger.info(args_init)
         self.ids.constructor(args_init)
-        self.run = args_init.get("run")
+        self.run = CASE_RUN if args_init.get("run") is True else CASE_SKIP
         self.dependent = [x for x in str(args_init.get("dependent")).split(";") if args_init.get("dependent") is not None]
         self.request.constructor(args_init)
         self.response.constructor(args_init)
@@ -66,3 +67,15 @@ class HttpApiCase(BaseCase):
 
     def generate_log_key(self):
         self.log_key = self.key = f"{self.bench_name}$%{self.ids.id}.{self.ids.subid}.{self.ids.name}$%"
+
+    def deserialize(self):
+        return {
+            "ids": self.ids.deserialize(),
+            "run": self.run,
+            "dependent": self.dependent,
+            "bench_name": self.bench_name,
+            "request": self.request.deserialize(),
+            "response": self.response.deserialize(),
+            "expect": self.expect.deserialize(),
+            "sqlinfo": self.sqlinfo.deserialize()
+        }

@@ -1,5 +1,6 @@
 # encoding='utf-8'
 import os
+import sys
 import time
 import traceback
 from multiprocessing import Process
@@ -10,23 +11,25 @@ from haf.config import *
 
 
 class Logger(Process):
-    def __init__(self):
+    def __init__(self, case_name):
         super().__init__()
         self.bus_client = None
         self.daemon = True
+        self.case_name = case_name
 
     def run(self):
+        log_home = f"{LOG_PATH_DEFAULT}/{self.case_name}"
+        if not os.path.exists(log_home):
+            os.makedirs(log_home)
         self.bus_client = BusClient()
+
         while True:
-            try:
-                log_queue = self.bus_client.get_log()
-                if log_queue.empty():
-                    time.sleep(1)
-                    continue
-                log = log_queue.get()
-                self.log_handler(log)
-            except Exception as e:
-                traceback.print_exc()
+            log_queue = self.bus_client.get_log()
+            if log_queue.empty():
+                time.sleep(1)
+                continue
+            log = log_queue.get()
+            self.log_handler(log)
 
     def split_log(self, log):
         try:
@@ -35,7 +38,13 @@ class Logger(Process):
             return f"log$%error$%{log}"
 
     def log_handler(self, log):
-        temp1, temp2, msg = self.split_log(log)
+        try:
+            temp1, temp2, msg = self.split_log(log)
+        except :
+            temp1 = "error"
+            temp2 = "error"
+            msg = log
+
         if "loader" in temp2:
             self.loader_handler(temp1, msg)
         elif "runner" in temp2:
@@ -68,7 +77,8 @@ class Logger(Process):
         self.write("error", temp1, msg)
 
     def write(self, dir, filename, msg):
-        dir = f"{LOG_PATH_DEFAULT}/{dir}"
+
+        dir = f"{LOG_PATH_DEFAULT}/{self.case_name}/{dir}"
         if not os.path.exists(dir):
             os.makedirs(dir)
         full_name = f"{dir}/{filename}.log"

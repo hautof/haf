@@ -53,12 +53,16 @@ class Runner(Process):
             return self.bus_client.get_lock().get()
         elif key == "web":
             return self.bus_client.get_web_lock().get()
+        elif key == "case":
+            return self.bus_client.get_case_lock().get()
 
     def release_lock(self, key):
         if key == "result":
             self.bus_client.get_lock().put(Lock)
         elif key == "web":
             self.bus_client.get_web_lock().put(Lock)
+        elif key == "case":
+            return self.bus_client.get_case_lock().put(Lock)
 
     def put_result(self, result:HttpApiResult):
         logger.info(f"{self.key} : runner {self.pid} put result{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}")
@@ -92,7 +96,7 @@ class Runner(Process):
                     "bench_name" : result.case.bench_name,
                     "begin" : result.begin_time,
                     "end" : result.end_time,
-                    "result" : result.result
+                    "result" : RESULT_GROUP.get(str(result.result))
                 }
             })
         elif isinstance(result, HttpApiCase):
@@ -149,10 +153,12 @@ class Runner(Process):
             except Exception as runerror:
                 logger.error(runerror)
                 result.run_error = traceback.format_exc()
+                result.result = RESULT_ERROR
                 return result
         except Exception as e:
             logger.error(e)
             result.run_error = traceback.format_exc()
+            result.result = RESULT_ERROR
             return result
 
     def end_handler(self):
@@ -164,9 +170,14 @@ class Runner(Process):
 
     def put_case_back(self, case):
         logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name}")
-        case_handler = self.bus_client.get_case()
-        case_handler.put(case)
-        time.sleep(1)
+        while True:
+            if self.get_lock("case") is None:
+                time.sleep(0.1)
+            else:
+                case_handler = self.bus_client.get_case()
+                case_handler.put(case)
+                self.release_lock("case")
+                break
 
 
 class BaseRunner(object):
@@ -185,8 +196,8 @@ class BaseRunner(object):
         except Exception:
             return False
 
-    def check_case_skip(self, case):
-        return case.run
+    def check_case_run(self, case): # if skip, return False
+        return case.run == CASE_RUN
 
 
 class ApiRunner(BaseRunner):
@@ -210,10 +221,10 @@ class ApiRunner(BaseRunner):
         if not self.check_case_run_here(case) :
             result.on_case_end()
             return [CASE_CAN_NOT_RUN_HERE, result]
-        if not self.check_case_skip(case):
+        if not self.check_case_run(case): # not False is skip
             result.case = case
             result.on_case_end()
-            result.result = CASE_SKIP
+            result.result = RESULT_SKIP
             return [CASE_SKIP, result]
 
         logger.info(f"{case.log_key} : ApiRunner run - {case.ids.id}.{case.ids.subid}-{case.ids.name}")
@@ -223,7 +234,7 @@ class ApiRunner(BaseRunner):
             case.expect.sql_response_result = self.sql_response(case.sqlinfo.scripts["sql_response"], case.sqlinfo.config, case.sqlinfo.check_list["sql_response"])
             result.result_check_sql_response = self.check_sql_response(case)
             result.case = case
-            result.result = result.result_check_response and result.result_check_sql_response
+            result.result = RESULT_PASS if False not in result.result_check_response and result.result_check_sql_response is True else RESULT_FAIL
         except Exception as e:
             result.run_error = e
         result.on_case_end()
@@ -237,15 +248,19 @@ class ApiRunner(BaseRunner):
             return None
 
         if check_list is None:
-            sql_result = Utils.sql_execute(sql_config, sql_script, dictcursor=True, key=self.key)
+            sql_result = RESULT_PASS if Utils.sql_execute(sql_config, sql_script, dictcursor=True, key=self.key) is True else RESULT_FAIL
         else:
-            sql_result = Utils.sql_execute(sql_config, sql_script, key=self.key)
+            sql_result = RESULT_PASS if Utils.sql_execute(sql_config, sql_script, key=self.key) is True else RESULT_FAIL
         return sql_result
 
     def check_response(self, response:Response, response_expect:Response):
         result = True
-        result = result and AssertHelper.assert_that(response.code, 200, key=self.key) and AssertHelper.assert_that(response.body, response_expect.body, key=self.key)
-        return result
+        result_check_code = result and AssertHelper.assert_that(response.code, 200, key=self.key)
+        if response_expect.body == {}:
+            result_check_body = True
+        else:
+            result_check_body = AssertHelper.assert_that(response.body, response_expect.body, key=self.key)
+        return [result_check_code, result_check_body]
 
     def check_sql_response(self, case:HttpApiCase):
         '''
