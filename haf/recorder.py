@@ -10,7 +10,7 @@ from haf.common.log import Log
 from haf.result import HttpApiResult, EndResult, Detail
 from haf.config import *
 from haf.utils import Utils
-from haf.ext.jinjia2report.report import Jinjia2Report
+from haf.ext.jinjia2report.report import Jinja2Report
 
 logger = Log.getLogger(__name__)
 
@@ -63,7 +63,8 @@ class Recorder(Process):
             raise FailRecorderException
 
     def generate_report(self):
-        Jinjia2Report.report(self.results, self.report_path)
+
+        Jinja2Report.write_report_to_file(Jinja2Report.report(self.results), self.report_path)
 
     def end_handler(self):
         self.on_recorder_stop()
@@ -146,7 +147,7 @@ class Recorder(Process):
 
     def publish_results(self):
         publish_result = self.bus_client.get_publish_result()
-        publish_result.put(self.results.deserialize())
+        publish_result.put(self.results)
 
     def json_result_handler(self):
         return json.dumps(self.results.deserialize())

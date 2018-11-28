@@ -1,15 +1,12 @@
 # encoding='utf-8'
-import json
-
 from flask_restful import Resource
-
 from haf.busclient import BusClient
 from haf import globalenv
 from haf.result import EndResult
 
 globalenv._init()
 globalenv.set_global("runners", {})
-globalenv.set_global("results", EndResult().deserialize())
+globalenv.set_global("results", EndResult())
 
 
 class ResultResource(Resource):
@@ -23,8 +20,8 @@ class ResultResource(Resource):
         if not get_queue.empty():
             results = get_queue.get()
             globalenv.set_global("results", results)
-        return results
 
+        return results.deserialize()
 
 
 class RunnerResource(Resource):
@@ -53,3 +50,5 @@ class LoaderResource(Resource):
             loader = get_queue.get()
             globalenv.set_global("loader", loader)
         return globalenv.get_global("loader")
+
+

@@ -1,8 +1,8 @@
 # encoding = 'utf-8'
 
 from flask import Flask
-from flask_restful import reqparse, abort, Api, Resource
-from multiprocessing import Process
+from flask_restful import abort, Api
+from haf.ext.jinjia2report.report import Jinja2Report
 from haf.ext.webserver.resources import *
 from haf.config import *
 
@@ -13,6 +13,12 @@ api = Api(app)
 @app.route("/")
 def index():
     return "welcome to use haf !"
+
+
+@app.route("/report")
+def report():
+        report_stream = Jinja2Report.report_online(globalenv.get_global("results"))
+        return report_stream
 
 
 def abort_if_not_exist():
