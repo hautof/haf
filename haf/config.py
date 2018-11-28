@@ -46,7 +46,7 @@ RESULT_GROUP = {
     "50": "PASS",
     "51": "FAIL",
     "52": "SKIP",
-    "54": "ERROR"
+    "53": "ERROR"
 }
 
 LOG_PATH_DEFAULT = "D:\workspace\mine\python\haf\data"

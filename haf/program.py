@@ -67,8 +67,8 @@ class Program(object):
     def start_main(self, args):
         self.bus_client.get_param().put(SIGNAL_START)
         self._init_system_lock()
-
-        self.bus_client.get_param().put({"file_name": args.case})
+        for arg in args.case:
+            self.bus_client.get_param().put({"file_name": arg})
         if args.web_server:
             ws = Process(target=web_server)
             ws.start()
