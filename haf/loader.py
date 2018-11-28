@@ -77,7 +77,10 @@ class Loader(Process):
                         case.bind_bench(bench_name)
                         case.sqlinfo.bind_config(bench.get_db(case.sqlinfo.config_id))
                     except Exception as e:
+                        case.bind_bench(bench_name)
+                        case.sqlinfo.bind_config(bench.get_db(case.sqlinfo.config_id))
                         case.run = CASE_SKIP
+                        case.error = CASE_ERROR
                         case.error_msg = str(e)
                     self.add_case(case)
                     self.put_case(case)

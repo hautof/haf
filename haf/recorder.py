@@ -10,7 +10,7 @@ from haf.common.log import Log
 from haf.result import HttpApiResult, EndResult, Detail
 from haf.config import *
 from haf.utils import Utils
-from haf.ext.jinjia2report.report import Jinjia2Report
+from haf.ext.jinjia2report.report import Jinja2Report
 
 logger = Log.getLogger(__name__)
 
@@ -32,6 +32,9 @@ class Recorder(Process):
 
     def on_recorder_stop(self):
         self.results.end_time = Utils.get_datetime_now()
+        for suite_name in self.results.summary.keys():
+            for key in ("begin_time", "end_time", "duration"):
+                self.results.summary[suite_name][key] = getattr(self.results.details.get(suite_name), key)
 
     def run(self):
         try:
@@ -45,7 +48,7 @@ class Recorder(Process):
                     result = results.get()
                     if isinstance(result, HttpApiResult):
                         if isinstance(result.case, HttpApiCase):
-                            logger.info(f"{self.recorder_key} recorder -- {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {result.result}")
+                            logger.info(f"{self.recorder_key} recorder--{result.case.bench_name}.{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {result.result}")
                         else:
                             logger.info(f"{self.recorder_key} recorder ! wrong result!")
                             logger.info(f"{self.recorder_key} recorder {result.run_error}")
@@ -60,8 +63,8 @@ class Recorder(Process):
             raise FailRecorderException
 
     def generate_report(self):
-        Jinjia2Report.report(self.results, self.report_path)
 
+        Jinja2Report.write_report_to_file(Jinja2Report.report(self.results), self.report_path)
 
     def end_handler(self):
         self.on_recorder_stop()
@@ -144,7 +147,7 @@ class Recorder(Process):
 
     def publish_results(self):
         publish_result = self.bus_client.get_publish_result()
-        publish_result.put(self.results.deserialize())
+        publish_result.put(self.results)
 
     def json_result_handler(self):
         return json.dumps(self.results.deserialize())

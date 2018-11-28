@@ -36,6 +36,7 @@ CASE_CAN_RUN_HERE = 40
 CASE_CAN_NOT_RUN_HERE = 41
 CASE_SKIP = 42
 CASE_RUN = 43
+CASE_ERROR = 44
 
 RESULT_PASS = 50
 RESULT_FAIL = 51
@@ -45,7 +46,7 @@ RESULT_GROUP = {
     "50": "PASS",
     "51": "FAIL",
     "52": "SKIP",
-    "54": "ERROR"
+    "53": "ERROR"
 }
 
 LOG_PATH_DEFAULT = "D:\workspace\mine\python\haf\data"

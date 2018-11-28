@@ -103,7 +103,9 @@ class EndResult(BaseResult):
             "error":self.error,
             "suite_name":self.suite_name,
             "summary": self.summary,
-            "details": {
-                x:self.details.get(x).deserialize() for x in self.details.keys()
-            }
+            "version": self.version,
+            "name": self.name,
+            "details": [
+                self.details.get(x).deserialize() for x in self.details.keys()
+            ]
         }
