@@ -14,6 +14,7 @@ from haf.common.httprequest import HttpController
 from http.client import HTTPResponse
 import random
 import platform
+import yaml
 
 logger = Log.getLogger(__name__)
 
@@ -114,20 +115,37 @@ class Utils(object):
 
             for d in dbconfig_data:
                 result["dbconfig"].append(dict(zip(dbconfig_header, d)))
-
             return result
         except Exception as e:
             logger.error(e)
 
     @staticmethod
     def load_from_json(file_name):
-        #TODO add load from json
-        pass
+        try:
+            if os.path.exists(file_name):
+                f = open(file_name, 'r', encoding='utf-8')
+                result = json.loads(f.read())
+                f.close()
+                return result
+            else:
+                raise FileNotFoundError
+        except Exception as e:
+            traceback.print_exc()
+            logger.error(e)
 
     @staticmethod
     def load_from_yml(file_name):
-        #TODO add load from yml
-        pass
+        try:
+            if os.path.exists(file_name):
+                f = open(file_name, 'r', encoding='utf-8')
+                result = yaml.load(f)
+                f.close()
+                return result
+            else:
+                raise FileNotFoundError
+        except Exception as e:
+            traceback.print_exc()
+            logger.error(e)
 
     @staticmethod
     def http_request(request:Request, **kwargs) :

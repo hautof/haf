@@ -1,0 +1,232 @@
+config:
+    - benchname: test3
+      name: test3
+dbconfig:
+    - database: visual
+      host: 192.168.41.208
+      id: 1
+      password: testzhan123
+      port: 3306
+      protocol: mysql
+      sql_name: mysql1
+      username: root
+    - database: ERP_DB
+      host: 192.168.41.102
+      id: 2
+      password: 111111
+      port: 1433
+      protocol: sqlserver
+      sql_name: 192.168.41.102
+      username: uat
+    - database: corpus_qa
+      host: 192.168.41.68
+      id: 3
+      password: nC0Dq1xDH6uq[K1of0V1
+      port: 3306
+      protocol: mysql
+      sql_name: mysql2
+      username: xztest
+testcases:
+    - api_name: default
+      dependent: null
+      description: default with no params
+      expect_response: '{}'
+      expect_sql: None
+      host_port: t.weather.sojson.com
+      id: 1
+      method: get
+      name: GetCityWeather
+      protocol: http
+      request_data: '{}'
+      request_header: '{}'
+      response: json
+      response_exclude: None
+      run: true
+      sql_config: None
+      sql_get_result: None
+      sql_response: None
+      sql_response_check_list: None
+      sql_setup: None
+      sql_teardown: None
+      story: Default with no params
+      subid: 1
+      subname: default
+      url: /api/weather/city/101030100
+    - api_name: default
+      dependent: 1.1.GetCityWeather
+      description: default with no params
+      expect_response: '{}'
+      expect_sql: None
+      host_port: t.weather.sojson.com
+      id: 1
+      method: get
+      name: GetCityWeather
+      protocol: http
+      request_data: '{}'
+      request_header: '{}'
+      response: json
+      response_exclude: None
+      run: true
+      sql_config: None
+      sql_get_result: None
+      sql_response: None
+      sql_response_check_list: None
+      sql_setup: None
+      sql_teardown: None
+      story: Default with no params
+      subid: 2
+      subname: default
+      url: /api/weather/city/101030100
+    - api_name: default
+      dependent: null
+      description: default with no params
+      expect_response: '{}'
+      expect_sql: None
+      host_port: t.weather.sojson.com
+      id: 1
+      method: get
+      name: GetCityWeather
+      protocol: http
+      request_data: '{}'
+      request_header: '{}'
+      response: json
+      response_exclude: None
+      run: true
+      sql_config: None
+      sql_get_result: None
+      sql_response: None
+      sql_response_check_list: None
+      sql_setup: None
+      sql_teardown: None
+      story: Default with no params
+      subid: 3
+      subname: default
+      url: /api/weather/city/101030100
+    - api_name: default
+      dependent: 1.3.GetCityWeather
+      description: default with no params
+      expect_response: '{}'
+      expect_sql: None
+      host_port: t.weather.sojson.com
+      id: 1
+      method: get
+      name: GetCityWeather
+      protocol: http
+      request_data: '{}'
+      request_header: '{}'
+      response: json
+      response_exclude: None
+      run: true
+      sql_config: None
+      sql_get_result: None
+      sql_response: None
+      sql_response_check_list: None
+      sql_setup: None
+      sql_teardown: None
+      story: Default with no params
+      subid: 4
+      subname: default
+      url: /api/weather/city/101030100
+    - api_name: default
+      dependent: null
+      description: default with no params
+      expect_response: '{}'
+      expect_sql: None
+      host_port: t.weather.sojson.com
+      id: 1
+      method: get
+      name: GetCityWeather
+      protocol: http
+      request_data: '{}'
+      request_header: '{}'
+      response: json
+      response_exclude: None
+      run: true
+      sql_config: None
+      sql_get_result: None
+      sql_response: None
+      sql_response_check_list: None
+      sql_setup: None
+      sql_teardown: None
+      story: Default with no params
+      subid: 5
+      subname: default
+      url: /api/weather/city/101030100
+    - api_name: default
+      dependent: null
+      description: default with no params
+      expect_response: '{}'
+      expect_sql: None
+      host_port: t.weather.sojson.com
+      id: 1
+      method: get
+      name: GetCityWeather
+      protocol: http
+      request_data: '{}'
+      request_header: '{}'
+      response: json
+      response_exclude: None
+      run: true
+      sql_config: None
+      sql_get_result: None
+      sql_response: None
+      sql_response_check_list: None
+      sql_setup: None
+      sql_teardown: None
+      story: Default with no params
+      subid: 6
+      subname: default
+      url: /api/weather/city/101030100
+    - api_name: default
+      dependent: null
+      description: default with no params
+      expect_response: "{\n    \"cityInfo\": {\n        \"city\": \"\u5929\u6D25\u5E02\
+        \",\n        \"cityId\": \"101030100\",\n        \"parent\": \"\u5929\u6D25\"\n\
+        \    },\n    \"message\": \"Success !\",\n    \"status\": 200,\n    \"data\":\
+        \ {}\n}"
+      expect_sql: None
+      host_port: t.weather.sojson.com
+      id: 1
+      method: get
+      name: GetCityWeather
+      protocol: http
+      request_data: '{}123'
+      request_header: '{}'
+      response: json
+      response_exclude: None
+      run: true
+      sql_config: None
+      sql_get_result: None
+      sql_response: None
+      sql_response_check_list: None
+      sql_setup: None
+      sql_teardown: None
+      story: Default with no params
+      subid: 7
+      subname: default
+      url: /api/weather/city/101030100
+    - api_name: null
+      dependent: null
+      description: null
+      expect_response: null
+      expect_sql: null
+      host_port: null
+      id: null
+      method: null
+      name: null
+      protocol: null
+      request_data: null
+      request_header: null
+      response: null
+      response_exclude: null
+      run: null
+      sql_config: null
+      sql_get_result: null
+      sql_response: null
+      sql_response_check_list: null
+      sql_setup: null
+      sql_teardown: null
+      story: null
+      subid: null
+      subname: null
+      url: null
