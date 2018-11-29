@@ -16,7 +16,6 @@ class Jinja2Report(object):
 
     @staticmethod
     def get_template(key: str):
-
         if key == "base":
             template = "base.html"
         elif key == "online":

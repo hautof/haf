@@ -13,6 +13,7 @@ from haf.config import *
 from haf.common.httprequest import HttpController
 from http.client import HTTPResponse
 import random
+import platform
 
 logger = Log.getLogger(__name__)
 
@@ -211,3 +212,7 @@ class Utils(object):
         :return:
         '''
         return str(random.randint(100000, 999999))
+
+    @staticmethod
+    def get_platform():
+        return platform.system()

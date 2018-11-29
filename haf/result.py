@@ -91,6 +91,7 @@ class EndResult(BaseResult):
         self.details = {}
         self.name = name
         self.version = PLATFORM_VERSION
+        self.platform = Utils.get_platform()
 
     def deserialize(self):
         return {
@@ -105,6 +106,7 @@ class EndResult(BaseResult):
             "summary": self.summary,
             "version": self.version,
             "name": self.name,
+            "platform": self.platform,
             "details": [
                 self.details.get(x).deserialize() for x in self.details.keys()
             ]
