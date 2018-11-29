@@ -57,17 +57,17 @@ class BusServer(Process):
         # log queue
         log = Queue()
         # lock queue
-        lock = Queue()
+        lock = Queue(maxsize=1)
         # web lock queue
-        web_lock = Queue()
+        web_lock = Queue(maxsize=1)
         # case lock queue
-        case_lock = Queue()
+        case_lock = Queue(maxsize=1)
         # result queue to web server
-        publish_result = Queue()
+        publish_result = Queue(maxsize=1)
         # loader queue to web server
-        publish_loader = Queue()
+        publish_loader = Queue(maxsize=1)
         # runner queue to web server
-        publish_runner = Queue()
+        publish_runner = Queue(maxsize=1)
 
 
         # register the functions to InfoManager

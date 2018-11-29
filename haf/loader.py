@@ -108,6 +108,8 @@ class Loader(Process):
 
     def put_web_message(self):
         web_queue = self.bus_client.get_publish_loader()
+        if web_queue.full():
+            web_queue.get()
         web_queue.put(self.loader)
 
     def put_case(self, case):

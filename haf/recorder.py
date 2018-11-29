@@ -147,6 +147,8 @@ class Recorder(Process):
 
     def publish_results(self):
         publish_result = self.bus_client.get_publish_result()
+        if publish_result.full():
+            publish_result.get()
         publish_result.put(self.results)
 
     def json_result_handler(self):

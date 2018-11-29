@@ -17,6 +17,7 @@ def index():
 
 @app.route("/report")
 def report():
+        ResultResource().get()
         report_stream = Jinja2Report.report_online(globalenv.get_global("results"))
         return report_stream
 
