@@ -82,6 +82,8 @@ class Runner(Process):
                 time.sleep(0.1)
             else:
                 web_queue = self.bus_client.get_publish_runner()
+                if web_queue.full():
+                    web_queue.get()
                 web_queue.put(self.runner)
                 self.release_lock("web")
                 break

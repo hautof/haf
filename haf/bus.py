@@ -45,29 +45,29 @@ class BusServer(Process):
         :return:
         '''
         # case queue, keep the case
-        case = Queue()
+        case = Queue(maxsize=-1)
         # param queue, keep the queue
-        param = Queue()
+        param = Queue(maxsize=-1)
         # result queue, keep the result
-        result = Queue()
+        result = Queue(maxsize=-1)
         # bench dict, keep the bench
-        bench = Queue()
+        bench = Queue(maxsize=-1)
         # system queue, keep the signal of system
-        system = Queue()
+        system = Queue(maxsize=-1)
         # log queue
-        log = Queue()
+        log = Queue(maxsize=-1)
         # lock queue
-        lock = Queue()
+        lock = Queue(maxsize=1)
         # web lock queue
-        web_lock = Queue()
+        web_lock = Queue(maxsize=1)
         # case lock queue
-        case_lock = Queue()
+        case_lock = Queue(maxsize=1)
         # result queue to web server
-        publish_result = Queue()
+        publish_result = Queue(maxsize=1)
         # loader queue to web server
-        publish_loader = Queue()
+        publish_loader = Queue(maxsize=1)
         # runner queue to web server
-        publish_runner = Queue()
+        publish_runner = Queue(maxsize=1)
 
 
         # register the functions to InfoManager
