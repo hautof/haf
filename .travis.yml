@@ -14,7 +14,7 @@ install:
   - pip install flask_restful
   - pip install jinja2
   - pip install coupling
-  - pip install yaml
+  - pip install pyaml
   - pip install deepdiff
 script:
   - # or py.test for Python versions 3.5 and below
