@@ -28,8 +28,7 @@ logger = logging.getLogger(__name__)
 class Program(object):
     def __init__(self):
         self.bus_client = None
-        self.case_name = Utils.get_case_name()
-        pass
+        self.case_name = ""
 
     def _start_bus(self, local=True):
         if local:
@@ -43,19 +42,19 @@ class Program(object):
             loader.start()
             time.sleep(0.1)
 
-    def _start_runner(self, count):
+    def _start_runner(self, count, log_dir: str):
         for x in range(count):
-            runner = Runner()
+            runner = Runner(log_dir)
             runner.start()
         time.sleep(0.5)
 
-    def _start_recorder(self, count:int=1, report_path:str=""):
+    def _start_recorder(self, count: int=1, report_path: str=""):
         recorder = Recorder(count, report_path, self.case_name)
         recorder.start()
         time.sleep(0.1)
 
-    def _init_system_logger(self):
-        l = Logger(self.case_name)
+    def _init_system_logger(self, log_dir: str):
+        l = Logger(self.case_name, log_dir)
         l.start()
         time.sleep(0.1)
 
@@ -76,12 +75,13 @@ class Program(object):
 
     def run(self, args):
         try:
+            self.case_name = Utils.get_case_name()
             runner_count = args.runner_count if args.runner_count else 1
 
             self._start_bus(local=True if not args.bus_server else False)
-            self._init_system_logger()
+            self._init_system_logger(args.log_dir)
             self._start_loader(1)
-            self._start_runner(runner_count)
+            self._start_runner(runner_count, f"{args.log_dir}/{self.case_name}")
             self._start_recorder(runner_count, args.report_output_dir)
             self.bus_client = BusClient()
             self.start_main(args)
@@ -96,7 +96,6 @@ class Program(object):
             logger.error(runner_inter)
         except FailFrameworkException as frame_inter:
             logger.error(frame_inter)
-
 
     def wait_end_signal(self, args):
         try:

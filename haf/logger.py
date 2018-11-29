@@ -11,14 +11,15 @@ from haf.config import *
 
 
 class Logger(Process):
-    def __init__(self, case_name):
+    def __init__(self, case_name, log_dir):
         super().__init__()
         self.bus_client = None
         self.daemon = True
         self.case_name = case_name
+        self.log_dir = log_dir
 
     def run(self):
-        log_home = f"{LOG_PATH_DEFAULT}/{self.case_name}"
+        log_home = f"{self.log_dir}/{self.case_name}"
         if not os.path.exists(log_home):
             os.makedirs(log_home)
         self.bus_client = BusClient()
@@ -77,13 +78,12 @@ class Logger(Process):
         self.write("error", temp1, msg)
 
     def write(self, dir, filename, msg):
-
-        dir = f"{LOG_PATH_DEFAULT}/{self.case_name}/{dir}"
+        dir = f"{self.log_dir}/{self.case_name}/{dir}"
         if not os.path.exists(dir):
             os.makedirs(dir)
         full_name = f"{dir}/{filename}.log"
         with open(full_name, 'a+') as f:
-            f.write(f"{msg}\n")
+            f.write(f"{self.now}{msg}\n")
             f.close()
 
     @property

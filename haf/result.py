@@ -34,6 +34,7 @@ class HttpApiResult(BaseResult):
         self.result = False
         self.begin_time = None
         self.end_time = None
+        self.log_dir = ""
 
     def on_case_begin(self):
         self.begin_time = Utils.get_datetime_now()
@@ -50,7 +51,8 @@ class HttpApiResult(BaseResult):
             "result": RESULT_GROUP.get(str(self.result)),
             "begin_time": self.begin_time,
             "end_time": self.end_time,
-            "case": self.case.deserialize()
+            "case": self.case.deserialize(),
+            "log_dir":self.log_dir
         }
 
 
@@ -90,7 +92,9 @@ class EndResult(BaseResult):
         self.summary = {}
         self.details = {}
         self.name = name
+        self.log_dir = ""
         self.version = PLATFORM_VERSION
+        self.platform = Utils.get_platform()
 
     def deserialize(self):
         return {
@@ -105,6 +109,8 @@ class EndResult(BaseResult):
             "summary": self.summary,
             "version": self.version,
             "name": self.name,
+            "platform": self.platform,
+            "log_dir": self.log_dir,
             "details": [
                 self.details.get(x).deserialize() for x in self.details.keys()
             ]

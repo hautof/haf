@@ -22,6 +22,8 @@ def main():
     sub_run_arg_program.add_argument("--report-output-dir", "-rod", dest="report_output_dir", type=str, required=True, default="", help="""default is "", using to generate report to this path""")
     sub_run_arg_program.add_argument("--report-template", "-rt", type=str, default="base", help="""default using base to generate report;
                                                                                                                     customer template is support too""")
+    sub_run_arg_program.add_argument("--log-dir", "-ld", type=str, required=True, dest="log_dir", help="""log output dir is needed!""")
+
     args = arg_program.parse_args()
     main_program = Program()
 

@@ -23,7 +23,7 @@ logger = Log.getLogger(__name__)
 
 
 class Runner(Process):
-    def __init__(self):
+    def __init__(self, log_dir:str):
         super().__init__()
         self.daemon = True
         self.bus_client = None
@@ -33,6 +33,7 @@ class Runner(Process):
         self.runner_key = ""
         self.lock = False
         self.runner = {"get": 0, "skip": 0, "run": {}, "done":[], "key": 0}
+        self.log_dir = log_dir
 
     def load(self):
         pass
@@ -148,6 +149,7 @@ class Runner(Process):
                             return
                         if result[0] == CASE_SKIP:
                             result = result[1]
+                    result.log_dir = f"{self.log_dir}/{local_case.bench_name}/{local_case.ids.id}.{local_case.ids.subid}.{local_case.ids.name}.log"
                     self.result_handler(result)
                     return result
             except Exception as runerror:

@@ -141,24 +141,15 @@ class LoadFromConfig(object):
         if isinstance(file_name, str):
             inputs = Utils.get_rows_from_xlsx(file_name)
             return inputs
-        if isinstance(file_name, list):
-            pass
 
     @staticmethod
     def load_from_json(file_name):
         if isinstance(file_name, str):
-            # TODO
-            pass
-
-        if isinstance(file_name, list):
-            # TODO
-            pass
+            inputs = Utils.load_from_json(file_name)
+            return inputs
 
     @staticmethod
     def load_from_yml(file_name):
         if isinstance(file_name, str):
-            # TODO
-            pass
-
-        if isinstance(file_name, list):
-            pass
+            inputs = Utils.load_from_yml(file_name)
+            return inputs

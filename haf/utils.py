@@ -13,6 +13,8 @@ from haf.config import *
 from haf.common.httprequest import HttpController
 from http.client import HTTPResponse
 import random
+import platform
+import yaml
 
 logger = Log.getLogger(__name__)
 
@@ -113,20 +115,37 @@ class Utils(object):
 
             for d in dbconfig_data:
                 result["dbconfig"].append(dict(zip(dbconfig_header, d)))
-
             return result
         except Exception as e:
             logger.error(e)
 
     @staticmethod
     def load_from_json(file_name):
-        #TODO add load from json
-        pass
+        try:
+            if os.path.exists(file_name):
+                f = open(file_name, 'r', encoding='utf-8')
+                result = json.loads(f.read())
+                f.close()
+                return result
+            else:
+                raise FileNotFoundError
+        except Exception as e:
+            traceback.print_exc()
+            logger.error(e)
 
     @staticmethod
     def load_from_yml(file_name):
-        #TODO add load from yml
-        pass
+        try:
+            if os.path.exists(file_name):
+                f = open(file_name, 'r', encoding='utf-8')
+                result = yaml.load(f)
+                f.close()
+                return result
+            else:
+                raise FileNotFoundError
+        except Exception as e:
+            traceback.print_exc()
+            logger.error(e)
 
     @staticmethod
     def http_request(request:Request, **kwargs) :
@@ -189,7 +208,7 @@ class Utils(object):
         current_time = time.time()
         local_time = time.localtime(current_time)
         time_temp = time.strftime("%Y-%m-%d-%H.%M", local_time)
-        return time_temp
+        return f"AutoTest-{time_temp}"
 
     @staticmethod
     def jsontool(input):
@@ -211,3 +230,7 @@ class Utils(object):
         :return:
         '''
         return str(random.randint(100000, 999999))
+
+    @staticmethod
+    def get_platform():
+        return platform.system()

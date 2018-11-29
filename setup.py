@@ -4,19 +4,19 @@ from setuptools import setup
 PACKAGE_NAME = "haf"
 
 requires = [
-            'pytest',
-            'allure-pytest',
-            'requests',
-            'openpyxl',
-            'pymysql',
-            'sphinx',
-            'xpinyin',
-            'paramiko',
-            'pytest-html',
-            'redis',
-            'assertpy',
-            'argparse',
-            'assertpy'
+    'paramiko',
+    'requests',
+    'openpyxl',
+    'pymysql',
+    'redis',
+    'twine',
+    'assertpy',
+    'flask',
+    'flask_restful',
+    'jinja2',
+    'coupling',
+    'yaml',
+    'deepdiff'
         ]
 
 with open('ReadMe.md', encoding='utf8') as f:
