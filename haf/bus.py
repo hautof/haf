@@ -45,17 +45,17 @@ class BusServer(Process):
         :return:
         '''
         # case queue, keep the case
-        case = Queue()
+        case = Queue(maxsize=-1)
         # param queue, keep the queue
-        param = Queue()
+        param = Queue(maxsize=-1)
         # result queue, keep the result
-        result = Queue()
+        result = Queue(maxsize=-1)
         # bench dict, keep the bench
-        bench = Queue()
+        bench = Queue(maxsize=-1)
         # system queue, keep the signal of system
-        system = Queue()
+        system = Queue(maxsize=-1)
         # log queue
-        log = Queue()
+        log = Queue(maxsize=-1)
         # lock queue
         lock = Queue(maxsize=1)
         # web lock queue

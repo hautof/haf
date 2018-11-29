@@ -20,10 +20,10 @@ class InfoManager(BaseManager): pass
 
 
 class BusClient(metaclass=SingletonType):
-    def __init__(self):
-        self.domain = BUS_DOMAIN
-        self.port = BUS_PORT
-        self.auth_key = BUS_AUTH_KEY
+    def __init__(self, domain:str=None, port:str=None, auth_key:str=None):
+        self.domain = BUS_DOMAIN if domain is None else domain
+        self.port = BUS_PORT if port is None else port
+        self.auth_key = BUS_AUTH_KEY if auth_key is None else auth_key
         self.queue = None
         #register the functions to InfoManager
         InfoManager.register("get_param")

@@ -11,9 +11,9 @@ from haf.config import *
 
 
 class Logger(Process):
-    def __init__(self, case_name, log_dir):
+    def __init__(self, case_name, log_dir, bus_client:BusClient=None):
         super().__init__()
-        self.bus_client = None
+        self.bus_client = bus_client
         self.daemon = True
         self.case_name = case_name
         self.log_dir = log_dir

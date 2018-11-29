@@ -17,9 +17,9 @@ logger = Log.getLogger(__name__)
 
 
 class Loader(Process):
-    def __init__(self):
+    def __init__(self, bus_client:BusClient=None):
         super().__init__()
-        self.bus_client = None
+        self.bus_client = bus_client
         self.daemon = True
         self.key = ""
         self.loader = {"all":0, "error":0, "error_info":{}}
@@ -27,7 +27,7 @@ class Loader(Process):
     def run(self):
         try:
             self.key = f"{self.pid}$%loader$%"
-            self.bus_client = BusClient()
+            #self.bus_client = BusClient()
             logger.info(f"{self.key} start loader")
 
             while True:
