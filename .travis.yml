@@ -13,7 +13,6 @@ install:
   - pip install pymysql
   - pip install sphinx
   - pip install xpinyin
-  - pip install paramiko
   - pip install pytest-html
   - pip install redis
   - pip install twine
@@ -22,7 +21,9 @@ install:
   - pip install flask_restful
   - pip install jinja2
   - pip install coupling
+  - pip install yaml
+  - pip install deepdiff
 script:
   - # or py.test for Python versions 3.5 and below
-  - python -m haf run -rc=1 -case=./testcases/test.xlsx -rh=True -rod=./testcases/report.html
-  - python -m haf run -rc=2 -case=./testcases/test.xlsx -rh=True -rod=./testcases/report1.html
+  - python -m haf run -rc=1 -case=./testcases/test.xlsx -rh=True -rod=./testcases/report.html -ld=./testcases
+  - python -m haf run -rc=2 -case=./testcases/test.xlsx -rh=True -rod=./testcases/report1.html -ld=./testcases

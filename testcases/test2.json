@@ -15,7 +15,7 @@
 		"sql_response_check_list": "None",
 		"sql_response": "None",
 		"response": "json",
-		"expect_response": "{}",
+		"expect_response": "{\"123\":123123}",
 		"response_exclude": "None",
 		"description": "default with no params",
 		"story": "Default with no params",

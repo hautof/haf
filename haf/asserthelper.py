@@ -3,7 +3,7 @@ from datetime import datetime
 
 from assertpy import assert_that
 from haf.common.log import Log
-
+from deepdiff import DeepDiff
 logger = Log.getLogger(__name__)
 
 
@@ -12,6 +12,7 @@ class AssertHelper(object):
     def assert_that(real, expect, **kwargs):
         key = kwargs.get("key", "assert$%test$%")
         try:
+            logger.debug(f"{key} {DeepDiff(real, expect, ignore_order=True)}")
             logger.debug(f"{key} {real} ?? {expect}")
             if real is None or expect is None:
                 return real == expect

@@ -208,7 +208,7 @@ class Utils(object):
         current_time = time.time()
         local_time = time.localtime(current_time)
         time_temp = time.strftime("%Y-%m-%d-%H.%M", local_time)
-        return time_temp
+        return f"AutoTest-{time_temp}"
 
     @staticmethod
     def jsontool(input):
