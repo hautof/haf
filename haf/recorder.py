@@ -64,7 +64,6 @@ class Recorder(Process):
             raise FailRecorderException
 
     def generate_report(self):
-
         Jinja2Report.write_report_to_file(Jinja2Report.report(self.results), self.report_path)
 
     def end_handler(self):
