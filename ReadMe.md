@@ -23,8 +23,8 @@
 
 - only mode : loader/runner/recorder/webserver/bus support
 
-![report](https://github.com/tsbxmw/haf/blob/master/doc/show/report.gif)
-![all](https://github.com/tsbxmw/haf/blob/master/doc/show/all.gif)
+![report](https://github.com/tsbxmw/haf/blob/master/docs/show/report.gif)
+![all](https://github.com/tsbxmw/haf/blob/master/docs/show/all.gif)
 
 ### How to get it
 
@@ -179,12 +179,12 @@
 
 #### Design
 
-![map](https://github.com/tsbxmw/haf/blob/master/doc/HAF-2.0.0.png)
+![map](https://github.com/tsbxmw/haf/blob/master/docs/png/HAF-2.0.0.png)
 
 #### Doc
 
-[doc url](https://github.com/tsbxmw/haf/blob/master/doc/design.md)
+[doc url](https://github.com/tsbxmw/haf/blob/master/docs/design.md)
 
 ### Release Note
 
-[release note](https://github.com/tsbxmw/haf/blob/master/doc/releasenote.md)
+[release note](https://github.com/tsbxmw/haf/blob/master/docs/releasenote.md)
