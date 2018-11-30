@@ -35,12 +35,17 @@ class HttpApiResult(BaseResult):
         self.begin_time = None
         self.end_time = None
         self.log_dir = ""
+        self.runner = ""
 
     def on_case_begin(self):
         self.begin_time = Utils.get_datetime_now()
 
     def on_case_end(self):
         self.end_time = Utils.get_datetime_now()
+        self.duration = Utils.get_date_result(self.begin_time, self.end_time)
+
+    def bind_runner(self, runner:int=0):
+        self.runner = runner
 
     def deserialize(self):
         return {
@@ -52,7 +57,8 @@ class HttpApiResult(BaseResult):
             "begin_time": self.begin_time,
             "end_time": self.end_time,
             "case": self.case.deserialize(),
-            "log_dir":self.log_dir
+            "log_dir": self.log_dir,
+            "runner": self.runner
         }
 
 

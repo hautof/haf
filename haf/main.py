@@ -1,4 +1,6 @@
 # encoding='utf-8'
+import json
+import os
 
 from haf.program import Program
 
@@ -22,18 +24,39 @@ def main():
     sub_run_arg_program.add_argument("--report-output-dir", "-rod", dest="report_output_dir", type=str, default="", help="""default is "", using to generate report to this path""")
     sub_run_arg_program.add_argument("--report-template", "-rt", type=str, default="base", help="""default using base to generate report;
                                                                                                                     customer template is support too""")
-    sub_run_arg_program.add_argument("--log-dir", "-ld", type=str, required=True, dest="log_dir", help="""log output dir is needed!""")
+    sub_run_arg_program.add_argument("--log-dir", "-ld", type=str, dest="log_dir", help="""log output dir is needed!""")
     sub_run_arg_program.add_argument("--only-loader", "-ol", type=bool, default=False, dest="only_loader", help="""if true, only start loader""")
     sub_run_arg_program.add_argument("--only-bus", "-ob", type=bool, default=False, dest="only_bus", help="""if true, only start bus""")
     sub_run_arg_program.add_argument("--only-runner", "-or", type=bool, default=False, dest="only_runner", help="""if true, only start runner""")
     sub_run_arg_program.add_argument("--only-recorder", "-ore", type=bool, default=False, dest="only_recorder", help="""if true, only start recorder""")
+    sub_run_arg_program.add_argument("--config", "-c", type=str, dest="config", help="""customer config""")
 
     args = arg_program.parse_args()
     main_program = Program()
 
     if args.all == "run":
+        if args.config:
+            if not os.path.exists(args.config):
+                argparse.ArgumentError(f"config file {args.config} not found!")
+            try:
+                with open(args.config, 'r') as f:
+                    config = json.load(f).get("config").get("run")
+                    args.log_dir = config.get("log").get("log_path")
+                    bus_config = config.get("bus")
+                    args.only_bus = bus_config.get("only")
+                    args.bus_server = None if bus_config.get("host") is None or bus_config.get("host")=="" else f"{bus_config.get('auth_key')}@{bus_config.get('host')}:{bus_config.get('host')}"
+                    args.report_output_dir = config.get("report").get("report_path")
+                    args.case = [ x.get("case_path") for x in config.get("case") ]
+                    runner_config = config.get("runner")
+                    args.runner_count = runner_config.get("count")
+                    args.only_runner = runner_config.get("only")
+                    args.web_server = config.get("web_server").get("run")
+            except Exception as e:
+                argparse.ArgumentError(e)
+
         if isinstance(args.case, str):
-            args.case = [str(case) for case in args.case.split(",")]
+            if not isinstance(args.case, list):
+                args.case = [str(case) for case in args.case.split(",")]
         if args.runner_count:
             pass
         if args.bus_server:

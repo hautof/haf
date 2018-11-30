@@ -35,6 +35,7 @@
 							<tr >
 								<th>Platform</th>
                                 <th>Haf Version</th>
+                                <th>Suites</th>
 								<th>Begin Time</th>
 								<th>End Time</th>
 								<th>Duration Time</th>
@@ -49,6 +50,11 @@
 							<tr >
 								<td>{{results.platform}}</td>
 								<td>{{results.version}}</td>
+                                <td>
+                                    {% for suite in results.suite_name %}
+                                    <a onclick="showElement('{{suite}}')">{{suite}}</a>
+                                    {% endfor %}
+                                </td>
 								<td>{{results.begin_time}}</td>
 								<td>{{results.end_time}}</td>
 								<td>{{results.duration}}</td>
@@ -66,6 +72,7 @@
 				<thead>
 					<tr>
 						<th>Suite Name</th>
+                        <th>Base Url</th>
 						<th>Begin Time</th>
 						<th>End Time</th>
 						<th>Duration Time</th>
@@ -80,6 +87,7 @@
 					{% for suite_summary in results.summary.keys() %}
 					<tr>
 					<td><a onclick="showElement('{{suite_summary}}')">{{suite_summary}}</a></td>
+                    <td>{{results.summary.get(suite_summary).get("base_url")}}</td>
 					<td>{{results.summary.get(suite_summary).get("begin_time")}}</td>
 					<td>{{results.summary.get(suite_summary).get("end_time")}}</td>
 					<td>{{results.summary.get(suite_summary).get("duration")}}</td>
@@ -140,6 +148,7 @@
 						<th>Check</th>
                         <th>Time</th>
 						<th>DependenceCase</th>
+                        <th>Runner</th>
 						<th>Result</th>
 					</tr>
 				</thead>
@@ -178,7 +187,7 @@
                             <ul>
                                 <li> {{"beg {}".format(case.begin_time)}}</li>
                                 <li> {{"end {}".format(case.end_time)}}</li>
-                                <li> {{"dur {}".format(case.case.duration)}}</li>
+                                <li> {{"dur {}".format(case.duration)}}</li>
                             </ul>
                         </td>
 						<td>
@@ -188,7 +197,9 @@
                                 {% endfor %}
                             </ul>
                         </td>
-						<td>{{case.result}}</td>
+                        <td>{{case.runner}}</td>
+                        {% set result_group = ["PASS","FAIL","SKIP","ERROR" ] %}
+						<td>{{result_group[case.result-50]}}</td>
 					</tr>
 					{% endfor %}
 				</tbody>

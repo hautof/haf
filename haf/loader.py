@@ -70,7 +70,8 @@ class Loader(Process):
                 for input in inputs.get("testcases"):
                     if input.get("id") is None or input.get("subid") is None:
                         continue
-
+                    if input.get("host_port") is None:
+                        input["host_port"] = inputs.get("config").get("host_port")
                     case = HttpApiCase()
                     try:
                         case.constructor(input)
