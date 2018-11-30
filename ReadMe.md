@@ -153,11 +153,11 @@
 
 #### Design
 
-![map](/doc/HAF-2.0.0.png)
+![map](https://github.com/tsbxmw/haf/tree/dev-2.0.0/doc/HAF-2.0.0.png)
 
 #### Doc
 
-[doc url](https://github.com/tsbxmw/haf/tree/dev-2.0.0/doc)
+[doc url](https://github.com/tsbxmw/haf/tree/dev-2.0.0/doc/design.md)
 
 ### Release Note
 
