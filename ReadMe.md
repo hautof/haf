@@ -22,7 +22,8 @@
 
 - only mode : loader/runner/recorder/webserver/bus support
 
-
+![report](https://github.com/tsbxmw/haf/blob/master/doc/show/report.gif)
+![all](https://github.com/tsbxmw/haf/blob/master/doc/show/all.gif)
 
 ### How to get it
 
@@ -147,7 +148,31 @@
     python -m haf run -ore=true
 ```
 
+#### web api server suport
 
+- get loader infos
+
+```bash
+    http://localhost:8888/loader
+```
+
+- get runner infos
+
+```bash
+    http://localhost:8888/runner
+```
+
+- get result infos
+
+```bash
+    http://localhost:8888/result
+```
+
+- get report infos
+
+```bash
+    http://localhost:8888/report
+```
 
 ### FrameWork 
 
