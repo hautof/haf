@@ -15,9 +15,9 @@
 import os
 import sys
 import sphinx_rtd_theme
-sys.path.insert(0, os.path.abspath('./../../haf'))
-sys.path.insert(0, os.path.abspath('./../../haf/common'))
-sys.path.insert(0, os.path.abspath('./../../haf/ext'))
+sys.path.insert(0, os.path.abspath('./../haf'))
+sys.path.insert(0, os.path.abspath('./../haf/common'))
+sys.path.insert(0, os.path.abspath('./../haf/ext'))
 
 # -- Project information -----------------------------------------------------
 
