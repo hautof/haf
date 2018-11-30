@@ -202,7 +202,6 @@ class Utils(object):
 
     @staticmethod
     def get_date_result(begin, end):
-        print(begin, end)
         if begin is None or end is None:
             return 0
         try:

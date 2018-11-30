@@ -15,7 +15,7 @@ requires = [
     'flask_restful',
     'jinja2',
     'coupling',
-    'yaml',
+    'pyaml',
     'deepdiff'
         ]
 
