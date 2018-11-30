@@ -1,5 +1,6 @@
 {
-	"testcases": [{
+	"testcases": [
+      {
 		"id": 1,
 		"name": "GetCityWeather",
 		"subid": 1,
@@ -213,6 +214,8 @@
 	}],
 	"config": [{
 		"name": "test2",
-		"benchname": "test2"
+		"benchname": "test2",
+		"protocol": "http",
+		"host_port": "t.weather.sojson.com"
 	}]
 }

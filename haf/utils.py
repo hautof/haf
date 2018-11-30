@@ -12,6 +12,7 @@ from openpyxl import load_workbook
 from haf.config import *
 from haf.common.httprequest import HttpController
 from http.client import HTTPResponse
+from datetime import datetime
 import random
 import platform
 import yaml
@@ -198,6 +199,23 @@ class Utils(object):
         secs = (current_time - int(current_time)) * 1000
         timenow = "%s %03d" % (time_temp, secs)
         return timenow
+
+    @staticmethod
+    def get_date_result(begin, end):
+        print(begin, end)
+        if begin is None or end is None:
+            return 0
+        try:
+            d1, s1 = begin.rsplit(" ", 1)
+            d2, s2 = end.rsplit(" ", 1)
+            d1 = datetime.strptime(d1, "%Y-%m-%d %H:%M:%S")
+            s1 = float(s1)
+            d2 = datetime.strptime(d2, "%Y-%m-%d %H:%M:%S")
+            s2 = float(s2)
+            return (d2-d1).seconds + (s2-s1)/1000
+        except Exception as e:
+            return 0
+
 
     @staticmethod
     def get_case_name():

@@ -152,6 +152,7 @@ class Runner(Process):
                         if result[0] == CASE_SKIP:
                             result = result[1]
                     result.log_dir = f"{self.log_dir}/{local_case.bench_name}/{local_case.ids.id}.{local_case.ids.subid}.{local_case.ids.name}.log"
+                    result.bind_runner(self.pid)
                     self.result_handler(result)
                     return result
             except Exception as runerror:

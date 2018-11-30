@@ -32,6 +32,7 @@ class Recorder(Process):
 
     def on_recorder_stop(self):
         self.results.end_time = Utils.get_datetime_now()
+        self.results.duration = Utils.get_date_result(self.results.begin_time, self.results.end_time)
         for suite_name in self.results.summary.keys():
             for key in ("begin_time", "end_time", "duration"):
                 self.results.summary[suite_name][key] = getattr(self.results.details.get(suite_name), key)
@@ -78,41 +79,31 @@ class Recorder(Process):
     def on_case_pass(self, suite_name):
         self.results.passed += 1
         self.results.all += 1
-        if suite_name not in self.results.summary :
-            self.results.summary[suite_name] = {"passed": 1, "skip": 0, "failed": 0, "error": 0, "all": 1}
-        else:
-            self.results.summary[suite_name]["passed"] += 1
-            self.results.summary[suite_name]["all"] += 1
+        self.results.summary[suite_name]["passed"] += 1
+        self.results.summary[suite_name]["all"] += 1
 
     def on_case_skip(self, suite_name):
         self.results.skip += 1
         self.results.all += 1
-        if suite_name not in self.results.summary :
-            self.results.summary[suite_name] = {"passed": 0, "skip": 1, "failed": 0, "error": 0, "all": 1}
-        else:
-            self.results.summary[suite_name]["skip"] += 1
-            self.results.summary[suite_name]["all"] += 1
+        self.results.summary[suite_name]["skip"] += 1
+        self.results.summary[suite_name]["all"] += 1
 
     def on_case_fail(self, suite_name):
         self.results.failed += 1
         self.results.all += 1
-        if suite_name not in self.results.summary :
-            self.results.summary[suite_name] = {"passed": 0, "skip": 0, "failed": 1, "error": 0, "all": 1}
-        else:
-            self.results.summary[suite_name]["failed"] += 1
-            self.results.summary[suite_name]["all"] += 1
+        self.results.summary[suite_name]["failed"] += 1
+        self.results.summary[suite_name]["all"] += 1
 
     def on_case_error(self, suite_name):
         self.results.error += 1
         self.results.all += 1
-        if suite_name not in self.results.summary :
-            self.results.summary[suite_name] = {"passed": 0, "skip": 0, "failed": 0, "error": 1, "all": 1}
-        else:
-            self.results.summary[suite_name]["error"] += 1
-            self.results.summary[suite_name]["all"] += 1
+        self.results.summary[suite_name]["error"] += 1
+        self.results.summary[suite_name]["all"] += 1
 
     def check_case_result(self, result:HttpApiResult):
         suite_name = result.case.bench_name
+        if suite_name not in self.results.summary.keys():
+            self.results.summary[suite_name] = {"passed": 0, "skip": 0, "failed": 0, "error": 0, "all": 0, "base_url":result.case.request.host_port}
         if result.result == RESULT_SKIP:
             self.on_case_skip(suite_name)
         elif result.result == RESULT_PASS:
@@ -136,6 +127,7 @@ class Recorder(Process):
                     suite = suite
                     break
             suite.end_time = result.end_time
+            suite.duration = Utils.get_date_result(suite.begin_time, suite.end_time)
             suite.cases.append(result)
         self.results.details[result.case.bench_name] = suite
 
