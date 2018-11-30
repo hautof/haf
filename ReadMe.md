@@ -3,7 +3,8 @@
     The http api auto test framework. 
     
 [![Build Status](https://travis-ci.org/tsbxmw/haf.svg?branch=master)](https://travis-ci.org/tsbxmw/haf)
-
+[![Documentation Status](https://readthedocs.org/projects/haf/badge/?version=latest)](https://haf.readthedocs.io/en/latest/?badge=latest)
+                
 
 ### new features
 
