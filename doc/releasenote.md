@@ -1,3 +1,23 @@
+> version 2.0.0
+
+- all new
+
+- based on local test runner 
+
+- support xlsx,json,yml,py cases
+
+- report generate with html-template
+
+- multi-processes on different machines
+
+- multi-runners
+
+- web-server support restful api based on flask
+
+- only mode : loader/runner/recorder/webserver/bus support
+
+
+
 > version 1.1.6
 * add argparse to make arg tool
 * local runner to replace pytest (dev)

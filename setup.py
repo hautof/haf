@@ -34,17 +34,15 @@ def package_files(directory):
 package_extras = []
 
 
-package_extras.extend(package_files('{}/bin'.format(PACKAGE_NAME)))
-package_extras.extend(package_files('{}/pylib'.format(PACKAGE_NAME)))
-package_extras.extend(package_files('{}/codegenerator'.format(PACKAGE_NAME)))
-package_extras.extend(package_files('{}/setup'.format(PACKAGE_NAME)))
-package_extras.extend(package_files('{}/testcase'.format(PACKAGE_NAME)))
-package_extras.extend(package_files('{}/check'.format(PACKAGE_NAME)))
+package_extras.extend(package_files('{}/common'.format(PACKAGE_NAME)))
+package_extras.extend(package_files('{}/ext/jinjia2report'.format(PACKAGE_NAME)))
+package_extras.extend(package_files('{}/ext/resource/report'.format(PACKAGE_NAME)))
+package_extras.extend(package_files('{}/ext/webserver'.format(PACKAGE_NAME)))
 
 
 setup(
     name = 'haf',
-    version = '1.1.6',
+    version = '2.0.0',
     author = 'wei.meng',
     author_email = 'mengwei1101@hotmail.com',    
     long_description = long_description,
@@ -54,7 +52,7 @@ setup(
 
     packages = setuptools.find_packages(exclude=['testcases','thirdparty']),
     package_data = {"": package_extras},
-    python_requires='>=3.5.2',
+    python_requires='>=3.6',
     install_requires=requires,
     platforms='Posix; MacOS X; Windows',
     classifiers=[
@@ -66,7 +64,6 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Software Development :: Testing',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
