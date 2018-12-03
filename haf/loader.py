@@ -11,7 +11,7 @@ from haf.common.exception import FailLoaderException
 from haf.common.log import Log
 from haf.config import *
 from haf.suite import HttpApiSuite
-from haf.utils import Utils
+from haf.utils import Utils, locker
 
 logger = Log.getLogger(__name__)
 
@@ -84,10 +84,10 @@ class Loader(Process):
                         case.error = CASE_ERROR
                         case.error_msg = str(e)
                     self.add_case(case)
-                    self.put_case(case)
-                    self.put_web_message()
+                    self.put_case("case", case)
+                    self.put_web_message("web")
 
-                self.put_web_message()
+                self.put_web_message("web")
                 time.sleep(0.1)
         except Exception:
             raise FailLoaderException
@@ -107,13 +107,15 @@ class Loader(Process):
             self.loader["error"] += 1
             self.loader["error_info"][f"{case.ids.id}.{case.ids.subid}.{case.ids.name}"] = case.error_msg
 
-    def put_web_message(self):
+    @locker
+    def put_web_message(self, key:str):
         web_queue = self.bus_client.get_publish_loader()
         if web_queue.full():
             web_queue.get()
         web_queue.put(self.loader)
 
-    def put_case(self, case):
+    @locker
+    def put_case(self, key:str, case):
         logger.info(f"{self.key} -- put case {case.ids.id}.{case.ids.subid}.{case.ids.name}")
         case_queue = self.bus_client.get_case()
         case_queue.put(case)

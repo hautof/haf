@@ -39,6 +39,7 @@ class Jinja2Report(object):
         try:
             stream = TemplateStream(info)
             stream.dump(report_path)
+
         except Exception as e:
             logger.error(e)
 

@@ -3,11 +3,17 @@ import json
 import os
 
 from haf.program import Program
-
+from haf.config import BANNER_STRS
 import argparse
+
+def init():
+    print(BANNER_STRS)
 
 
 def main():
+
+    init()
+
     arg_program = argparse.ArgumentParser(prog="python -m haf", add_help=True)
 
     sub_all_arg_program = arg_program.add_subparsers(dest="all")
