@@ -6,11 +6,9 @@ Advanced Usage
 .. image:: https://travis-ci.org/tsbxmw/haf.svg?branch=dev-2.1.0
     :target: https://travis-ci.org/tsbxmw/haf
 
-.. image:: https://github.com/tsbxmw/haf/blob/master/docs/show/report.gif
-    :target: https://github.com/tsbxmw/haf
+.. image:: https://raw.githubusercontent.com/tsbxmw/haf/dev-2.1.0/docs/show/all.gif
 
-.. image:: https://github.com/tsbxmw/haf/blob/master/docs/show/report.gif
-    :target: https://github.com/tsbxmw/haf
+.. image:: https://raw.githubusercontent.com/tsbxmw/haf/dev-2.1.0/docs/show/report.gif
 
 
 How to get it
