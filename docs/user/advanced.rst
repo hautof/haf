@@ -7,10 +7,8 @@ Advanced Usage
     :target: https://travis-ci.org/tsbxmw/haf
 
 .. image:: https://github.com/tsbxmw/haf/blob/master/docs/show/report.gif
-    :target: https://github.com/tsbxmw/haf/blob/master/docs/show/report.gif
 
 .. image:: https://github.com/tsbxmw/haf/blob/master/docs/show/report.gif
-    :target: https://github.com/tsbxmw/haf/blob/master/docs/show/all.gif
 
 
 How to get it
