@@ -14,7 +14,7 @@ from haf.common.lock import Lock
 from haf.result import HttpApiResult
 from haf.common.log import Log
 from haf.config import *
-from haf.utils import Utils
+from haf.utils import Utils, locker
 from haf.asserthelper import AssertHelper
 from haf.case import HttpApiCase, BaseCase
 import traceback
@@ -49,44 +49,24 @@ class Runner(Process):
         self.benchs[case.bench_name] = bench
         return bench
 
-    def get_lock(self, key):
-        if key == "result":
-            return self.bus_client.get_lock().get()
-        elif key == "web":
-            return self.bus_client.get_web_lock().get()
-        elif key == "case":
-            return self.bus_client.get_case_lock().get()
-
-    def release_lock(self, key):
-        if key == "result":
-            self.bus_client.get_lock().put(Lock)
-        elif key == "web":
-            self.bus_client.get_web_lock().put(Lock)
-        elif key == "case":
-            return self.bus_client.get_case_lock().put(Lock)
-
-    def put_result(self, result:HttpApiResult):
+    @locker
+    def put_result(self,  key:str, result:HttpApiResult):
         logger.info(f"{self.key} : runner {self.pid} put result{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}")
-        while True:
-            if self.get_lock("result") is None:
-                time.sleep(0.1)
-            else:
-                result_handler = self.bus_client.get_result()
-                result_handler.put(result)
-                self.release_lock("result")
-                break
+        result_handler = self.bus_client.get_result()
+        result_handler.put(result)
 
-    def put_web_message(self):
-        while True:
-            if self.get_lock("web") is None:
-                time.sleep(0.1)
-            else:
-                web_queue = self.bus_client.get_publish_runner()
-                if web_queue.full():
-                    web_queue.get()
-                web_queue.put(self.runner)
-                self.release_lock("web")
-                break
+    @locker
+    def put_web_message(self, key:str):
+        web_queue = self.bus_client.get_publish_runner()
+        if web_queue.full():
+            web_queue.get()
+        web_queue.put(self.runner)
+
+    @locker
+    def put_case_back(self, key:str, case):
+        logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name}")
+        case_handler = self.bus_client.get_case()
+        case_handler.put(case)
 
     def result_handler(self, result):
         if isinstance(result, HttpApiResult):
@@ -111,7 +91,7 @@ class Runner(Process):
             }
 
         logger.info(f"{self.key} : runner {self.pid} -- put web message {self.runner}")
-        self.put_web_message()
+        self.put_web_message("web")
 
     def run(self):
         try:
@@ -128,7 +108,7 @@ class Runner(Process):
                         break
                     result = self.run_case(case)
                     if isinstance(result, HttpApiResult):
-                        self.put_result(result)
+                        self.put_result("result", result)
                 time.sleep(0.1)
         except Exception as e:
             logger.error(e)
@@ -147,7 +127,7 @@ class Runner(Process):
                     result = api_runner.run(local_case)
                     if isinstance(result, list):
                         if result[0] == CASE_CAN_NOT_RUN_HERE:
-                            self.put_case_back(local_case)
+                            self.put_case_back("case", local_case)
                             return
                         if result[0] == CASE_SKIP:
                             result = result[1]
@@ -172,17 +152,6 @@ class Runner(Process):
         result_handler.put(SIGNAL_RESULT_END)
         case_handler = self.bus_client.get_case()
         case_handler.put(SIGNAL_CASE_END)
-
-    def put_case_back(self, case):
-        logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name}")
-        while True:
-            if self.get_lock("case") is None:
-                time.sleep(0.1)
-            else:
-                case_handler = self.bus_client.get_case()
-                case_handler.put(case)
-                self.release_lock("case")
-                break
 
 
 class BaseRunner(object):
