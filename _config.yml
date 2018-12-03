@@ -1,7 +1,7 @@
 theme: jekyll-theme-leap-day
 
-title: "AutoTest Framework"
-description: "make autotest easy and better"
+title: "HAF"
+description: "haf, make autotest easy and better"
 
 show_downloads: true
 google_analytics:

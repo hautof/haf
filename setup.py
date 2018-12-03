@@ -16,7 +16,8 @@ requires = [
     'jinja2',
     'coupling',
     'pyaml',
-    'deepdiff'
+    'deepdiff',
+    'setuptools'
         ]
 
 with open('ReadMe.md', encoding='utf8') as f:
@@ -42,7 +43,7 @@ package_extras.extend(package_files('{}/ext/webserver'.format(PACKAGE_NAME)))
 
 setup(
     name = 'haf',
-    version = '2.0.1',
+    version = '2.0.2',
     author = 'wei.meng',
     author_email = 'mengwei1101@hotmail.com',    
     long_description = long_description,
