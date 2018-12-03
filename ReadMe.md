@@ -184,6 +184,7 @@
 #### Doc
 
 [doc url](https://github.com/tsbxmw/haf/blob/master/docs/design.md)
+[read the doc](https://haf-doc.readthedocs.io/en/dev-2.1.0/)
 
 ### Release Note
 

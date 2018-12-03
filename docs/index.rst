@@ -24,6 +24,7 @@ Haf ecosystem and community.
    :maxdepth: 2
 
    community/faq
+   community/design
 
 The API Documentation / Guide
 -----------------------------
