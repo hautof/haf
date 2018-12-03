@@ -42,7 +42,7 @@ package_extras.extend(package_files('{}/ext/webserver'.format(PACKAGE_NAME)))
 
 setup(
     name = 'haf',
-    version = '2.0.0',
+    version = '2.0.1',
     author = 'wei.meng',
     author_email = 'mengwei1101@hotmail.com',    
     long_description = long_description,
