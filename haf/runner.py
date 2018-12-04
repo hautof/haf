@@ -118,23 +118,27 @@ class Runner(Process):
         result = HttpApiResult()
         try:
             try:
+                self.key = local_case.log_key
+                logger.info(f"{self.key} : runner {self.pid} -- get {local_case.ids.id}.{local_case.ids.subid}-{local_case.ids.name}")
+                self.result_handler(local_case)
+                self.init_runner(local_case)
                 if local_case.type == CASE_TYPE_HTTPAPI:
-                    self.key = local_case.log_key
-                    logger.info(f"{self.key} : runner {self.pid} -- get {local_case.ids.id}.{local_case.ids.subid}-{local_case.ids.name}")
-                    self.result_handler(local_case)
-                    self.init_runner(local_case)
                     api_runner = ApiRunner(self.bench)
                     result = api_runner.run(local_case)
-                    if isinstance(result, list):
-                        if result[0] == CASE_CAN_NOT_RUN_HERE:
-                            self.put_case_back("case", local_case)
-                            return
-                        if result[0] == CASE_SKIP:
-                            result = result[1]
-                    result.log_dir = f"{self.log_dir}/{local_case.bench_name}/{local_case.ids.id}.{local_case.ids.subid}.{local_case.ids.name}.log"
-                    result.bind_runner(self.pid)
-                    self.result_handler(result)
-                    return result
+                elif local_case.type == CASE_TYPE_PY:
+                    py_runner = PyRunner(self.bench)
+                    result = py_runner.run(local_case)
+
+                if isinstance(result, list):
+                    if result[0] == CASE_CAN_NOT_RUN_HERE:
+                        self.put_case_back("case", local_case)
+                        return
+                    if result[0] == CASE_SKIP:
+                        result = result[1]
+                result.log_dir = f"{self.log_dir}/{local_case.bench_name}/{local_case.ids.id}.{local_case.ids.subid}.{local_case.ids.name}.log"
+                result.bind_runner(self.pid)
+                self.result_handler(result)
+                return result
             except Exception as runerror:
                 logger.error(runerror)
                 result.run_error = traceback.format_exc()
@@ -177,6 +181,17 @@ class BaseRunner(object):
         return case.error == CASE_ERROR
 
 
+class PyRunner(BaseRunner):
+    def __init__(self, bench):
+        super().__init__(bench)
+        self.bench = bench
+        self.key = ""
+
+    def run(self):
+        pass
+
+
+
 class ApiRunner(BaseRunner):
     '''
     ApiRunner
@@ -206,14 +221,15 @@ class ApiRunner(BaseRunner):
 
         logger.info(f"{case.log_key} : ApiRunner run - {case.ids.id}.{case.ids.subid}-{case.ids.name}")
         try:
+            result.case = case
             case.response = self.request(case.request)
             result.result_check_response = self.check_response(case.response, case.expect.response)
             case.expect.sql_response_result = self.sql_response(case.sqlinfo.scripts["sql_response"], case.sqlinfo.config, case.sqlinfo.check_list["sql_response"])
             result.result_check_sql_response = self.check_sql_response(case)
-            result.case = case
             result.result = RESULT_PASS if False not in result.result_check_response and result.result_check_sql_response is True else RESULT_FAIL
         except Exception as e:
             result.run_error = e
+            result.result = RESULT_ERROR
         result.on_case_end()
         return result
 

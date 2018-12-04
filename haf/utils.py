@@ -192,6 +192,22 @@ class Utils(object):
             logger.error(e)
 
     @staticmethod
+    def get_path(path):
+        path, file = os.path.split(path)
+        return path, file
+
+    @staticmethod
+    def load_from_py(file_name):
+        try:
+            if os.path.exists(file_name):
+                path, file = Utils.get_path(file_name)
+
+
+        except Exception as e:
+            traceback.print_exc()
+            logger.error(e)
+
+    @staticmethod
     def http_request(request:Request, **kwargs) :
         '''
         http request

@@ -158,3 +158,9 @@ class LoadFromConfig(object):
         if isinstance(file_name, str):
             inputs = Utils.load_from_yml(file_name)
             return inputs
+
+    @staticmethod
+    def load_from_py(file_name):
+        if isinstance(file_name, str):
+            inputs = Utils.load_from_py(file_name)
+            return inputs

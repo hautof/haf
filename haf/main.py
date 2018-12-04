@@ -4,13 +4,15 @@ import os
 
 from haf.program import Program
 from haf.config import BANNER_STRS
+from coupling.dict import AttrDict
 import argparse
+
 
 def init():
     print(BANNER_STRS)
 
 
-def main():
+def main_args():
 
     init()
 
@@ -36,6 +38,7 @@ def main():
     sub_run_arg_program.add_argument("--only-runner", "-or", type=bool, default=False, dest="only_runner", help="""if true, only start runner""")
     sub_run_arg_program.add_argument("--only-recorder", "-ore", type=bool, default=False, dest="only_recorder", help="""if true, only start recorder""")
     sub_run_arg_program.add_argument("--config", "-c", type=str, dest="config", help="""customer config""")
+    sub_run_arg_program.add_argument("--api", "-api", dest="api", default=True, type=bool, help="api case or not, default is true")
 
     args = arg_program.parse_args()
     main_program = Program()
