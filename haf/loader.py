@@ -6,7 +6,7 @@ from haf.common.database import SQLConfig
 
 from haf.bench import HttpApiBench
 from haf.busclient import BusClient
-from haf.case import HttpApiCase
+from haf.case import HttpApiCase, PyCase
 from haf.common.exception import FailLoaderException
 from haf.common.log import Log
 from haf.config import *
@@ -53,26 +53,28 @@ class Loader(Process):
                 file_name = temp.get("file_name")
                 inputs = LoadFromConfig.load_from_file(file_name)
 
-                suite = HttpApiSuite()
-
-                bench_name = ""
-
                 input = inputs.get("config")[0]
                 bench_name = input.get("name")
+                module_name = input.get("module_name")
+                module_path = input.get("module_path")
 
                 bench = HttpApiBench()
-
-                for input in inputs.get("dbconfig"):
-                    db = SQLConfig()
-                    db.constructor(input)
-                    bench.add_db(db)
+                if "dbconfig" in inputs.keys():
+                    for input in inputs.get("dbconfig"):
+                        db = SQLConfig()
+                        db.constructor(input)
+                        bench.add_db(db)
 
                 for input in inputs.get("testcases"):
+
                     if input.get("id") is None or input.get("subid") is None:
                         continue
                     if input.get("host_port") is None:
-                        input["host_port"] = inputs.get("config").get("host_port")
-                    case = HttpApiCase()
+                        input["host_port"] = inputs.get("config")[0].get("host_port")
+                    if "api_name" in input.keys():
+                        case = HttpApiCase()
+                    else:
+                        case = PyCase(module_name, module_path)
                     try:
                         case.constructor(input)
                         case.bind_bench(bench_name)
@@ -116,7 +118,7 @@ class Loader(Process):
 
     @locker
     def put_case(self, key:str, case):
-        logger.info(f"{self.key} -- put case {case.ids.id}.{case.ids.subid}.{case.ids.name}")
+        logger.info(f"{self.key} -- put case {case.bench_name} - {case.ids.id}.{case.ids.subid}.{case.ids.name}")
         case_queue = self.bus_client.get_case()
         case_queue.put(case)
 
@@ -127,7 +129,6 @@ class Loader(Process):
             case_queue.put(SIGNAL_CASE_END)
         except Exception as e:
             logger.error(e)
-        pass
 
 
 class LoadFromConfig(object):
@@ -135,11 +136,14 @@ class LoadFromConfig(object):
     @staticmethod
     def load_from_file(file_name):
         if file_name.endswith(".xlsx"):
-            return LoadFromConfig.load_from_xlsx(file_name)
+            output = LoadFromConfig.load_from_xlsx(file_name)
         elif file_name.endswith(".json"):
-            return LoadFromConfig.load_from_json(file_name)
+            output = LoadFromConfig.load_from_json(file_name)
         elif file_name.endswith(".yml"):
-            return LoadFromConfig.load_from_yml(file_name)
+            output = LoadFromConfig.load_from_yml(file_name)
+        elif file_name.endswith(".py"):
+            output = LoadFromConfig.load_from_py(file_name)
+        return output
 
     @staticmethod
     def load_from_xlsx(file_name):
@@ -157,4 +161,10 @@ class LoadFromConfig(object):
     def load_from_yml(file_name):
         if isinstance(file_name, str):
             inputs = Utils.load_from_yml(file_name)
+            return inputs
+
+    @staticmethod
+    def load_from_py(file_name):
+        if isinstance(file_name, str):
+            inputs = Utils.load_from_py(file_name)
             return inputs

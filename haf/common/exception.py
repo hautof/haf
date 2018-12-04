@@ -47,7 +47,11 @@ class SkipCaseException(BaseException):
         pass
 
 
-
 class FailBusException(BaseException):
+    def __init__(self):
+        pass
+
+
+class FailLoadCaseFromPyException(BaseException):
     def __init__(self):
         pass

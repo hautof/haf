@@ -1,12 +1,19 @@
 # encoding = 'utf-8'
+import importlib
+import inspect
 import json
 import os
+import sys
 import time
 import traceback
 import urllib
+from types import GeneratorType
+
 
 from haf.apihelper import Request, Response
+from haf.case import BaseCase
 from haf.common.database import MysqlTool
+from haf.common.exception import FailLoadCaseFromPyException
 from haf.common.log import Log
 from openpyxl import load_workbook
 from haf.config import *
@@ -18,6 +25,8 @@ from functools import wraps
 import random
 import platform
 import yaml
+
+from haf.mark import test, skip, parameters, TestDecorator
 
 logger = Log.getLogger(__name__)
 
@@ -187,6 +196,110 @@ class Utils(object):
                 return result
             else:
                 raise FileNotFoundError
+        except Exception as e:
+            traceback.print_exc()
+            logger.error(e)
+
+    @staticmethod
+    def get_path(path):
+        path, file = os.path.split(path)
+        return path, file
+
+    @staticmethod
+    def get_class_from_py(module):
+        built_in_list = ['__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__']
+        attr_list = ['AttrNoneList', 'bench_name', 'error_msg', 'expect', 'id', 'mark', 'name', 'run', 'subid', 'type']
+        class_list = []
+        for attr in dir(module):
+            class_attr = getattr(module, attr)
+            class_temp = {attr: class_attr}
+            if attr not in built_in_list and inspect.isclass(class_attr) and attr != "BaseCase":
+                if issubclass(class_attr, BaseCase) and isinstance(class_attr(), BaseCase):
+                    class_list.append(class_temp)
+        return class_list if len(class_list) > 0 else None
+
+    @staticmethod
+    def get_case_from_class(class_list):
+        case_dict = {}
+        for cl in class_list.keys():
+            case_dict[cl] = []
+            suites = class_list.get(cl)
+            for suite in suites:
+                suite_dict = {}
+                for class_temp_key in suite.keys():
+                    suite_dict[class_temp_key] = []
+                    class_temp = suite.get(class_temp_key)
+                    for func_key in dir(class_temp):
+                        func = getattr(class_temp, func_key)
+                        func_temp = {}
+                        if isinstance(func, test):
+                            func_temp[func_key] = func
+                            suite_dict[class_temp_key].append(func_temp)
+                        elif isinstance(func, skip):
+                            func_temp[func_key] = func
+                            suite_dict[class_temp_key].append(func_temp)
+
+                case_dict[cl].append(suite_dict)
+        return case_dict
+
+    @staticmethod
+    def load_dict_to_case(case_dict):
+        cases = []
+        id = 0
+        name = ""
+        for suites_key in case_dict.keys():
+            suites = case_dict.get(suites_key)
+            for suite in suites:
+                for suite_key in suite.keys():
+                    suite_temp = suite.get(suite_key)
+                    id += 1
+                    subid = 1
+                    for case in suite_temp:
+                        for key in case.keys():
+                            case_temp = {"id": id, "subid": subid, "name": key, "run": case.get(key).run if hasattr(case.get(key), 'run') else False, "reason": case.get(key).reason if hasattr(case.get(key), 'reason') else None}
+                            subid += 1
+                            case_temp["func"] = key
+                            case_temp["suite"] = suite_key
+                            if isinstance(case.get(key), test):
+                                case_temp["param"] = case.get(key).param
+                            cases.append(case_temp)
+        print(cases)
+        return cases
+
+
+    @staticmethod
+    def load_from_py(file_name):
+        try:
+            py_config = {}
+            py_config["config"] = []
+            config_temp = {}
+            logger.info("{} found python file : {}".format("system$%util$%", file_name))
+            if os.path.exists(file_name):
+                path, file = Utils.get_path(file_name)
+                sys.path.append(path)
+                module_name = file.rsplit(".", 1)[0]
+
+                config_temp["name"] = module_name
+                config_temp["benchname"] = module_name
+
+                module = importlib.import_module(module_name)
+
+                class_list = {module_name: Utils.get_class_from_py(module)}
+                if not class_list:
+                    raise FailLoadCaseFromPyException
+
+                case_dict = Utils.get_case_from_class(class_list)
+                cases = Utils.load_dict_to_case(case_dict)
+                return {
+                    "config": [{
+                        "name": module_name,
+                        "benchname": module_name,
+                        "module_name": module_name,
+                        "module_path": path
+                    }],
+                    "testcases": cases
+                }
+
         except Exception as e:
             traceback.print_exc()
             logger.error(e)

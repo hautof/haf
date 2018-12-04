@@ -69,9 +69,7 @@ class BusServer(Process):
         # runner queue to web server
         publish_runner = Queue(maxsize=1)
 
-
         # register the functions to InfoManager
-
         InfoManager.register("get_case", callable=lambda: case)
         InfoManager.register("get_param", callable=lambda: param)
         InfoManager.register("get_result", callable=lambda: result)
