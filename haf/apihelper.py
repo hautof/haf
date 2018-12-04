@@ -32,9 +32,13 @@ class Request(object):
         self.url = f"{self.protocol}://{self.host_port}{self.url_part}"
 
     def deserialize(self):
+        try:
+            data = json.dumps(self.data, indent=4)
+        except:
+            data = str(self.data)
         return {
             "header": self.header,
-            "data": self.data,
+            "data": data,
             "url": self.url,
             "method": self.method,
             "protocol": self.protocol,
@@ -54,9 +58,13 @@ class Response(object):
         self.code = inputs.get("code", {})
 
     def deserialize(self):
+        try:
+            body = json.dumps(self.body, indent=4)
+        except:
+            body = str(self.body)
         return {
             "header": str(self.header),
-            "body": str(self.body),
+            "body": body,
             "code": self.code
         }
 

@@ -50,6 +50,9 @@ RESULT_GROUP = {
     "53": "ERROR"
 }
 
+CASE_MARK_BASE = 60
+CASE_MARK_API = 61
+
 LOG_PATH_DEFAULT = "D:\workspace\mine\python\haf\data"
 
 MAIN_VERSION = 2

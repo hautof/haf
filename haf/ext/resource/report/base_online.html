@@ -56,7 +56,11 @@
                                     {% endfor %}
                                 </td>
 								<td>{{results.begin_time}}</td>
+								{% if results.end_time %}
 								<td>{{results.end_time}}</td>
+								{% else %}
+								<td>running...</td>
+								{% endif %}
 								<td>{{results.duration}}</td>
 								<td>{{results.passed}}</td>
 								<td>{{results.failed}}</td>
@@ -162,8 +166,12 @@
                             <li>url : {{case.case.request.url}}</li>
                             <li onclick="showElement('{{case.case.request}}')" ><a>all</a></li>
                             <ul id="{{case.case.request}}" style="display:none">
-                                <li>header : {{case.case.request.header}}</li>
-                                <li>data : {{case.case.request.data}}</li>
+                                <li>header :
+									<pre>{{case.case.request.header}}</pre>
+								</li>
+                                <li>data :
+									<pre>{{case.case.request.data}}</pre>
+								</li>
                             </ul>
                         </td>
 						<td>
@@ -171,17 +179,29 @@
                             <li >code : {{response.get("code")}}</li>
                             <li onclick="showElement('{{case.case.response}}')" ><a>all</a></li>
                             <ul id="{{case.case.response}}" style="display:none">
-                                <li style="hidden:none">header : {{response.get("header")}}</li>
-                                <li style="hidden:none">body : {{response.get("body")}}</li>
+                                <li style="hidden:none">
+									header :
+									<pre>{{response.get("header")}}</pre>
+								</li>
+                                <li style="hidden:none">
+									body :
+									<pre>{{response.get("body")}}</pre>
+								</li>
                             </ul>
                         </td>
 						<td>
                             {% set check=case.result_check_response %}
                             <li onclick="showElement('{{'{}.{}.{}.{}.response_check'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}')"><a>response check</a></li>
                             <ul id="{{'{}.{}.{}.{}.response_check'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}" style="display:none">
-                                <li>code check: {{case.result_check_response[0]}}</li>
+                                <li>code check:
+									<pre>{{case.result_check_response[0]}}</pre>
+								</li>
                                 <li><a href="file:///{{case.log_dir}}">body check: {{case.result_check_response[1]}}</a></li>
                             </ul>
+							<li onclick="showElement('{{'{}.{}.{}.{}.run_error'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}')"><a>run error</a></li>
+							<div id="{{'{}.{}.{}.{}.run_error'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}" style="display:none">
+								<pre> {{case.run_error}} </pre>
+							</div>
                         </td>
                         <td>
                             <ul>

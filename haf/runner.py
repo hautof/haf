@@ -1,5 +1,6 @@
 # encoding='utf-8'
 import importlib
+import sys
 import time
 from multiprocessing import Process
 
@@ -16,7 +17,7 @@ from haf.common.log import Log
 from haf.config import *
 from haf.utils import Utils, locker
 from haf.asserthelper import AssertHelper
-from haf.case import HttpApiCase, BaseCase
+from haf.case import HttpApiCase, BaseCase, PyCase
 import traceback
 
 logger = Log.getLogger(__name__)
@@ -187,10 +188,46 @@ class PyRunner(BaseRunner):
         self.bench = bench
         self.key = ""
 
-    def run(self):
-        pass
+    def run(self, case:PyCase):
+        result = HttpApiResult()
+        self.key = case.log_key
+        result.on_case_begin()
+        if not self.check_case_run(case): # not False is skip
+            result.case = case
+            result.on_case_end()
+            result.result = RESULT_SKIP
+            return [CASE_SKIP, result]
 
+        result.case = case
+        logger.info(f"{case.log_key} : PyRunner run - {case.bench_name} {case.ids.id}.{case.ids.subid}-{case.ids.name}")
+        try:
+            module_name = case.module_name
+            module_path = case.module_path
+            sys.path.append(module_path)
+            module = importlib.import_module(module_name)
+            func = getattr(getattr(module, case.suite), case.func)
+            if hasattr(func, "param"):
+                func(param=func.param)
+            else:
+                func(key=True)
+            result.result = RESULT_PASS
+        except AssertionError as ae:
+            traceback.print_exc()
+            logger.error(ae)
+            result.result = RESULT_FAIL
+            result.run_error = traceback.format_exc()
+            result.on_case_end()
+            return result
+        except Exception as e:
+            traceback.print_exc()
+            logger.error(e)
+            result.result = RESULT_ERROR
+            result.run_error = traceback.format_exc()
+            result.on_case_end()
+            return result
 
+        result.on_case_end()
+        return result
 
 class ApiRunner(BaseRunner):
     '''
