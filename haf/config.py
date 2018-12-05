@@ -61,7 +61,7 @@ FIX_VERSION = 3
 VERSION_TYPE = "dev"
 PLATFORM_VERSION = f"{VERSION_TYPE}-{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}"
 
-BANNER_STRS =f"""
+BANNER_STRS_OLD =f"""
 ***************************************
 *    H      H      A      FFFFFFFF    *
 *    H      H     A A     F           *
@@ -69,6 +69,15 @@ BANNER_STRS =f"""
 *    HHHHHHHH   AAAAAAA   FFFFFFFF    *
 *    H      H  A       A  F           *
 *    H      H A         A F           *
-*    H      HA           AF    v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION} *
+*    H      HA           AF    v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}
 ***************************************
+"""
+
+BANNER_STRS = f"""
+  .                       ___
+ /\\\\  | |  | |  ____    /  _/
+(  )) | |__| |/ ___ \___| |___  
+ \\\\/  |  __  || |__\ \__  ____| 
+  '   | |  | ||_____\_\ / /   
+      |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}  / /   
 """
