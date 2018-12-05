@@ -35,12 +35,17 @@ class SkipDecorator:
 skip = SkipDecorator
 
 
-class ParametersDecorator:
+class ParameterizeDecorator:
     def __init__(self,  params: list=[]):
         self.params = params
+        self.mark = "test"
 
     def __call__(self, *args, **kwargs):
-        return self.params
+        func = args[0]
+        setattr(func, "mark", self.mark)
+        setattr(func, "params", self.params)
+        setattr(func, "run", True)
+        return func
 
 
-parameters = ParametersDecorator
+parameterize = ParameterizeDecorator

@@ -3,36 +3,39 @@
 import sys
 
 sys.path.append("..")
-from haf.mark import test, skip, parameters
+from haf.mark import test, skip, parameterize
 from haf.case import BaseCase
-import inspect
 
 
 class TestHello(BaseCase):
 
     @test("test hello11")
-    def Hello(self):
+    def test_1(self):
         assert 1+1 == 2
         assert 1 == 5
 
     @skip
     @test("test hello12")
-    def Hello1(self):
+    def test_2(self):
         assert 1 + 1 == 2
 
-    @parameters([{"test":123},{"test":245}])
-    def Hello2(self, params):
+    @parameterize([{"test":123},{"test":245}])
+    def test_3(self, params):
         print(params)
         assert 1 + 1 == 2
+
+    @parameterize([{"test":123},{"test":245}])
+    def test_4(self, params):
+        assert params.get("test")==123
 
 
 class TestHello2(BaseCase):
     @test("test hello2")
-    def Hello(self):
+    def test1(self):
         assert 1+1 == 2
 
     @test("test hello21")
-    def Hello1123(self):
+    def test2(self):
         assert 1 + 1 == 2
 
 

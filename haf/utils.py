@@ -26,7 +26,7 @@ import random
 import platform
 import yaml
 
-from haf.mark import test, skip, parameters, TestDecorator
+from haf.mark import test, skip, parameterize, TestDecorator
 
 logger = Log.getLogger(__name__)
 
@@ -261,11 +261,19 @@ class Utils(object):
                     for case in suite_temp:
                         for key in case.keys():
                             case_temp = {"id": id, "subid": subid, "name": key, "run": case.get(key).run if hasattr(case.get(key), 'run') else False, "reason": case.get(key).reason if hasattr(case.get(key), 'reason') else None}
-                            subid += 1
                             case_temp["func"] = key
                             case_temp["suite"] = suite_key
-                            cases.append(case_temp)
-        print(cases)
+                            func = case.get(key)
+                            if hasattr(func, "params"):
+                                for param in func.params:
+                                    case_temp_1 = case_temp.copy()
+                                    case_temp_1["subid"] = subid
+                                    case_temp_1["param"] = param
+                                    cases.append(case_temp_1)
+                                    subid += 1
+                            else:
+                                subid += 1
+                                cases.append(case_temp)
         return cases
 
 
