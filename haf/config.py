@@ -78,6 +78,6 @@ BANNER_STRS = f"""
  /\\\\  | |  | |  ____    /  _/
 (  )) | |__| |/ ___ \___| |___  
  \\\\/  |  __  || |__\ \__  ____| 
-  '   | |  | ||_____\_\ / /   
-      |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}  / /   
+  '   | |  | ||_____\_\ | |   
+      |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}   |_|   
 """
