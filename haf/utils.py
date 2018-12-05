@@ -238,6 +238,10 @@ class Utils(object):
                         elif isinstance(func, skip):
                             func_temp[func_key] = func
                             suite_dict[class_temp_key].append(func_temp)
+                        elif inspect.isfunction(func):
+                            if hasattr(func, "mark") and func.mark == "test":
+                                func_temp[func_key] = func
+                                suite_dict[class_temp_key].append(func_temp)
 
                 case_dict[cl].append(suite_dict)
         return case_dict
@@ -260,8 +264,6 @@ class Utils(object):
                             subid += 1
                             case_temp["func"] = key
                             case_temp["suite"] = suite_key
-                            if isinstance(case.get(key), test):
-                                case_temp["param"] = case.get(key).param
                             cases.append(case_temp)
         print(cases)
         return cases

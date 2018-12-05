@@ -9,17 +9,17 @@ import inspect
 
 
 class TestHello(BaseCase):
-    @test
+
+    @test("test hello11")
     def Hello(self):
         assert 1+1 == 2
         assert 1 == 5
 
     @skip
-    @test
+    @test("test hello12")
     def Hello1(self):
         assert 1 + 1 == 2
 
-    @test
     @parameters([{"test":123},{"test":245}])
     def Hello2(self, params):
         print(params)
@@ -27,11 +27,11 @@ class TestHello(BaseCase):
 
 
 class TestHello2(BaseCase):
-    @test
+    @test("test hello2")
     def Hello(self):
         assert 1+1 == 2
 
-    @test
+    @test("test hello21")
     def Hello1123(self):
         assert 1 + 1 == 2
 
