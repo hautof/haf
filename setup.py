@@ -1,5 +1,6 @@
 import setuptools, os
 from setuptools import setup
+from haf.config import *
 
 PACKAGE_NAME = "haf"
 
@@ -43,7 +44,7 @@ package_extras.extend(package_files('{}/ext/webserver'.format(PACKAGE_NAME)))
 
 setup(
     name = 'haf',
-    version = '2.0.2',
+    version = f"{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}",
     author = 'wei.meng',
     author_email = 'mengwei1101@hotmail.com',    
     long_description = long_description,
