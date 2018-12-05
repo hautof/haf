@@ -36,6 +36,8 @@ class PyCase(BaseCase):
         self.suite = ""
         self.func = ""
         self._init_all()
+        self.run = self.func
+        self.param = None
 
     def _init_all(self):
         self.ids = Ids()
@@ -65,6 +67,7 @@ class PyCase(BaseCase):
         self.run = CASE_RUN if args_init.get("run") is True else CASE_SKIP
         self.func = args_init.get("func")
         self.suite = args_init.get("suite")
+        self.param = args_init.get("param")
 
     def bind_bench(self, bench_name):
         self.bench_name = bench_name

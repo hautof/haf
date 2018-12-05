@@ -205,11 +205,11 @@ class PyRunner(BaseRunner):
             module_path = case.module_path
             sys.path.append(module_path)
             module = importlib.import_module(module_name)
-            func = getattr(getattr(module, case.suite), case.func)
-            if hasattr(func, "param"):
-                func(param=func.param)
+            func = getattr(getattr(module, case.suite)(), case.func)
+            if case.param is not None:
+                func(case.param)
             else:
-                func(key=True)
+                func()
             result.result = RESULT_PASS
         except AssertionError as ae:
             traceback.print_exc()
