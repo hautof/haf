@@ -1,17 +1,15 @@
 # encoding='utf-8'
 import time
-from multiprocessing import Process, Manager
-
+from multiprocessing import Process
 from haf.common.database import SQLConfig
-
 from haf.bench import HttpApiBench
 from haf.busclient import BusClient
 from haf.case import HttpApiCase, PyCase
 from haf.common.exception import FailLoaderException
 from haf.common.log import Log
 from haf.config import *
-from haf.suite import HttpApiSuite
-from haf.utils import Utils, locker
+from haf.utils import Utils
+from haf.mark import locker
 
 logger = Log.getLogger(__name__)
 

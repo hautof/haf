@@ -7,15 +7,14 @@ from multiprocessing import Process
 from haf.common.database import SQLConfig
 
 from haf.bench import HttpApiBench, BaseBench
-import haf.result
 from haf.apihelper import Request, Response
 from haf.busclient import BusClient
 from haf.common.exception import FailRunnerException
-from haf.common.lock import Lock
 from haf.result import HttpApiResult
 from haf.common.log import Log
 from haf.config import *
-from haf.utils import Utils, locker
+from haf.utils import Utils
+from haf.mark import locker
 from haf.asserthelper import AssertHelper
 from haf.case import HttpApiCase, BaseCase, PyCase
 import traceback
