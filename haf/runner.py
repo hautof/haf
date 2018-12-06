@@ -51,7 +51,7 @@ class Runner(Process):
 
     @locker
     def put_result(self,  key:str, result:HttpApiResult):
-        logger.info(f"{self.key} : runner {self.pid} put result{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}")
+        logger.info(f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}")
         result_handler = self.bus_client.get_result()
         result_handler.put(result)
 
