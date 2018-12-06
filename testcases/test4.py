@@ -19,6 +19,7 @@ class TestHello(BaseCase):
     def test_2(self):
         assert 1 + 1 == 2
 
+    @test
     @parameterize([{"test":123},{"test":245}])
     def test_3(self, params):
         print(params)
