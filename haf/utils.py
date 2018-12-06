@@ -166,11 +166,12 @@ class Utils(object):
     def get_class_from_py(module):
         built_in_list = ['__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__']
         attr_list = ['AttrNoneList', 'bench_name', 'error_msg', 'expect', 'id', 'mark', 'name', 'run', 'subid', 'type']
+        attr_none_list = ["BaseCase", "PyCase", "HttpApiCase"]
         class_list = []
         for attr in dir(module):
             class_attr = getattr(module, attr)
             class_temp = {attr: class_attr}
-            if attr not in built_in_list and inspect.isclass(class_attr) and attr != "BaseCase":
+            if attr not in built_in_list and inspect.isclass(class_attr) and attr not in attr_none_list:
                 if issubclass(class_attr, BaseCase) and isinstance(class_attr(), BaseCase):
                     class_list.append(class_temp)
         return class_list if len(class_list) > 0 else None

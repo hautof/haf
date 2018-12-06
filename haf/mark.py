@@ -2,8 +2,6 @@
 import functools
 import inspect
 import time
-
-from haf.case import PyCase
 from haf.common.lock import Lock
 
 
