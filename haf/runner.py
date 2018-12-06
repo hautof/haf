@@ -7,15 +7,14 @@ from multiprocessing import Process
 from haf.common.database import SQLConfig
 
 from haf.bench import HttpApiBench, BaseBench
-import haf.result
 from haf.apihelper import Request, Response
 from haf.busclient import BusClient
 from haf.common.exception import FailRunnerException
-from haf.common.lock import Lock
 from haf.result import HttpApiResult
 from haf.common.log import Log
 from haf.config import *
-from haf.utils import Utils, locker
+from haf.utils import Utils
+from haf.mark import locker
 from haf.asserthelper import AssertHelper
 from haf.case import HttpApiCase, BaseCase, PyCase
 import traceback
@@ -52,7 +51,7 @@ class Runner(Process):
 
     @locker
     def put_result(self,  key:str, result:HttpApiResult):
-        logger.info(f"{self.key} : runner {self.pid} put result{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}")
+        logger.info(f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}")
         result_handler = self.bus_client.get_result()
         result_handler.put(result)
 

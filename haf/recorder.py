@@ -4,7 +4,7 @@ import time
 from multiprocessing import Process
 
 from haf.busclient import BusClient
-from haf.case import HttpApiCase
+from haf.case import HttpApiCase, BaseCase
 from haf.common.exception import FailRecorderException
 from haf.common.log import Log
 from haf.result import HttpApiResult, EndResult, Detail
@@ -48,7 +48,7 @@ class Recorder(Process):
                 if not results.empty() :
                     result = results.get()
                     if isinstance(result, HttpApiResult):
-                        if isinstance(result.case, HttpApiCase):
+                        if isinstance(result.case, HttpApiCase) or isinstance(result.case, BaseCase):
                             logger.info(f"{self.recorder_key} recorder--{result.case.bench_name}.{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {result.result}")
                         else:
                             logger.info(f"{self.recorder_key} recorder ! wrong result!")
