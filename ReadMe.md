@@ -23,8 +23,8 @@
 
 - only mode : loader/runner/recorder/webserver/bus support
 
-![report](https://github.com/tsbxmw/haf/blob/master/docs/show/report.gif)
-![all](https://github.com/tsbxmw/haf/blob/master/docs/show/all.gif)
+![report](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/report.gif)
+![all](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/all.gif)
 
 ### How to get it
 
