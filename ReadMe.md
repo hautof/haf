@@ -179,7 +179,7 @@
 
 #### Design
 
-![map](https://github.com/tsbxmw/haf/blob/master/docs/png/HAF-2.0.0.png)
+![map](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/png/HAF-2.0.0.png)
 
 #### Doc
 

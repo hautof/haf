@@ -1,8 +1,10 @@
 # encoding='utf-8'
+import requests
 from flask_restful import Resource
 from haf.busclient import BusClient
 from haf import globalenv
 from haf.result import EndResult
+from flask import make_response
 
 globalenv._init()
 globalenv.set_global("runners", {})
@@ -51,4 +53,41 @@ class LoaderResource(Resource):
             globalenv.set_global("loader", loader)
         return globalenv.get_global("loader")
 
+
+class DocResource(Resource):
+    def __init__(self):
+        super().__init__()
+        self.bus_client = BusClient()
+
+    def get(self):
+        return make_response(requests.get("http://autotest.wang").text, 200)
+        return make_response("""
+        <html>  
+          <body>         
+            <p>
+              Haf is an easy http api test framework.
+            </p>
+            
+            <p>
+              <a href="http://autotest.wang/">MainPage</a>
+            </p>
+            
+            <p>
+              <a href="https://github.com/tsbxmw/haf/">GitHub</a>
+            </p>
+            
+            <p>
+              <a href="https://pypi.org/project/haf/">Pypi haf</a>
+            </p>
+            
+            <p>
+              <a href="https://github.com/tsbxmw/haf/">GitHub</a>
+            </p>
+            
+            <p>
+              <a href="https://github.com/tsbxmw/haf/wiki/Quick-Start">Quick Start</a>
+            </p>
+          </body>
+        </html>
+        """, 200)
 
