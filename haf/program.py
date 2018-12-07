@@ -55,6 +55,9 @@ class Program(object):
         recorder.start()
         time.sleep(0.1)
 
+    def _init_logging_module(self, args):
+        logging.basicConfig(level=logging.INFO if not args.debug else logging.DEBUG, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')
+
     def _init_system_logger(self, log_dir: str, bus_client:BusClient):
         l = Logger(self.case_name, log_dir, bus_client)
         l.start()
@@ -91,9 +94,9 @@ class Program(object):
 
     def run(self, args):
         try:
+            self._init_logging_module(args)
             self.case_name = Utils.get_case_name()
             runner_count = args.runner_count if args.runner_count else 1
-
             self.only_bus(args)
 
             self._start_bus(local=args.bus_server if args.bus_server else False)
