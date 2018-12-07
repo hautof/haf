@@ -39,6 +39,7 @@ def main_args():
     sub_run_arg_program.add_argument("--only-recorder", "-ore", type=bool, default=False, dest="only_recorder", help="""if true, only start recorder""")
     sub_run_arg_program.add_argument("--config", "-c", type=str, dest="config", help="""customer config""")
     sub_run_arg_program.add_argument("--api", "-api", dest="api", default=True, type=bool, help="api case or not, default is true")
+    sub_run_arg_program.add_argument("--debug", "-debug", dest="debug", default=False, type=bool, help="open debug or not")
 
     args = arg_program.parse_args()
     main_program = Program()
