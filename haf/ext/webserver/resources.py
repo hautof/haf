@@ -61,33 +61,3 @@ class DocResource(Resource):
 
     def get(self):
         return make_response(requests.get("http://autotest.wang").text, 200)
-        return make_response("""
-        <html>  
-          <body>         
-            <p>
-              Haf is an easy http api test framework.
-            </p>
-            
-            <p>
-              <a href="http://autotest.wang/">MainPage</a>
-            </p>
-            
-            <p>
-              <a href="https://github.com/tsbxmw/haf/">GitHub</a>
-            </p>
-            
-            <p>
-              <a href="https://pypi.org/project/haf/">Pypi haf</a>
-            </p>
-            
-            <p>
-              <a href="https://github.com/tsbxmw/haf/">GitHub</a>
-            </p>
-            
-            <p>
-              <a href="https://github.com/tsbxmw/haf/wiki/Quick-Start">Quick Start</a>
-            </p>
-          </body>
-        </html>
-        """, 200)
-

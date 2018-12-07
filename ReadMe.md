@@ -149,7 +149,7 @@
     python -m haf run -ore=true
 ```
 
-#### web api server suport
+### web api server suport
 
 - get loader infos
 
@@ -181,10 +181,15 @@
 
 ![map](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/png/HAF-2.0.0.png)
 
-#### Doc
+### Doc
 
-[doc url](https://github.com/tsbxmw/haf/blob/master/docs/design.md)
-[read the doc](https://haf-doc.readthedocs.io/en/dev-2.1.0/)
+> [doc url](https://github.com/tsbxmw/haf/blob/master/docs/design.md)
+
+> [read the doc](https://haf-doc.readthedocs.io/en/dev-2.1.0/)
+
+> [wiki home](https://github.com/tsbxmw/haf/wiki)
+
+> [Quick Start](https://github.com/tsbxmw/haf/wiki/Quick-Start)
 
 ### Release Note
 
