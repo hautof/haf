@@ -1,8 +1,10 @@
 # encoding='utf-8'
+import requests
 from flask_restful import Resource
 from haf.busclient import BusClient
 from haf import globalenv
 from haf.result import EndResult
+from flask import make_response
 
 globalenv._init()
 globalenv.set_global("runners", {})
@@ -52,3 +54,10 @@ class LoaderResource(Resource):
         return globalenv.get_global("loader")
 
 
+class DocResource(Resource):
+    def __init__(self):
+        super().__init__()
+        self.bus_client = BusClient()
+
+    def get(self):
+        return make_response(requests.get("http://autotest.wang").text, 200)

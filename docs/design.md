@@ -1,16 +1,16 @@
 # HAF Framework
 
-![map](HAF-2.0.0.png)
+![map](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/png/HAF-2.0.0.png)
 
 
 ## Loader
 
-![map](Loader.png)
+![map](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/png/Loader.png)
 
 
 ## Runner
 
-![map](Runner.png)
+![map](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/png/Runner.png)
 
 
 ## WebServer
