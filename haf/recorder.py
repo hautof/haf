@@ -16,7 +16,7 @@ logger = Log.getLogger(__name__)
 
 
 class Recorder(Process):
-    def __init__(self, runner_count:int=1, report_path:str="", case_name:str=""):
+    def __init__(self, runner_count:int=1, report_path:str="", case_name:str="", log_dir=""):
         super().__init__()
         self.bus_client = None
         self.daemon = True
@@ -26,6 +26,7 @@ class Recorder(Process):
         self.report_path = report_path
         self.case_name = case_name
         self.recorder_key = ""
+        self.log_dir = log_dir
 
     def on_recorder_start(self):
         self.results.begin_time = Utils.get_datetime_now()
@@ -65,6 +66,7 @@ class Recorder(Process):
 
     def generate_report(self):
         Jinja2Report.write_report_to_file(Jinja2Report.report(self.results), self.report_path)
+        Jinja2Report.write_report_to_file(Jinja2Report.report(self.results), f"{self.log_dir}/report.html")
 
     def end_handler(self):
         self.on_recorder_stop()

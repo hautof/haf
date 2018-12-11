@@ -37,9 +37,9 @@ class Jinja2Report(object):
     @staticmethod
     def write_report_to_file(info, report_path: str):
         try:
+            logger.info(f"generate report to {report_path}")
             stream = TemplateStream(info)
             stream.dump(report_path)
-
         except Exception as e:
             logger.error(e)
 

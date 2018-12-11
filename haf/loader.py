@@ -51,6 +51,7 @@ class Loader(Process):
                 file_name = temp.get("file_name")
                 inputs = LoadFromConfig.load_from_file(file_name)
 
+                logger.info(f"{self.key} -- {inputs}")
                 input = inputs.get("config")[0]
                 bench_name = input.get("name")
                 module_name = input.get("module_name")

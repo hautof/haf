@@ -50,8 +50,8 @@ class Program(object):
             runner.start()
         time.sleep(0.5)
 
-    def _start_recorder(self, count: int=1, report_path: str=""):
-        recorder = Recorder(count, report_path, self.case_name)
+    def _start_recorder(self, count: int=1, report_path: str="", log_dir: str=""):
+        recorder = Recorder(count, report_path, self.case_name, log_dir)
         recorder.start()
         time.sleep(0.1)
 
@@ -111,11 +111,11 @@ class Program(object):
             elif args.only_runner:
                 self._start_runner(runner_count, f"{args.log_dir}/{self.case_name}")
             elif args.only_recorder:
-                self._start_recorder(runner_count, args.report_output_dir)
+                self._start_recorder(runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
             else:
                 self._start_loader(1, self.bus_client)
                 self._start_runner(runner_count, f"{args.log_dir}/{self.case_name}")
-                self._start_recorder(runner_count, args.report_output_dir)
+                self._start_recorder(runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
 
             self.start_main()
             self.put_loader_msg(args)
