@@ -234,7 +234,6 @@ class Utils(object):
                                 cases.append(case_temp)
         return cases
 
-
     @staticmethod
     def load_from_py(file_name):
         try:
