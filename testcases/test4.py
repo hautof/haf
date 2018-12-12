@@ -39,16 +39,3 @@ class TestHello2(BaseCase):
     def test2(self):
         assert 1 + 1 == 2
 
-
-
-if __name__ == "__main__":
-    th = TestHello()
-    print(type(th))
-    print(isinstance(th, BaseCase))
-    print(issubclass(TestHello, BaseCase))
-    print(isinstance(TestHello, BaseCase))
-    print(dir(th))
-    print(dir(BaseCase))
-    print(dir(TestHello))
-    print(isinstance(th.Hello, test))
-    print(type(th.Hello))

@@ -120,25 +120,6 @@
 							 </button>
                              <a class="navbar-brand" onclick="showElement('{{suite}}')">{{suite}}</a>
                         </div>
-						<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-							 <ul class="nav navbar-nav navbar-right">
-                                <li>
-                                    <a class="navbar-brand" style="color:green" onclick="showElement('{{suite}}')">pass</a>
-                                </li>
-                                <li>
-                                    <a class="navbar-brand" style="color:red" onclick="showElement('{{suite}}')">fail</a>
-                                </li>
-                                <li>
-                                    <a class="navbar-brand" style="color:black" onclick="showElement('{{suite}}')">skip</a>
-                                </li>
-                                <li>
-                                    <a class="navbar-brand" style="color:orange" onclick="showElement('{{suite}}')">error</a>
-                                </li>
-                                <li>
-								<a class="navbar-brand" onclick="showElement('{{suite}}')">|</a>
-                                </li>
-							 </ul>
-						</div>
 					</nav>
 				</div>
 
@@ -190,14 +171,24 @@
                             </ul>
                         </td>
 						<td>
-                            {% set check=case.result_check_response %}
+                            {% set check1=case.result_check_response %}
                             <li onclick="showElement('{{'{}.{}.{}.{}.response_check'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}')"><a>response check</a></li>
                             <ul id="{{'{}.{}.{}.{}.response_check'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}" style="display:none">
-                                <li>code check:
+                                <li>result:{{check1}}</li>
+								<li>code check:
 									<pre>{{case.result_check_response[0]}}</pre>
 								</li>
                                 <li><a href="file:///{{case.log_dir}}">body check: {{case.result_check_response[1]}}</a></li>
                             </ul>
+							{% set check2=case.result_check_sql_response %}
+                            <li onclick="showElement('{{'{}.{}.{}.{}.sql_check'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}')"><a>sql check</a></li>
+                            <ul id="{{'{}.{}.{}.{}.sql_check'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}" style="display:none">
+								<li>result:{{check2}}</li>
+								{% if case.case.sql_check_func != "" %}
+								<li>check func: {{case.case.sql_check_func}}</li>
+								{% endif %}
+                            </ul>
+
 							<li onclick="showElement('{{'{}.{}.{}.{}.run_error'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}')"><a>run error</a></li>
 							<div id="{{'{}.{}.{}.{}.run_error'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}" style="display:none">
 								<pre> {{case.run_error}} </pre>
