@@ -47,8 +47,8 @@ class Utils(object):
             sqlconfig = sqlconfig
             if sqlconfig.protocol == "mysql":
                  func_obj = MysqlTool()
-            # elif sqlconfig.protocol == "sqlserver":
-            #     func_obj = SqlServerTool()
+            elif sqlconfig.protocol == "sqlserver":
+                 func_obj = SqlServerTool()
             # elif sqlconfig.protocol == "redis":
             #     func_obj = RedisTool()
             # elif sqlconfig.protocol == "neo4j":
@@ -182,6 +182,8 @@ class Utils(object):
         for cl in class_list.keys():
             case_dict[cl] = []
             suites = class_list.get(cl)
+            if suites is None:
+                raise FailLoadCaseFromPyException
             for suite in suites:
                 suite_dict = {}
                 for class_temp_key in suite.keys():
