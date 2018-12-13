@@ -17,8 +17,10 @@ class Request(object):
         self.url_part = ""
 
     def constructor(self, inputs:dict={}):
-        self.header = json.loads(inputs.get("request_header"))
-        self.data = json.loads(inputs.get("request_data"))
+        header = inputs.get("request_header")
+        self.header = json.loads(header) if isinstance(header, str) else header
+        data = inputs.get("request_data")
+        self.data = json.loads(data) if isinstance(data, str) else data
         method = inputs.get("method", CASE_HTTP_API_METHOD_GET)
         if str(method) == "get":
             self.method = CASE_HTTP_API_METHOD_GET
@@ -135,7 +137,8 @@ class Expect(object):
         self.sql_response_result = {}
 
     def constructor(self, inputs:dict={}):
-        self.response.body = json.loads(inputs.get("expect_response"))
+        body = inputs.get("expect_response")
+        self.response.body = json.loads(body) if isinstance(body, str) else body
         sql_check_func = inputs.get("expect_sql")
         if "None" in sql_check_func or sql_check_func is None:
             self.sql_check_func = None
