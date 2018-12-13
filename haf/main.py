@@ -31,8 +31,7 @@ def main_args():
                                              if is ip or domain, would not run local bus-server, and using ip to connect""")
     sub_run_arg_program.add_argument("--web-server", "-ws", type=bool,
                                      help="""default is not run;
-                                             if is True, would create web server to offer the api and html service;
-                                                                """)
+                                             if is True, would create web server to offer the api and html service;""")
     sub_run_arg_program.add_argument("--report-html", "-rh", type=bool, default=True,
                                      help="""default is True,to generate html report""")
     sub_run_arg_program.add_argument("--report-output-dir", "-rod", dest="report_output_dir", type=str, default="",
