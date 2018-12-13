@@ -73,7 +73,9 @@ class Recorder(Process):
         self.publish_results()
         self.generate_report()
         logger.info(f"{self.recorder_key} end recorder")
-        self.json_result_handler()
+        self.send_record_end_signal()
+
+    def send_record_end_signal(self):
         system_handler = self.bus_client.get_system()
         system_handler.put(SIGNAL_RECORD_END)
 
@@ -142,6 +144,3 @@ class Recorder(Process):
         if publish_result.full():
             publish_result.get()
         publish_result.put(self.results)
-
-    def json_result_handler(self):
-        return json.dumps(self.results.deserialize())
