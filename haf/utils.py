@@ -336,7 +336,11 @@ class Utils(object):
             s1 = float(s1)
             d2 = datetime.strptime(d2, "%Y-%m-%d %H:%M:%S")
             s2 = float(s2)
-            return (d2-d1).seconds + (s2-s1)/1000
+            sec = (d2-d1).seconds
+            if sec == 0:
+                return (s2-s1)/1000
+            else:
+                return float(sec) + (s2-s1)/1000
         except Exception as e:
             return 0
 
