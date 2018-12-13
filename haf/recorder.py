@@ -120,16 +120,15 @@ class Recorder(Process):
             case = result.case
             suite = Detail(case.bench_name)
             suite.begin_time = result.begin_time
-            suite.end_time = result.end_time
-            suite.cases.append(result)
         else:
+            # find suite here
             for suite in self.results.details.values():
                 if suite.suite_name == result.case.bench_name:
                     suite = suite
                     break
-            suite.end_time = result.end_time
-            suite.duration = Utils.get_date_result(suite.begin_time, suite.end_time)
-            suite.cases.append(result)
+        suite.end_time = result.end_time
+        suite.duration = Utils.get_date_result(suite.begin_time, suite.end_time)
+        suite.cases.append(result)
         self.results.details[result.case.bench_name] = suite
 
     def result_handler(self, result:HttpApiResult):
