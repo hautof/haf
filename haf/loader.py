@@ -1,9 +1,9 @@
 # encoding='utf-8'
 import time
 from multiprocessing import Process
-from haf.common.database import SQLConfig
 from haf.bench import HttpApiBench
 from haf.busclient import BusClient
+from haf.common.database import SQLConfig
 from haf.case import HttpApiCase, PyCase
 from haf.common.exception import FailLoaderException
 from haf.common.log import Log

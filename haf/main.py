@@ -4,7 +4,6 @@ import os
 
 from haf.program import Program
 from haf.config import BANNER_STRS
-from coupling.dict import AttrDict
 import argparse
 
 

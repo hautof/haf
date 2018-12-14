@@ -1,6 +1,5 @@
 # encoding='utf-8'
 
-import importlib
 import json
 from haf.common.database import SQLConfig
 from haf.config import CASE_HTTP_API_METHOD_GET, CASE_HTTP_API_METHOD_POST

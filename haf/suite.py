@@ -1,8 +1,5 @@
 # encoding='utf-8'
 
-from haf.config import  *
-from haf.result import BaseResult, HttpApiResult
-
 
 class BaseSuite(object):
     '''

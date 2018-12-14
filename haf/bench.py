@@ -1,8 +1,6 @@
 # encoding='utf-8'
 from haf.common.database import SQLConfig
-
 from haf.case import HttpApiCase
-from haf.config import  *
 
 
 class BaseBench(object):

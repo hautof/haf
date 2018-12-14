@@ -1,8 +1,6 @@
 # encoding='utf-8'
 import os
-import sys
 import time
-import traceback
 from multiprocessing import Process
 
 from haf.busclient import BusClient
@@ -23,14 +21,16 @@ class Logger(Process):
         if not os.path.exists(log_home):
             os.makedirs(log_home)
         self.bus_client = BusClient()
-
-        while True:
-            log_queue = self.bus_client.get_log()
-            if log_queue.empty():
-                time.sleep(1)
-                continue
-            log = log_queue.get()
-            self.log_handler(log)
+        try:
+            while True:
+                log_queue = self.bus_client.get_log()
+                if log_queue.empty():
+                    time.sleep(1)
+                    continue
+                log = log_queue.get()
+                self.log_handler(log)
+        except KeyboardInterrupt as key_e:
+            print(BANNER_STRS_EXIT)
 
     def split_log(self, log):
         try:
