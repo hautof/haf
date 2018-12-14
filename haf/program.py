@@ -8,17 +8,16 @@
 import logging
 import time
 from multiprocessing import Process
-
 from haf.bus import BusServer
 from haf.busclient import BusClient
 from haf.common.lock import Lock
-from haf.loader import Loader
-from haf.recorder import Recorder
-from haf.runner import Runner
 from haf.config import *
 from haf.common.exception import *
-from haf.logger import Logger
 from haf.ext.webserver.app import web_server
+from haf.loader import Loader
+from haf.logger import Logger
+from haf.recorder import Recorder
+from haf.runner import Runner
 from haf.utils import Utils
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')

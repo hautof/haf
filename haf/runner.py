@@ -3,20 +3,18 @@ import importlib
 import sys
 import time
 from multiprocessing import Process
-
-from haf.common.database import SQLConfig
-
-from haf.bench import HttpApiBench, BaseBench
 from haf.apihelper import Request, Response
+from haf.asserthelper import AssertHelper
+from haf.bench import HttpApiBench, BaseBench
 from haf.busclient import BusClient
+from haf.common.database import SQLConfig
 from haf.common.exception import FailRunnerException
-from haf.result import HttpApiResult
 from haf.common.log import Log
 from haf.config import *
-from haf.utils import Utils
-from haf.mark import locker
-from haf.asserthelper import AssertHelper
 from haf.case import HttpApiCase, BaseCase, PyCase
+from haf.mark import locker
+from haf.result import HttpApiResult
+from haf.utils import Utils
 import traceback
 
 logger = Log.getLogger(__name__)

@@ -1,29 +1,15 @@
 # encoding = 'utf-8'
-import importlib
-import inspect
-import json
-import os
-import sys
-import time
-import traceback
-import urllib
-from types import GeneratorType
-
-
-from haf.apihelper import Request, Response
-from haf.case import BaseCase
-from haf.common.database import MysqlTool
-from haf.common.exception import FailLoadCaseFromPyException
-from haf.common.log import Log
-from openpyxl import load_workbook
-from haf.config import *
-from haf.common.httprequest import HttpController
+import importlib, inspect, json, os, sys, time, traceback, urllib, random, platform, yaml
 from http.client import HTTPResponse
 from datetime import datetime
-import random
-import platform
-import yaml
-
+from openpyxl import load_workbook
+from haf.apihelper import Request, Response
+from haf.case import BaseCase
+from haf.common.database import MysqlTool, SqlServerTool
+from haf.common.exception import FailLoadCaseFromPyException
+from haf.common.log import Log
+from haf.common.httprequest import HttpController
+from haf.config import *
 from haf.mark import test, skip
 
 logger = Log.getLogger(__name__)

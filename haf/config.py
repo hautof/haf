@@ -81,3 +81,12 @@ BANNER_STRS = f"""
   '   | |  | ||_____\_\ | |   
       |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}   |_|   
 """
+
+BANNER_STRS_EXIT = f"""
+  .                       ___
+ /\\\\  | |  | |  ____    /  _/
+(  )) | |__| |/ ___ \___| |___  
+ \\\\/  |  __  || |__\ \__  ____| 
+  '   | |  | ||_____\_\ | |   
+      |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}   |_|       EXIT ...
+"""

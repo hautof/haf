@@ -10,7 +10,6 @@ import time
 from multiprocessing.managers import BaseManager
 from queue import Queue
 from multiprocessing import Process, Pipe
-
 from haf.common.exception import FailBusException
 from haf.config import BUS_DOMAIN, BUS_PORT, BUS_AUTH_KEY, SIGNAL_BUS_END
 
