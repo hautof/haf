@@ -69,12 +69,13 @@ class MysqlTool(object):
         sqlconfig = sqlconfig
         self.connect_msql = None
         try:
+
             if "dictcursor" in kwargs.keys() and kwargs.get("dictcursor") is True:
-                self.connect_msql = pymysql.connect(sqlconfig.host, sqlconfig.username, sqlconfig.password,
-                                                sqlconfig.database, cursorclass = pymysql.cursors.DictCursor)
+                self.connect_msql = pymysql.connect(host=sqlconfig.host, port=sqlconfig.port, user=sqlconfig.username,
+                                                    passwd=sqlconfig.password, db=sqlconfig.database,
+                                                    cursorclass=pymysql.cursors.DictCursor)
             else:
-                self.connect_msql = pymysql.connect(sqlconfig.host, sqlconfig.username, sqlconfig.password,
-                                                sqlconfig.database)
+                self.connect_msql = pymysql.connect(host=sqlconfig.host, port=sqlconfig.port, user=sqlconfig.username, passwd=sqlconfig.password, db=sqlconfig.database)
             cursor_m = self.connect_msql.cursor()
             data = []
             if isinstance(sqlscript, list):
