@@ -1,4 +1,5 @@
 # encoding='utf-8'
+import json
 
 from haf.apihelper import Request, Response, Ids, Expect, SqlInfo
 from haf.config import *
@@ -83,7 +84,12 @@ class PyCase(BaseCase):
             "run": self.run,
             "bench_name": self.bench_name,
             "func": str(self.func),
-            "type": self.type
+            "type": self.type,
+            "suite": self.suite,
+            "param": str(self.param),
+            "module_name": self.module_name,
+            "module_path": self.module_path,
+            "sqlinfo": self.sqlinfo.deserialize()
         }
 
 

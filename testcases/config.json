@@ -25,6 +25,9 @@
         },
         {
           "case_path": "D:/workspace/mine/python/haf/testcases/test3.yml"
+        },
+        {
+          "case_path": "D:/workspace/mine/python/haf/testcases/test4.py"
         }
       ],
       "runner":{

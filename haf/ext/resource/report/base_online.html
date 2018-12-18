@@ -135,6 +135,7 @@
 				<thead>
 					<tr>
 						<th>Case Id</th>
+						<th>Params</th>
 						<th>Request</th>
 						<th>Response</th>
 						<th>Check</th>
@@ -147,9 +148,17 @@
 				<tbody>
 					{% for case in results.details.get(suite).cases %}
 					{% set infos = ["success","danger", "", "warning"] %}
-                    {% set id='{}.{}.{}'.format(case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
+                    {% set id='{}.{}.{}.{}'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
 					<tr class="{{infos[case.result-50]}}" id="{{id}}">
 						<td>{{id}}</td>
+						<td>
+							<li onclick="showElement('{{id}}-params')">Params</li>
+							<ul id="{{id}}-params" style="display:none">
+								<li>
+									<pre>{{case.case.param}}</pre>
+								</li>
+							</ul>
+						</td>
 						<td>
                             <li>url : {{case.case.request.url}}</li>
                             <li onclick="showElement('{{case.case.request}}')" ><a>all</a></li>
@@ -228,6 +237,7 @@
 		{% endfor %}
 		{% endblock %}
 	</div>
+</div>
 </div>
 </body>
 </html>
