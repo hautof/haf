@@ -76,7 +76,7 @@ def main_args():
                     args.only_runner = runner_config.get("only")
                     args.web_server = config.get("web_server").get("run")
             except Exception as e:
-                argparse.ArgumentError(e)
+                argparse.ArgumentError("run", e)
 
         if isinstance(args.case, str):
             if not isinstance(args.case, list):
@@ -93,6 +93,6 @@ def main_args():
         print(args)
         main_program.run(args)
     else:
-        argparse.ArgumentError("using python -m haf help to show help infos")
+        argparse.ArgumentError("run", "using python -m haf help to show help infos")
 
 

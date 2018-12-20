@@ -201,7 +201,7 @@
                             <ul id="{{'{}.{}.{}.{}.sql_check'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}" style="display:none">
 								<li>result:{{check2}}</li>
 								{% if case.case.sql_check_func != "" %}
-								<li>check func: {{case.case.sql_check_func}}</li>
+								<li>check func: {{case.case.expect.sql_check_func}}</li>
 								{% endif %}
                             </ul>
 

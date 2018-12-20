@@ -178,6 +178,9 @@ class BaseRunner(object):
     def check_case_error(self, case):
         return case.error == CASE_ERROR
 
+    def get_dependence_case_from_bench(self, dependence):
+        return None
+
 
 class PyRunner(BaseRunner):
     def __init__(self, bench):
@@ -259,7 +262,11 @@ class ApiRunner(BaseRunner):
             case.response = self.request(case.request)
             result.result_check_response = self.check_response(case.response, case.expect.response)
             case.expect.sql_response_result = self.sql_response(case.sqlinfo.scripts["sql_response"], case.sqlinfo.config, case.sqlinfo.check_list["sql_response"])
-            result.result_check_sql_response = self.check_sql_response(case)
+            temp_r = self.check_sql_response(case)
+            result.result_check_sql_response = temp_r[0]
+            if not temp_r[0]:
+                result.run_error = temp_r[1]
+            result.case = case
             result.result = RESULT_PASS if False not in result.result_check_response and result.result_check_sql_response is True else RESULT_FAIL
         except Exception as e:
             result.run_error = e
@@ -275,9 +282,9 @@ class ApiRunner(BaseRunner):
             return None
 
         if check_list is None:
-            sql_result = RESULT_PASS if Utils.sql_execute(sql_config, sql_script, dictcursor=True, key=self.key) is True else RESULT_FAIL
+            sql_result = Utils.sql_execute(sql_config, sql_script, dictcursor=True, key=self.key)
         else:
-            sql_result = RESULT_PASS if Utils.sql_execute(sql_config, sql_script, key=self.key) is True else RESULT_FAIL
+            sql_result = Utils.sql_execute(sql_config, sql_script, key=self.key)
         return sql_result
 
     def check_response(self, response:Response, response_expect:Response):
@@ -296,17 +303,20 @@ class ApiRunner(BaseRunner):
         :return:
         '''
         if case.expect.sql_check_func is None or case.expect.sql_response_result is None:
-            return True
-        result = True
+            return [True, "ok"]
         data = case.response.body
         logger.info(f"{case.log_key} : check sql response : {case.expect.sql_check_func}")
         class_content = importlib.import_module(case.expect.sql_check_func[0])
         check_func = getattr(getattr(class_content, case.expect.sql_check_func[1]), case.expect.sql_check_func[2])
         logger.info(f"{case.log_key} : check func : {check_func}")
-
-        if case.sqlinfo.check_list is not None:
-            result = check_func(case.expect.sql_response_result, data, case.sqlinfo.check_list["sql_response"])
-        else:
-            result = check_func(case.expect.sql_response_result, data)
+        try:
+            result = [True, "ok"]
+            if case.sqlinfo.check_list is not None:
+                check_func(case.expect.sql_response_result, data, case.sqlinfo.check_list["sql_response"])
+            else:
+                check_func(case.expect.sql_response_result, data)
+        except Exception as e:
+            traceback.print_exc()
+            return [False, traceback.format_exc()]
         return result
 
