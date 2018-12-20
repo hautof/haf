@@ -93,6 +93,7 @@ class Program(object):
 
     def run(self, args):
         try:
+            self.args = args
             self._init_logging_module(args)
             self.case_name = Utils.get_case_name()
             runner_count = args.runner_count if args.runner_count else 1
@@ -156,8 +157,43 @@ class Program(object):
                         self.bus_client.get_system().put(SIGNAL_BUS_END)
                         break
                     time.sleep(0.1)
+                else:
+                    cmd = input(f"haf-{PLATFORM_VERSION}# ")
+                    self._run_cmd(cmd)
             time.sleep(1)
         except KeyboardInterrupt as key_inter:
             self.bus_client.get_param().put(SIGNAL_STOP)
 
+    def _run_cmd(self, cmd):
+        if cmd == "rerun" or cmd == "r":
+            self._rerun()
+        elif cmd == "version" or cmd == "v":
+            self._version()
+        elif cmd == "help" or cmd == "h":
+            self._help()
+        else:
+            print("unsupported command!")
+            self._help()
 
+    def _rerun(self):
+        case_handler = self.bus_client.get_case()
+        while not case_handler.empty():
+            case_handler.get()
+        self._start_runner(self.args.runner_count if self.args.runner_count else 1, f"{self.args.log_dir}/{self.case_name}")
+        self._start_loader(1, self.bus_client)
+        self._start_recorder(1, self.args.report_output_dir, f"{self.args.log_dir}/{self.case_name}")
+        self.start_main()
+        self.put_loader_msg(self.args)
+        self.stop_main()
+
+    def _version(self):
+        print(BANNER_STRS)
+
+    def _help(self):
+        help = f"""
+        haf-{PLATFORM_VERSION}
+        # rerun   / r     rerun the input cases
+        # version / v     version of haf
+        # help    / h     help information
+        """
+        print(help)

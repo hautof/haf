@@ -81,13 +81,13 @@ class MysqlTool(object):
             if isinstance(sqlscript, list):
                 for ss in sqlscript:
                     if ss != None and ss != "None" and "None" not in ss and len(ss) > 5:
-                        logger.info(f"{key} start execute {ss}")
+                        logger.info(f"{key} start {sqlconfig.host} execute {ss}")
                         cursor_m.execute(ss)
                         data.append(cursor_m.fetchall())
                         logger.info(f"{key} result {str(data)}")
             elif isinstance(sqlscript, str):
                 if sqlscript != None and sqlscript != "None" and "None" not in sqlscript and len(sqlscript) > 5:
-                    logger.info(f"{key} start execute {sqlscript}")
+                    logger.info(f"{key} start {sqlconfig.host} execute {sqlscript}")
                     cursor_m.execute(sqlscript)
                     data.append(cursor_m.fetchall())
                     logger.info(f"{key} result {str(data)}")
@@ -135,13 +135,13 @@ class SqlServerTool(object):
             if isinstance(sqlscript, list):
                 for ss in sqlscript:
                     if ss != None and ss != "None" and "None" not in ss and len(ss) > 5:
-                        logger.info(f"{key} start execute {ss}")
+                        logger.info(f"{key} [{sqlconfig.host}] start execute {ss}")
                         cursor_m.execute(ss)
                         data.append(cursor_m.fetchall())
                         logger.info(f"{key} result {str(data)}")
             elif isinstance(sqlscript, str):
                 if sqlscript != None and sqlscript != "None" and "None" not in sqlscript and len(sqlscript) > 5:
-                    logger.info(f"{key} start execute {sqlscript}")
+                    logger.info(f"{key} start [{sqlconfig.host}] execute {sqlscript}")
                     cursor_m.execute(sqlscript)
                     data.append(cursor_m.fetchall())
                     logger.info(f"{key} result {str(data)}")
