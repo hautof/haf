@@ -22,8 +22,8 @@ class Logger(Process):
             os.makedirs(log_home)
         self.bus_client = BusClient()
         try:
+            log_queue = self.bus_client.get_log()
             while True:
-                log_queue = self.bus_client.get_log()
                 if log_queue.empty():
                     time.sleep(1)
                     continue

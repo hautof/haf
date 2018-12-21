@@ -44,10 +44,11 @@ class Recorder(Process):
             self.recorder_key = f"{self.pid}$%recorder$%"
             logger.info(f"{self.recorder_key} start recorder ")
             self.bus_client = BusClient()
+            self.results_handler = self.bus_client.get_result()
+            self.publish_result = self.bus_client.get_publish_result()
             while True:
-                results = self.bus_client.get_result()
-                if not results.empty() :
-                    result = results.get()
+                if not self.results_handler.empty() :
+                    result = self.results_handler.get()
                     if isinstance(result, HttpApiResult):
                         if isinstance(result.case, HttpApiCase) or isinstance(result.case, BaseCase):
                             logger.info(f"{self.recorder_key} recorder--{result.case.bench_name}.{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {result.result}")
@@ -140,7 +141,6 @@ class Recorder(Process):
         self.publish_results()
 
     def publish_results(self):
-        publish_result = self.bus_client.get_publish_result()
-        if publish_result.full():
-            publish_result.get()
-        publish_result.put(self.results)
+        if self.publish_result.full():
+            self.publish_result.get()
+        self.publish_result.put(self.results)

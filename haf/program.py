@@ -6,6 +6,7 @@
 '''
 
 import logging
+import os
 import time
 from multiprocessing import Process
 from haf.bus import BusServer
@@ -171,6 +172,8 @@ class Program(object):
             self._version()
         elif cmd == "help" or cmd == "h":
             self._help()
+        elif cmd == "exit" or cmd == "e":
+            self._exit()
         else:
             print("unsupported command!")
             self._help()
@@ -191,9 +194,14 @@ class Program(object):
 
     def _help(self):
         help = f"""
-        haf-{PLATFORM_VERSION}
-        # rerun   / r     rerun the input cases
-        # version / v     version of haf
-        # help    / h     help information
+    haf-{PLATFORM_VERSION}
+    # rerun   / r     rerun the input cases
+    # version / v     version of haf
+    # help    / h     help information
+    # exit    / e     exit 
         """
         print(help)
+
+    def _exit(self):
+        print(BANNER_STRS_EXIT)
+        os._exit(1)
