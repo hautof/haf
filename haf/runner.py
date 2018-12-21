@@ -50,21 +50,18 @@ class Runner(Process):
     @locker
     def put_result(self,  key:str, result:HttpApiResult):
         logger.info(f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}")
-        result_handler = self.bus_client.get_result()
-        result_handler.put(result)
+        self.result_handler_queue.put(result)
 
     @locker
     def put_web_message(self, key:str):
-        web_queue = self.bus_client.get_publish_runner()
-        if web_queue.full():
-            web_queue.get()
-        web_queue.put(self.runner)
+        if self.web_queue.full():
+            self.web_queue.get()
+            self.web_queue.put(self.runner)
 
     @locker
     def put_case_back(self, key:str, case):
         logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name}")
-        case_handler = self.bus_client.get_case()
-        case_handler.put(case)
+        self.case_handler_queue.put(case)
 
     def result_handler(self, result):
         if isinstance(result, HttpApiResult):
@@ -93,14 +90,16 @@ class Runner(Process):
 
     def run(self):
         try:
+            self.bus_client = BusClient()
             self.runner_key = f"{self.pid}$%runner$%"
             self.runner["key"] = f"{self.pid}"
             logger.info(f"{self.runner_key} start runner")
-            self.bus_client = BusClient()
+            self.web_queue = self.bus_client.get_publish_runner()
+            self.case_handler_queue = self.bus_client.get_case()
+            self.result_handler_queue = self.bus_client.get_result()
             while True:
-                case_handler = self.bus_client.get_case()
-                if not case_handler.empty() :
-                    case = case_handler.get()
+                if not self.case_handler_queue.empty() :
+                    case = self.case_handler_queue.get()
                     if case == SIGNAL_CASE_END:
                         self.end_handler()
                         break
@@ -150,10 +149,8 @@ class Runner(Process):
 
     def end_handler(self):
         logger.info("{} : end runner".format(self.runner_key))
-        result_handler = self.bus_client.get_result()
-        result_handler.put(SIGNAL_RESULT_END)
-        case_handler = self.bus_client.get_case()
-        case_handler.put(SIGNAL_CASE_END)
+        self.result_handler_queue.put(SIGNAL_RESULT_END)
+        self.case_handler_queue.put(SIGNAL_CASE_END)
 
 
 class BaseRunner(object):
@@ -302,15 +299,16 @@ class ApiRunner(BaseRunner):
         :param case:
         :return:
         '''
-        if case.expect.sql_check_func is None or case.expect.sql_response_result is None:
-            return [True, "ok"]
-        data = case.response.body
-        logger.info(f"{case.log_key} : check sql response : {case.expect.sql_check_func}")
-        class_content = importlib.import_module(case.expect.sql_check_func[0])
-        check_func = getattr(getattr(class_content, case.expect.sql_check_func[1]), case.expect.sql_check_func[2])
-        logger.info(f"{case.log_key} : check func : {check_func}")
         try:
             result = [True, "ok"]
+            if case.expect.sql_check_func is None or case.expect.sql_response_result is None:
+                return [True, "ok"]
+            data = case.response.body
+            logger.info(f"{case.log_key} : check sql response : {case.expect.sql_check_func}")
+            class_content = importlib.import_module(case.expect.sql_check_func[0])
+            check_func = getattr(getattr(class_content, case.expect.sql_check_func[1]), case.expect.sql_check_func[2])
+            logger.info(f"{case.log_key} : check func : {check_func}")
+            logger.info(f"{case.log_key} : check list is {case.sqlinfo.check_list}")
             if case.sqlinfo.check_list is not None:
                 check_func(case.expect.sql_response_result, data, case.sqlinfo.check_list["sql_response"])
             else:
