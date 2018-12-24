@@ -1,6 +1,7 @@
 # encoding='utf-8'
 import json
 import os
+import sys
 
 from haf.program import Program
 from haf.config import BANNER_STRS
@@ -61,7 +62,8 @@ def main_args():
     if args.all == "run":
         if args.config:
             if not os.path.exists(args.config):
-                argparse.ArgumentError(f"config file {args.config} not found!")
+                print(f"config file {args.config} not found!")
+                sys.exit(-1)
             try:
                 with open(args.config, 'r') as f:
                     config = json.load(f).get("config").get("run")
@@ -76,7 +78,8 @@ def main_args():
                     args.only_runner = runner_config.get("only")
                     args.web_server = config.get("web_server").get("run")
             except Exception as e:
-                argparse.ArgumentError("run", e)
+                print(e)
+                sys.exit(-1)
 
         if isinstance(args.case, str):
             if not isinstance(args.case, list):
@@ -93,6 +96,6 @@ def main_args():
         print(args)
         main_program.run(args)
     else:
-        argparse.ArgumentError("run", "using python -m haf help to show help infos")
+        print("using python -m haf help to show help infos")
 
 
