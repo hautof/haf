@@ -7,9 +7,9 @@
 '''
 import logging
 import time
+from multiprocessing import Process
 from multiprocessing.managers import BaseManager
 from queue import Queue
-from multiprocessing import Process, Pipe
 from haf.common.exception import FailBusException
 from haf.config import BUS_DOMAIN, BUS_PORT, BUS_AUTH_KEY, SIGNAL_BUS_END
 
@@ -81,7 +81,6 @@ class BusServer(Process):
         InfoManager.register("get_publish_result", callable=lambda: publish_result)
         InfoManager.register("get_publish_runner", callable=lambda: publish_runner)
         InfoManager.register("get_publish_loader", callable=lambda: publish_loader)
-
         self.queue_manager = InfoManager(address=('', self.port), authkey=self.auth_key)
         self.server = self.queue_manager.get_server()
 
@@ -91,20 +90,21 @@ class BusServer(Process):
         :return:
         '''
         try:
-            logger.info("start Bus {}".format(self.pid))
+            logger.info("start Bus")
             self.start_manager_server()
             self.server.serve_forever()
-            while True:
-                system_signal = self.queue_manager.get_system()
-                if system_signal.get() == SIGNAL_BUS_END:
-                    self.stop()
-                    break
-                time.sleep(1)
+            # while True:
+            #     system_signal = self.queue_manager.get_system()
+            #     if not system_signal.empty():
+            #         if system_signal.get() == SIGNAL_BUS_END:
+            #             self.stop()
+            #             break
+            #     time.sleep(0.1)
         except Exception:
             raise FailBusException
 
     def stop(self):
-        logger.info(f"end bus {self.pid}")
+        logger.info(f"end bus")
         self.server.shutdown()
         self.is_stop = True
 
