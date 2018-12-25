@@ -89,7 +89,7 @@ class Program(object):
 
     def _start_web_server(self, args):
         if args.web_server:
-            ws = Process(target=web_server)
+            ws = Process(target=web_server, daemon=True)
             ws.start()
 
     def run(self, args):
@@ -149,34 +149,37 @@ class Program(object):
 
     def wait_end_signal(self, args):
         try:
+            system_signal = self.bus_client.get_system()
             while True:
                 if not args.web_server:
-                    system_signal = self.bus_client.get_system()
-                    signal = system_signal.get()
-                    if signal == SIGNAL_RECORD_END or signal == SIGNAL_STOP:
-                        logger.info("main -- stop")
-                        self.bus_client.get_system().put(SIGNAL_BUS_END)
-                        break
+                    if not system_signal.empty():
+                        self.signal = system_signal.get()
+                        if self.signal == SIGNAL_RECORD_END or self.signal == SIGNAL_STOP:
+                            logger.info("main -- stop")
+                            system_signal.put(SIGNAL_BUS_END)
+                            break
                     time.sleep(0.1)
                 else:
                     cmd = input(f"haf-{PLATFORM_VERSION}# ")
-                    self._run_cmd(cmd)
+                    if self._run_cmd(cmd):
+                        break
             time.sleep(1)
         except KeyboardInterrupt as key_inter:
             self.bus_client.get_param().put(SIGNAL_STOP)
 
     def _run_cmd(self, cmd):
         if cmd == "rerun" or cmd == "r":
-            self._rerun()
+            result = self._rerun()
         elif cmd == "version" or cmd == "v":
-            self._version()
+            result = self._version()
         elif cmd == "help" or cmd == "h":
-            self._help()
+            result = self._help()
         elif cmd == "exit" or cmd == "e":
-            self._exit()
+            result = self._exit()
         else:
             print("unsupported command!")
-            self._help()
+            result = self._help()
+        return result
 
     def _rerun(self):
         case_handler = self.bus_client.get_case()
@@ -188,20 +191,24 @@ class Program(object):
         self.start_main()
         self.put_loader_msg(self.args)
         self.stop_main()
+        return False
 
     def _version(self):
         print(BANNER_STRS)
+        return False
 
     def _help(self):
         help = f"""
-    haf-{PLATFORM_VERSION}
-    # rerun   / r     rerun the input cases
-    # version / v     version of haf
-    # help    / h     help information
-    # exit    / e     exit 
+haf-{PLATFORM_VERSION}#
+# rerun   / r     rerun the input cases
+# version / v     version of haf
+# help    / h     help information
+# exit    / e     exit 
         """
         print(help)
+        return False
 
     def _exit(self):
+        logger.info("main -- stop, wait for bus end")
         print(BANNER_STRS_EXIT)
-        os._exit(1)
+        return True
