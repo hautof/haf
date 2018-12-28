@@ -51,16 +51,21 @@
 								<td>{{results.platform}}</td>
 								<td>{{results.version}}</td>
                                 <td>
-									{% block suite_temp %}
-                                    {% set i = 0 %}
-									{% for suite in results.suite_name %}
-                                    <a onclick="showElement('{{suite}}')">[{{suite}}]</a>
-									{% if i%3 == 0 %}
-									<br>
-									{% endif %}
-									{% set i = i + 1 %}
-                                    {% endfor %}
-									{% endblock %}
+
+                                    <li><a onclick="showElement('all_suites')">all suites</a></li>
+									<ul id="all_suites" style="display:none">
+										{% block suite_temp %}
+										{% set i = 0 %}
+										{% for suite in results.suite_name %}
+										<li><a onclick="showElement('{{suite}}')">[{{suite}}]</a></li>
+										{% if i%3 == 0 %}
+										<br>
+										{% endif %}
+										{% set i = i + 1 %}
+										{% endfor %}
+										{% endblock %}
+									</ul>
+
                                 </td>
 								<td>{{results.begin_time}}</td>
 								{% if results.end_time %}
