@@ -103,6 +103,10 @@ class EndResult(BaseResult):
         self.platform = Utils.get_platform()
 
     def deserialize(self):
+        summary = {}
+        for s in self.summary.keys():
+            summary[s] = self.summary.get(s).deserialize()
+
         return {
             "begin_time":self.begin_time,
             "end_time":self.end_time,
@@ -112,7 +116,7 @@ class EndResult(BaseResult):
             "skip":self.skip,
             "error":self.error,
             "suite_name":self.suite_name,
-            "summary": self.summary,
+            "summary": summary,
             "version": self.version,
             "name": self.name,
             "platform": self.platform,
@@ -121,3 +125,32 @@ class EndResult(BaseResult):
                 self.details.get(x).deserialize() for x in self.details.keys()
             ]
         }
+
+
+class Summary(object):
+    def __init__(self, name, base_url):
+        self.passed = 0
+        self.skip = 0
+        self.failed = 0
+        self.error = 0
+        self.all = 0
+        self.base_url = base_url
+        self.begin_time = ""
+        self.end_time = ""
+        self.duration = 0
+        self.name = name
+
+    def deserialize(self):
+        return {
+                "passed": self.passed,
+                "skip": self.skip,
+                "failed": self.failed,
+                "error": self.error,
+                "all": self.all,
+                "base_url": self.base_url,
+                "begin_time": self.begin_time,
+                "end_time": self.end_time,
+                "duration": self.duration,
+                "name": self.name
+                }
+

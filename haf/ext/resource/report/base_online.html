@@ -103,15 +103,15 @@
 					{% for suite_summary in results.summary.keys() %}
 					<tr>
 					<td><a onclick="showElement('{{suite_summary}}')">{{suite_summary}}</a></td>
-                    <td>{{results.summary.get(suite_summary).get("base_url")}}</td>
-					<td>{{results.summary.get(suite_summary).get("begin_time")}}</td>
-					<td>{{results.summary.get(suite_summary).get("end_time")}}</td>
-					<td>{{results.summary.get(suite_summary).get("duration")}}</td>
-					<td>{{results.summary.get(suite_summary).get("passed")}}</td>
-					<td>{{results.summary.get(suite_summary).get("failed")}}</td>
-					<td>{{results.summary.get(suite_summary).get("error")}}</td>
-					<td>{{results.summary.get(suite_summary).get("skip")}}</td>
-					<td>{{results.summary.get(suite_summary).get("all")}}</td>
+                    <td>{{results.summary.get(suite_summary).base_url}}</td>
+					<td>{{results.summary.get(suite_summary).begin_time}}</td>
+					<td>{{results.summary.get(suite_summary).end_time}}</td>
+					<td>{{results.summary.get(suite_summary).duration}}</td>
+					<td>{{results.summary.get(suite_summary).passed}}</td>
+					<td>{{results.summary.get(suite_summary).failed}}</td>
+					<td>{{results.summary.get(suite_summary).error}}</td>
+					<td>{{results.summary.get(suite_summary).skip}}</td>
+					<td>{{results.summary.get(suite_summary).all}}</td>
 					</tr>
 					{% endfor %}
 				</tbody>

@@ -9,6 +9,7 @@ import traceback
 
 logger = Log.getLogger(__name__)
 
+
 class HttpController(object):
     '''
     Http 请求 管理类

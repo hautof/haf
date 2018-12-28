@@ -7,7 +7,7 @@ from haf.busclient import BusClient
 from haf.case import HttpApiCase, BaseCase
 from haf.common.exception import FailRecorderException
 from haf.common.log import Log
-from haf.result import HttpApiResult, EndResult, Detail
+from haf.result import HttpApiResult, EndResult, Detail, Summary
 from haf.config import *
 from haf.utils import Utils
 from haf.ext.jinjia2report.report import Jinja2Report
@@ -35,8 +35,9 @@ class Recorder(Process):
         self.results.end_time = Utils.get_datetime_now()
         self.results.duration = Utils.get_date_result(self.results.begin_time, self.results.end_time)
         for suite_name in self.results.summary.keys():
-            for key in ("begin_time", "end_time", "duration"):
-                self.results.summary[suite_name][key] = getattr(self.results.details.get(suite_name), key)
+            self.results.summary[suite_name].begin_time = getattr(self.results.details.get(suite_name), "begin_time")
+            self.results.summary[suite_name].end_time = getattr(self.results.details.get(suite_name), "end_time")
+            self.results.summary[suite_name].duration = getattr(self.results.details.get(suite_name), "duration")
 
     def run(self):
         try:
@@ -83,31 +84,31 @@ class Recorder(Process):
     def on_case_pass(self, suite_name):
         self.results.passed += 1
         self.results.all += 1
-        self.results.summary[suite_name]["passed"] += 1
-        self.results.summary[suite_name]["all"] += 1
+        self.results.summary[suite_name].passed += 1
+        self.results.summary[suite_name].all += 1
 
     def on_case_skip(self, suite_name):
         self.results.skip += 1
         self.results.all += 1
-        self.results.summary[suite_name]["skip"] += 1
-        self.results.summary[suite_name]["all"] += 1
+        self.results.summary[suite_name].skip += 1
+        self.results.summary[suite_name].all += 1
 
     def on_case_fail(self, suite_name):
         self.results.failed += 1
         self.results.all += 1
-        self.results.summary[suite_name]["failed"] += 1
-        self.results.summary[suite_name]["all"] += 1
+        self.results.summary[suite_name].failed += 1
+        self.results.summary[suite_name].all += 1
 
     def on_case_error(self, suite_name):
         self.results.error += 1
         self.results.all += 1
-        self.results.summary[suite_name]["error"] += 1
-        self.results.summary[suite_name]["all"] += 1
+        self.results.summary[suite_name].error += 1
+        self.results.summary[suite_name].all += 1
 
     def check_case_result(self, result:HttpApiResult):
         suite_name = result.case.bench_name
         if suite_name not in self.results.summary.keys():
-            self.results.summary[suite_name] = {"passed": 0, "skip": 0, "failed": 0, "error": 0, "all": 0, "base_url":result.case.request.host_port}
+            self.results.summary[suite_name] = Summary(suite_name, result.case.request.host_port)
         if result.result == RESULT_SKIP:
             self.on_case_skip(suite_name)
         elif result.result == RESULT_PASS:
@@ -141,6 +142,7 @@ class Recorder(Process):
         self.publish_results()
 
     def publish_results(self):
+        logger.info(f"publish results now...")
         if self.publish_result.full():
             self.publish_result.get()
         self.publish_result.put(self.results)
