@@ -1,10 +1,7 @@
 # -*- encoding:utf-8 -*-
 
 import logging
-from logging import handlers
-import time
 
-#from haf.busclient import BusClient
 from haf.busclient import BusClient
 from haf.common.sigleton import SingletonType
 
@@ -15,7 +12,6 @@ class BaseLogger(metaclass=SingletonType):
         self.logger_name = logger_name
         logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')
         self.logger = logging.getLogger(self.logger_name)
-        #local_handler = logging.handlers.QueueHandler()
         self.bus_client = None
 
     def debug(self, msg):

@@ -25,7 +25,6 @@ class Loader(Process):
     def run(self):
         try:
             self.key = f"{self.pid}$%loader$%"
-            #self.bus_client = BusClient()
             logger.info(f"{self.key} start loader")
             self.case_queue = self.bus_client.get_case()
             while True:

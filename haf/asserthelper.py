@@ -4,6 +4,7 @@ from datetime import datetime
 from assertpy import assert_that
 from haf.common.log import Log
 from deepdiff import DeepDiff
+
 logger = Log.getLogger(__name__)
 
 
