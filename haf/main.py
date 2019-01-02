@@ -93,6 +93,23 @@ def main_args():
                 args.bus_server = [bytes(password, encoding='utf-8'), host, int(port)]
         if args.web_server:
             pass
+
+        cases = []
+        for case in args.case:
+            cases.append(case)
+        args.case = []
+        for path in cases:
+            if not path.endswith(".py") and not path.endswith(".yml") and not path.endswith(".json") and not path.endswith(".xlsx"):
+                if os.path.exists(path) and os.path.isdir(path):
+                    file_list = os.listdir(path)
+                    for f in file_list:
+                        if f.startswith("test_") and (f.endswith(".py") or f.endswith(".yml") or f.endswith(".json") or f.endswith(".xlsx")):
+                            args.case.append(os.path.join(path, f))
+                else:
+                    print("found wrong case path ...")
+            else:
+                args.case.append(path)
+
         print(args)
         main_program.run(args)
     else:
