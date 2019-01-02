@@ -1,3 +1,7 @@
+> version 2.2.b
+
+- add new reprot html template
+
 > version 2.0.3
 
 - complete @ support

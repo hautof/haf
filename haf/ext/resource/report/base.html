@@ -12,6 +12,84 @@
         {% include "js/base.js" %}
         {% include "js/jquery.min.js" %}
         {% include "js/bootstrap.min.js" %}
+
+		function showElementOnly(id){
+        	document.getElementById(id).style.display = "block";
+		}
+
+		function showNow(id){
+			console.log(id)
+        	document.getElementById(id).style.display = "table-row";
+		}
+
+		function hideNow(id){
+			console.log(id)
+        	document.getElementById(id).style.display = "none";
+		}
+
+		function dealstatus(status, all_data){
+			console.log(status);
+			console.log(all_data);
+			now_a = [];
+			now_b = [];
+			if (status == "pass"){
+				now_a = ["pass"];
+				now_b = ["failed", "skiped", "error"];
+			} else if (status == "failed") {
+				now_a = ["failed"];
+				now_b = ["pass", "skiped", "error"];
+			} else if (status == "skiped") {
+				now_a = ["skiped"];
+				now_b = ["pass", "failed", "error"];
+			} else if (status == "error") {
+				now_a = ["error"];
+				now_b = ["pass", "failed", "skiped"];
+			} else if (status == "all") {
+				now_a = ["pass", "failed", "error", "skiped"];
+				now_b = [];
+			}
+			for(var j=0; j<now_a.length; j++){
+				now_status = all_data[now_a[j]];
+				for(var i=0; i<now_status.length; i++){
+					console.log(now_status[i]);
+					showNow(now_status[i]);
+				}
+			}
+			for(var i=0; i<now_b.length; i++){
+				now_status_b = all_data[now_b[i]];
+				for(var j=0; j<now_status_b.length; j++){
+					console.log("hide " + now_status_b[j]);
+					hideNow(now_status_b[j]);
+				}
+			}
+
+		}
+
+		function showElements(suite, status){
+			showElementOnly(suite);
+			all_data = {};
+			{% for suite in results.details.keys() %}
+			all_data['{{suite}}'] = {"pass": new Array(), "failed": new Array(), "skiped": new Array(), "error": new Array()}
+			{% for case in results.details.get(suite).cases %}
+			{% set id='{}.{}.{}.{}'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
+			{% if case.result == 50 %}
+				all_data['{{suite}}']["pass"].push('{{id}}');
+			{% endif %}
+			{% if case.result == 51 %}
+				all_data['{{suite}}']["failed"].push('{{id}}');
+			{% endif %}
+			{% if case.result == 52 %}
+				all_data['{{suite}}']["skiped"].push('{{id}}');
+			{% endif %}
+			{% if case.result == 53 %}
+				all_data['{{suite}}']["error"].push('{{id}}');
+			{% endif %}
+			{% endfor %}
+			{% endfor %}
+			console.log(all_data);
+			dealstatus(status, all_data[suite]);
+		}
+
     </script>
 
 	<script language="javascript">
@@ -74,10 +152,10 @@
 								<td>running...</td>
 								{% endif %}
 								<td>{{results.duration}}</td>
-								<td>{{results.passed}}</td>
-								<td>{{results.failed}}</td>
-								<td>{{results.error}}</td>
-								<td>{{results.skip}}</td>
+								<td><a onclick="showElement('all_pass')">{{results.passed}}</a></td>
+								<td><a onclick="showElement('all_fail')">{{results.failed}}</a></td>
+								<td><a onclick="showElement('all_error')">{{results.error}}</a></td>
+								<td><a onclick="showElement('all_skip')">{{results.skip}}</a></td>
 								<td>{{results.all}}</td>
 							</tr>
 						</tbody>
@@ -107,17 +185,544 @@
 					<td>{{results.summary.get(suite_summary).begin_time}}</td>
 					<td>{{results.summary.get(suite_summary).end_time}}</td>
 					<td>{{results.summary.get(suite_summary).duration}}</td>
-					<td>{{results.summary.get(suite_summary).passed}}</td>
-					<td>{{results.summary.get(suite_summary).failed}}</td>
-					<td>{{results.summary.get(suite_summary).error}}</td>
-					<td>{{results.summary.get(suite_summary).skip}}</td>
-					<td>{{results.summary.get(suite_summary).all}}</td>
+					<td><a onclick="showElements('{{suite_summary}}', 'pass')">{{results.summary.get(suite_summary).passed}}</a></td>
+					<td><a onclick="showElements('{{suite_summary}}', 'failed')">{{results.summary.get(suite_summary).failed}}</a></td>
+					<td><a onclick="showElements('{{suite_summary}}', 'error')">{{results.summary.get(suite_summary).error}}</a></td>
+					<td><a onclick="showElements('{{suite_summary}}', 'skiped')">{{results.summary.get(suite_summary).skip}}</a></td>
+					<td><a onclick="showElements('{{suite_summary}}', 'all')">{{results.summary.get(suite_summary).all}}</a></td>
 					</tr>
 					{% endfor %}
 				</tbody>
 			</table>
 		</div>
 	</div>
+
+	<div class="row clearfix" style="display:none" id="all_pass">
+		{% block all_pass %}
+		<div class="col-md-12 column">
+			<div class="row clearfix">
+				<div class="col-md-12 column">
+					<nav class="navbar navbar-default" role="navigation">
+						<div class="navbar-header">
+							 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+								 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span>
+								 <span class="icon-bar"></span>
+							 </button>
+                             <a class="navbar-brand" style="color:green" onclick="showElement('all_pass')">All Passed</a>
+                        </div>
+					</nav>
+				</div>
+
+				<div class="jumbotron well">
+				<table class="table">
+				<thead>
+					<tr>
+						<th>Suite</th>
+						<th>Case Id</th>
+						<th>Params</th>
+						<th>Request</th>
+						<th>Response</th>
+						<th>Check</th>
+                        <th>Time</th>
+						<th>DependenceCase</th>
+                        <th>Runner</th>
+						<th>Result</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for suite in results.details.keys() %}
+					{% for case in results.details.get(suite).cases %}
+					{% set infos = ["success","danger", "", "warning"] %}
+                    {% set id='{}.{}.{}.{}.all-pass'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
+					{% set id_temp = '{}.{}.{}'.format(case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
+					{% if case.result == 50 %}
+					<tr class="{{infos[case.result-50]}}" id="{{id}}">
+						<td>{{suite}}</td>
+						<td>{{id_temp}}</td>
+						<td>
+							<li onclick="showElement('{{id}}-params')">Params</li>
+							<ul id="{{id}}-params" style="display:none">
+								<li>
+									<pre>{{case.case.param}}</pre>
+								</li>
+							</ul>
+						</td>
+						<td>
+                            <li>url : {{case.case.request.url}}</li>
+                            <li onclick="showElement('{{id}}-request')" ><a>all</a></li>
+                            <ul id="{{id}}-request" style="display:none">
+                                <li>header :
+									<pre>{{case.case.request.header}}</pre>
+								</li>
+                                <li>data :
+									<pre>{{case.case.request.data}}</pre>
+								</li>
+                            </ul>
+                        </td>
+						<td>
+                            {% set response=case.case.response.deserialize() %}
+                            <li >code : {{response.get("code")}}</li>
+                            <li onclick="showElement('{{id}}-response')" ><a>all</a></li>
+                            <ul id="{{id}}-response" style="display:none">
+                                <li style="hidden:none">
+									header :
+									<pre>{{response.get("header")}}</pre>
+								</li>
+                                <li style="hidden:none">
+									body :
+									<pre>{{response.get("body")}}</pre>
+								</li>
+                            </ul>
+                        </td>
+						<td>
+                            {% set check1=case.result_check_response %}
+                            <li onclick="showElement('{{id}}-response_check')"><a>response check</a></li>
+                            <ul id="{{id}}-response_check" style="display:none">
+                                <li>result:{{check1}}</li>
+								<li>code check:
+									<pre>{{case.result_check_response[0]}}</pre>
+								</li>
+                                <li><a href="file:///{{case.log_dir}}">body check: {{case.result_check_response[1]}}</a></li>
+                            </ul>
+							{% set check2=case.result_check_sql_response %}
+                            <li onclick="showElement('{{id}}.sql_check')"><a>sql check</a></li>
+                            <ul id="{{id}}.sql_check" style="display:none">
+								<li>result:{{check2}}</li>
+								{% if case.case.sql_check_func != "" %}
+								<li>check func: {{case.case.expect.sql_check_func}}</li>
+								{% endif %}
+                            </ul>
+
+							<li onclick="showElement('{{id}}.run_error')"><a>run error</a></li>
+							<div id="{{id}}.run_error" style="display:none">
+								<pre> {{case.run_error}} </pre>
+							</div>
+                        </td>
+                        <td>
+                            <ul>
+                                <li> {{"beg {}".format(case.begin_time)}}</li>
+                                <li> {{"end {}".format(case.end_time)}}</li>
+                                <li> {{"dur {}".format(case.duration)}}</li>
+                            </ul>
+                        </td>
+						<td>
+                            <ul>
+                                {% for dep in case.case.dependent %}
+                                <li>{{dep}}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>{{case.runner}}</td>
+                        {% set result_group = ["PASS","FAIL","SKIP","ERROR" ] %}
+						<td>{{result_group[case.result-50]}}</td>
+					</tr>
+					{% endif %}
+					{% endfor %}
+					{% endfor %}
+
+				</tbody>
+				</table>
+				</div>
+			</div>
+		</div>
+		{% endblock %}
+	</div>
+
+
+	<div class="row clearfix" style="display:none" id="all_fail">
+		{% block all_fail %}
+		<div class="col-md-12 column">
+			<div class="row clearfix">
+				<div class="col-md-12 column">
+					<nav class="navbar navbar-default" role="navigation">
+						<div class="navbar-header">
+							 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+								 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span>
+								 <span class="icon-bar"></span>
+							 </button>
+                             <a class="navbar-brand" style="color:red" onclick="showElement('all_fail')">All Failed</a>
+                        </div>
+					</nav>
+				</div>
+
+				<div class="jumbotron well">
+				<table class="table">
+				<thead>
+					<tr>
+						<th>Suite</th>
+						<th>Case Id</th>
+						<th>Params</th>
+						<th>Request</th>
+						<th>Response</th>
+						<th>Check</th>
+                        <th>Time</th>
+						<th>DependenceCase</th>
+                        <th>Runner</th>
+						<th>Result</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for suite in results.details.keys() %}
+					{% for case in results.details.get(suite).cases %}
+					{% set infos = ["success","danger", "", "warning"] %}
+                    {% set id='{}.{}.{}.{}.all-fail'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
+					{% set id_temp = '{}.{}.{}'.format(case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
+					{% if case.result == 51 %}
+					<tr class="{{infos[case.result-50]}}" id="{{id}}">
+						<td>{{suite}}</td>
+						<td>{{id_temp}}</td>
+						<td>
+							<li onclick="showElement('{{id}}-params')">Params</li>
+							<ul id="{{id}}-params" style="display:none">
+								<li>
+									<pre>{{case.case.param}}</pre>
+								</li>
+							</ul>
+						</td>
+						<td>
+                            <li>url : {{case.case.request.url}}</li>
+                            <li onclick="showElement('{{id}}-request')" ><a>all</a></li>
+                            <ul id="{{id}}-request" style="display:none">
+                                <li>header :
+									<pre>{{case.case.request.header}}</pre>
+								</li>
+                                <li>data :
+									<pre>{{case.case.request.data}}</pre>
+								</li>
+                            </ul>
+                        </td>
+						<td>
+                            {% set response=case.case.response.deserialize() %}
+                            <li >code : {{response.get("code")}}</li>
+                            <li onclick="showElement('{{id}}-response')" ><a>all</a></li>
+                            <ul id="{{id}}-response" style="display:none">
+                                <li style="hidden:none">
+									header :
+									<pre>{{response.get("header")}}</pre>
+								</li>
+                                <li style="hidden:none">
+									body :
+									<pre>{{response.get("body")}}</pre>
+								</li>
+                            </ul>
+                        </td>
+						<td>
+                            {% set check1=case.result_check_response %}
+                            <li onclick="showElement('{{id}}-response_check')"><a>response check</a></li>
+                            <ul id="{{id}}-response_check" style="display:none">
+                                <li>result:{{check1}}</li>
+								<li>code check:
+									<pre>{{case.result_check_response[0]}}</pre>
+								</li>
+                                <li><a href="file:///{{case.log_dir}}">body check: {{case.result_check_response[1]}}</a></li>
+                            </ul>
+							{% set check2=case.result_check_sql_response %}
+                            <li onclick="showElement('{{id}}.sql_check')"><a>sql check</a></li>
+                            <ul id="{{id}}.sql_check" style="display:none">
+								<li>result:{{check2}}</li>
+								{% if case.case.sql_check_func != "" %}
+								<li>check func: {{case.case.expect.sql_check_func}}</li>
+								{% endif %}
+                            </ul>
+
+							<li onclick="showElement('{{id}}.run_error')"><a>run error</a></li>
+							<div id="{{id}}.run_error" style="display:none">
+								<pre> {{case.run_error}} </pre>
+							</div>
+                        </td>
+                        <td>
+                            <ul>
+                                <li> {{"beg {}".format(case.begin_time)}}</li>
+                                <li> {{"end {}".format(case.end_time)}}</li>
+                                <li> {{"dur {}".format(case.duration)}}</li>
+                            </ul>
+                        </td>
+						<td>
+                            <ul>
+                                {% for dep in case.case.dependent %}
+                                <li>{{dep}}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>{{case.runner}}</td>
+                        {% set result_group = ["PASS","FAIL","SKIP","ERROR" ] %}
+						<td>{{result_group[case.result-50]}}</td>
+					</tr>
+					{% endif %}
+					{% endfor %}
+					{% endfor %}
+
+				</tbody>
+				</table>
+				</div>
+			</div>
+		</div>
+		{% endblock %}
+	</div>
+
+
+	<div class="row clearfix" style="display:none" id="all_skip">
+		{% block all_skip %}
+		<div class="col-md-12 column">
+			<div class="row clearfix">
+				<div class="col-md-12 column">
+					<nav class="navbar navbar-default" role="navigation">
+						<div class="navbar-header">
+							 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+								 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span>
+								 <span class="icon-bar"></span>
+							 </button>
+                             <a class="navbar-brand" style="color:black" onclick="showElement('all_skip')">All Skip</a>
+                        </div>
+					</nav>
+				</div>
+
+				<div class="jumbotron well">
+				<table class="table">
+				<thead>
+					<tr>
+						<th>Suite</th>
+						<th>Case Id</th>
+						<th>Params</th>
+						<th>Request</th>
+						<th>Response</th>
+						<th>Check</th>
+                        <th>Time</th>
+						<th>DependenceCase</th>
+                        <th>Runner</th>
+						<th>Result</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for suite in results.details.keys() %}
+					{% for case in results.details.get(suite).cases %}
+					{% set infos = ["success","danger", "", "warning"] %}
+                    {% set id='{}.{}.{}.{}.all-skip'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
+					{% set id_temp = '{}.{}.{}'.format(case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
+					{% if case.result == 52 %}
+					<tr class="{{infos[case.result-50]}}" id="{{id}}">
+						<td>{{suite}}</td>
+						<td>{{id_temp}}</td>
+						<td>
+							<li onclick="showElement('{{id}}-params')">Params</li>
+							<ul id="{{id}}-params" style="display:none">
+								<li>
+									<pre>{{case.case.param}}</pre>
+								</li>
+							</ul>
+						</td>
+						<td>
+                            <li>url : {{case.case.request.url}}</li>
+                            <li onclick="showElement('{{id}}-request')" ><a>all</a></li>
+                            <ul id="{{id}}-request" style="display:none">
+                                <li>header :
+									<pre>{{case.case.request.header}}</pre>
+								</li>
+                                <li>data :
+									<pre>{{case.case.request.data}}</pre>
+								</li>
+                            </ul>
+                        </td>
+						<td>
+                            {% set response=case.case.response.deserialize() %}
+                            <li >code : {{response.get("code")}}</li>
+                            <li onclick="showElement('{{id}}-response')" ><a>all</a></li>
+                            <ul id="{{id}}-response" style="display:none">
+                                <li style="hidden:none">
+									header :
+									<pre>{{response.get("header")}}</pre>
+								</li>
+                                <li style="hidden:none">
+									body :
+									<pre>{{response.get("body")}}</pre>
+								</li>
+                            </ul>
+                        </td>
+						<td>
+                            {% set check1=case.result_check_response %}
+                            <li onclick="showElement('{{id}}-response_check')"><a>response check</a></li>
+                            <ul id="{{id}}-response_check" style="display:none">
+                                <li>result:{{check1}}</li>
+								<li>code check:
+									<pre>{{case.result_check_response[0]}}</pre>
+								</li>
+                                <li><a href="file:///{{case.log_dir}}">body check: {{case.result_check_response[1]}}</a></li>
+                            </ul>
+							{% set check2=case.result_check_sql_response %}
+                            <li onclick="showElement('{{id}}.sql_check')"><a>sql check</a></li>
+                            <ul id="{{id}}.sql_check" style="display:none">
+								<li>result:{{check2}}</li>
+								{% if case.case.sql_check_func != "" %}
+								<li>check func: {{case.case.expect.sql_check_func}}</li>
+								{% endif %}
+                            </ul>
+
+							<li onclick="showElement('{{id}}.run_error')"><a>run error</a></li>
+							<div id="{{id}}.run_error" style="display:none">
+								<pre> {{case.run_error}} </pre>
+							</div>
+                        </td>
+                        <td>
+                            <ul>
+                                <li> {{"beg {}".format(case.begin_time)}}</li>
+                                <li> {{"end {}".format(case.end_time)}}</li>
+                                <li> {{"dur {}".format(case.duration)}}</li>
+                            </ul>
+                        </td>
+						<td>
+                            <ul>
+                                {% for dep in case.case.dependent %}
+                                <li>{{dep}}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>{{case.runner}}</td>
+                        {% set result_group = ["PASS","FAIL","SKIP","ERROR" ] %}
+						<td>{{result_group[case.result-50]}}</td>
+					</tr>
+					{% endif %}
+					{% endfor %}
+					{% endfor %}
+				</table>
+				</div>
+			</div>
+		</div>
+		{% endblock %}
+	</div>
+
+
+	<div class="row clearfix" style="display:none" id="all_error">
+		{% block all_error %}
+		<div class="col-md-12 column">
+			<div class="row clearfix">
+				<div class="col-md-12 column">
+					<nav class="navbar navbar-default" role="navigation">
+						<div class="navbar-header">
+							 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+								 <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span>
+								 <span class="icon-bar"></span>
+							 </button>
+                             <a class="navbar-brand" style="color:yellow" onclick="showElement('all_error')">All Error</a>
+                        </div>
+					</nav>
+				</div>
+
+				<div class="jumbotron well">
+				<table class="table">
+				<thead>
+					<tr>
+						<th>Suite</th>
+						<th>Case Id</th>
+						<th>Params</th>
+						<th>Request</th>
+						<th>Response</th>
+						<th>Check</th>
+                        <th>Time</th>
+						<th>DependenceCase</th>
+                        <th>Runner</th>
+						<th>Result</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for suite in results.details.keys() %}
+					{% for case in results.details.get(suite).cases %}
+					{% set infos = ["success","danger", "", "warning"] %}
+                    {% set id='{}.{}.{}.{}.all-error'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
+					{% set id_temp = '{}.{}.{}'.format(case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
+					{% if case.result == 53 %}
+					<tr class="{{infos[case.result-50]}}" id="{{id}}">
+						<td>{{suite}}</td>
+						<td>{{id_temp}}</td>
+						<td>
+							<li onclick="showElement('{{id}}-params')">Params</li>
+							<ul id="{{id}}-params" style="display:none">
+								<li>
+									<pre>{{case.case.param}}</pre>
+								</li>
+							</ul>
+						</td>
+						<td>
+                            <li>url : {{case.case.request.url}}</li>
+                            <li onclick="showElement('{{id}}-request')" ><a>all</a></li>
+                            <ul id="{{id}}-request" style="display:none">
+                                <li>header :
+									<pre>{{case.case.request.header}}</pre>
+								</li>
+                                <li>data :
+									<pre>{{case.case.request.data}}</pre>
+								</li>
+                            </ul>
+                        </td>
+						<td>
+                            {% set response=case.case.response.deserialize() %}
+                            <li >code : {{response.get("code")}}</li>
+                            <li onclick="showElement('{{id}}-response')" ><a>all</a></li>
+                            <ul id="{{id}}-response" style="display:none">
+                                <li style="hidden:none">
+									header :
+									<pre>{{response.get("header")}}</pre>
+								</li>
+                                <li style="hidden:none">
+									body :
+									<pre>{{response.get("body")}}</pre>
+								</li>
+                            </ul>
+                        </td>
+						<td>
+                            {% set check1=case.result_check_response %}
+                            <li onclick="showElement('{{id}}-response_check')"><a>response check</a></li>
+                            <ul id="{{id}}-response_check" style="display:none">
+                                <li>result:{{check1}}</li>
+								<li>code check:
+									<pre>{{case.result_check_response[0]}}</pre>
+								</li>
+                                <li><a href="file:///{{case.log_dir}}">body check: {{case.result_check_response[1]}}</a></li>
+                            </ul>
+							{% set check2=case.result_check_sql_response %}
+                            <li onclick="showElement('{{id}}.sql_check')"><a>sql check</a></li>
+                            <ul id="{{id}}.sql_check" style="display:none">
+								<li>result:{{check2}}</li>
+								{% if case.case.sql_check_func != "" %}
+								<li>check func: {{case.case.expect.sql_check_func}}</li>
+								{% endif %}
+                            </ul>
+
+							<li onclick="showElement('{{id}}.run_error')"><a>run error</a></li>
+							<div id="{{id}}.run_error" style="display:none">
+								<pre> {{case.run_error}} </pre>
+							</div>
+                        </td>
+                        <td>
+                            <ul>
+                                <li> {{"beg {}".format(case.begin_time)}}</li>
+                                <li> {{"end {}".format(case.end_time)}}</li>
+                                <li> {{"dur {}".format(case.duration)}}</li>
+                            </ul>
+                        </td>
+						<td>
+                            <ul>
+                                {% for dep in case.case.dependent %}
+                                <li>{{dep}}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>{{case.runner}}</td>
+                        {% set result_group = ["PASS","FAIL","SKIP","ERROR" ] %}
+						<td>{{result_group[case.result-50]}}</td>
+					</tr>
+					{% endif %}
+					{% endfor %}
+					{% endfor %}
+
+				</tbody>
+				</table>
+				</div>
+			</div>
+		</div>
+		{% endblock %}
+	</div>
+
+
 	<div class="row clearfix">
 		{% block suites %}
 		{% for suite in results.details.keys() %}
@@ -132,6 +737,14 @@
 							 </button>
                              <a class="navbar-brand" onclick="showElement('{{suite}}')">{{suite}}</a>
                         </div>
+
+						 <ul class="nav navbar-nav navbar-right">
+							 <li><a onclick="showElements('{{suite}}', 'pass')" style="color:green">PASS</a></li>
+							 <li><a onclick="showElements('{{suite}}', 'failed')" style="color:red">FAILED</a></li>
+							 <li><a onclick="showElements('{{suite}}', 'skiped')" style="color:black">SKIPED</a></li>
+							 <li><a onclick="showElements('{{suite}}', 'error')" style="color:#FF00FF">ERROR</a></li>
+							 <li><a onclick="showElements('{{suite}}', 'all')" style="color:grey">ALL</a></li>
+						 </ul>
 					</nav>
 				</div>
 
@@ -156,6 +769,7 @@
                     {% set id='{}.{}.{}.{}'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
 					{% set id_temp = '{}.{}.{}'.format(case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
 					<tr class="{{infos[case.result-50]}}" id="{{id}}">
+						<td>{{suite}}</td>
 						<td>{{id_temp}}</td>
 						<td>
 							<li onclick="showElement('{{id}}-params')">Params</li>
@@ -167,8 +781,8 @@
 						</td>
 						<td>
                             <li>url : {{case.case.request.url}}</li>
-                            <li onclick="showElement('{{case.case.request}}')" ><a>all</a></li>
-                            <ul id="{{case.case.request}}" style="display:none">
+                            <li onclick="showElement('{{id}}-request')" ><a>all</a></li>
+                            <ul id="{{id}}-request" style="display:none">
                                 <li>header :
 									<pre>{{case.case.request.header}}</pre>
 								</li>
@@ -180,8 +794,8 @@
 						<td>
                             {% set response=case.case.response.deserialize() %}
                             <li >code : {{response.get("code")}}</li>
-                            <li onclick="showElement('{{case.case.response}}')" ><a>all</a></li>
-                            <ul id="{{case.case.response}}" style="display:none">
+                            <li onclick="showElement('{{id}}-response')" ><a>all</a></li>
+                            <ul id="{{id}}-response" style="display:none">
                                 <li style="hidden:none">
 									header :
 									<pre>{{response.get("header")}}</pre>
@@ -194,8 +808,8 @@
                         </td>
 						<td>
                             {% set check1=case.result_check_response %}
-                            <li onclick="showElement('{{'{}.{}.{}.{}.response_check'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}')"><a>response check</a></li>
-                            <ul id="{{'{}.{}.{}.{}.response_check'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}" style="display:none">
+                            <li onclick="showElement('{{id}}-response_check')"><a>response check</a></li>
+                            <ul id="{{id}}-response_check" style="display:none">
                                 <li>result:{{check1}}</li>
 								<li>code check:
 									<pre>{{case.result_check_response[0]}}</pre>
@@ -203,16 +817,16 @@
                                 <li><a href="file:///{{case.log_dir}}">body check: {{case.result_check_response[1]}}</a></li>
                             </ul>
 							{% set check2=case.result_check_sql_response %}
-                            <li onclick="showElement('{{'{}.{}.{}.{}.sql_check'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}')"><a>sql check</a></li>
-                            <ul id="{{'{}.{}.{}.{}.sql_check'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}" style="display:none">
+                            <li onclick="showElement('{{id}}.sql_check')"><a>sql check</a></li>
+                            <ul id="{{id}}.sql_check" style="display:none">
 								<li>result:{{check2}}</li>
 								{% if case.case.sql_check_func != "" %}
 								<li>check func: {{case.case.expect.sql_check_func}}</li>
 								{% endif %}
                             </ul>
 
-							<li onclick="showElement('{{'{}.{}.{}.{}.run_error'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}')"><a>run error</a></li>
-							<div id="{{'{}.{}.{}.{}.run_error'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name)}}" style="display:none">
+							<li onclick="showElement('{{id}}.run_error')"><a>run error</a></li>
+							<div id="{{id}}.run_error" style="display:none">
 								<pre> {{case.run_error}} </pre>
 							</div>
                         </td>
