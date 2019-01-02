@@ -99,12 +99,14 @@ def main_args():
             cases.append(case)
         args.case = []
         for path in cases:
-            if not path.endswith(".py") and not path.endswith(".yml") and not path.endswith(".json") or not path.endswith(".xlsx"):
-                if os.path.exists(path):
+            if not path.endswith(".py") and not path.endswith(".yml") and not path.endswith(".json") and not path.endswith(".xlsx"):
+                if os.path.exists(path) and os.path.isdir(path):
                     file_list = os.listdir(path)
                     for f in file_list:
                         if f.startswith("test_") and (f.endswith(".py") or f.endswith(".yml") or f.endswith(".json") or f.endswith(".xlsx")):
                             args.case.append(os.path.join(path, f))
+                else:
+                    print("found wrong case path ...")
             else:
                 args.case.append(path)
 
