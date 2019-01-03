@@ -6,10 +6,13 @@
 [![Documentation Status](https://readthedocs.org/projects/haf/badge/?version=latest)](https://haf.readthedocs.io/en/latest/?badge=latest)
                 
 
+![report](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/report.gif)
+![all](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/all.gif)
+
+
 ### new features
 
-
-- based on local test runner 
+- based on local test runners 
 
 - support xlsx,json,yml,py cases
 
@@ -21,10 +24,8 @@
 
 - web-server support restful api based on flask
 
-- only mode : loader/runner/recorder/webserver/bus support
+- only mode : loader/runner/recorder/webserver/bus/logger support
 
-![report](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/report.gif)
-![all](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/all.gif)
 
 ### How to get it
 
@@ -56,9 +57,10 @@
 ```json
     {
       "config":{
+        "name": "test",
         "run": {
           "log": {
-            "log_path": "D:/workspace/mine/python/haf/data"
+            "log_path": "./data"
           },
           "bus": {
             "only": false,
@@ -67,20 +69,20 @@
             "auth_key": ""
           },
           "report": {
-            "report_path": "D:/workspace/mine/python/haf/data/report.html"
+            "report_path": "./data/report.html"
           },
           "case": [
             {
-              "case_path": "D:/workspace/mine/python/haf/testcases/test.xlsx"
+              "case_path": "./testcases/test.xlsx"
             },
             {
-              "case_path": "D:/workspace/mine/python/haf/testcases/test2.json"
+              "case_path": "./testcases/test2.json"
             },
             {
-              "case_path": "D:/workspace/mine/python/haf/testcases/test1.xlsx"
+              "case_path": "./testcases/test1.xlsx"
             },
             {
-              "case_path": "D:/workspace/mine/python/haf/testcases/test3.yml"
+              "case_path": "./testcases/test3.yml"
             }
           ],
           "runner":{
@@ -106,7 +108,7 @@
 
 ##### create testcase
 
-- create xlsx/json/yml file with template in testcases/
+- create xlsx/json/yml/py file with template in testcases/
 
 ##### run
 
@@ -185,7 +187,7 @@
 
 > [doc url](https://github.com/tsbxmw/haf/blob/master/docs/design.md)
 
-> [read the doc](https://haf-doc.readthedocs.io/en/dev-2.1.0/)
+> [read the doc](https://haf-doc.readthedocs.io/en/dev-2.2.0/)
 
 > [wiki home](https://github.com/tsbxmw/haf/wiki)
 
