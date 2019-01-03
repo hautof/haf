@@ -1,3 +1,12 @@
+> version 2.2rc2
+
+- add name support
+
+> version 2.2rc1
+
+- fix some bugs
+- update report template
+
 > version 2.2.b
 
 - add new reprot html template

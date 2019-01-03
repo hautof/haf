@@ -5,7 +5,6 @@ from haf.config import *
 PACKAGE_NAME = "haf"
 
 requires = [
-    'paramiko',
     'requests',
     'openpyxl',
     'pymysql',
