@@ -26,6 +26,8 @@ def main_args():
                                      help="run cases wiht -case, path or file would be ok")
     sub_run_arg_program.add_argument("--runner-count", "-rc", dest="runner_count", type=int, default=1,
                                      help="runner count, default is 1 runner to run cases, max would be cpus*2")
+    sub_run_arg_program.add_argument("--name", "-name", dest="name", type=str, default="AutoTest",
+                                     help="test name, defautl is autotest")
     sub_run_arg_program.add_argument("--bus-server", "-bs", dest="bus_server", type=str, default=None,
                                      help="""default is localhost to run bus server;
                                              if is ip or domain, would not run local bus-server, and using ip to connect""")
@@ -67,17 +69,19 @@ def main_args():
                 sys.exit(-1)
             try:
                 with open(args.config, 'r') as f:
-                    config = json.load(f).get("config").get("run")
-                    args.log_dir = config.get("log").get("log_path")
-                    bus_config = config.get("bus")
+                    config = json.load(f).get("config")
+                    config_run = config.get("run")
+                    args.name = config.get("name")
+                    args.log_dir = config_run.get("log").get("log_path")
+                    bus_config = config_run.get("bus")
                     args.only_bus = bus_config.get("only")
                     args.bus_server = None if bus_config.get("host") is None or bus_config.get("host")=="" else f"{bus_config.get('auth_key')}@{bus_config.get('host')}:{bus_config.get('host')}"
-                    args.report_output_dir = config.get("report").get("report_path")
-                    args.case = [ x.get("case_path") for x in config.get("case") ]
-                    runner_config = config.get("runner")
+                    args.report_output_dir = config_run.get("report").get("report_path")
+                    args.case = [ x.get("case_path") for x in config_run.get("case") ]
+                    runner_config = config_run.get("runner")
                     args.runner_count = runner_config.get("count")
                     args.only_runner = runner_config.get("only")
-                    args.web_server = config.get("web_server").get("run")
+                    args.web_server = config_run.get("web_server").get("run")
             except Exception as e:
                 print(e)
                 sys.exit(-1)

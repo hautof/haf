@@ -113,7 +113,7 @@ class Program(object):
         try:
             self.args = args
             self._init_logging_module(args)
-            self.case_name = Utils.get_case_name()
+            self.case_name = Utils.get_case_name(self.args.name)
             runner_count = args.runner_count if args.runner_count else 1
             self.only_bus(args)
 
@@ -203,9 +203,9 @@ class Program(object):
         case_handler = self.bus_client.get_case()
         while not case_handler.empty():
             case_handler.get()
-        self._start_runner(self.args.runner_count if self.args.runner_count else 1, f"{self.args.log_dir}/{self.case_name}")
+        self._start_runner(self.args.runner_count if self.args.runner_count else 1, f"{self.args.log_dir}/{self.case_name}", self.bus_client)
         self._start_loader(1, self.bus_client)
-        self._start_recorder(self.args.runner_count, self.args.report_output_dir, f"{self.args.log_dir}/{self.case_name}")
+        self._start_recorder(self.bus_client, self.args.runner_count, self.args.report_output_dir, f"{self.args.log_dir}/{self.case_name}")
         self.start_main()
         self.put_loader_msg(self.args)
         self.stop_main()
