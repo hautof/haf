@@ -739,11 +739,11 @@
                         </div>
 
 						 <ul class="nav navbar-nav navbar-right">
-							 <li><a onclick="showElements('{{suite}}', 'pass')" style="color:green">PASS</a></li>
-							 <li><a onclick="showElements('{{suite}}', 'failed')" style="color:red">FAILED</a></li>
-							 <li><a onclick="showElements('{{suite}}', 'skiped')" style="color:black">SKIPED</a></li>
-							 <li><a onclick="showElements('{{suite}}', 'error')" style="color:#FF00FF">ERROR</a></li>
-							 <li><a onclick="showElements('{{suite}}', 'all')" style="color:grey">ALL</a></li>
+							 <li><a onclick="showElements('{{suite}}', 'pass')" style="color:green">PASS-{{results.summary.get(suite).passed}}</a></li>
+							 <li><a onclick="showElements('{{suite}}', 'failed')" style="color:red">FAILED-{{results.summary.get(suite).failed}}</a></li>
+							 <li><a onclick="showElements('{{suite}}', 'skiped')" style="color:black">SKIPED-{{results.summary.get(suite).skip}}</a></li>
+							 <li><a onclick="showElements('{{suite}}', 'error')" style="color:#FF00FF">ERROR-{{results.summary.get(suite).error}}</a></li>
+							 <li><a onclick="showElements('{{suite}}', 'all')" style="color:grey">ALL-{{results.summary.get(suite).all}}</a></li>
 						 </ul>
 					</nav>
 				</div>
@@ -769,7 +769,6 @@
                     {% set id='{}.{}.{}.{}'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
 					{% set id_temp = '{}.{}.{}'.format(case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
 					<tr class="{{infos[case.result-50]}}" id="{{id}}">
-						<td>{{suite}}</td>
 						<td>{{id_temp}}</td>
 						<td>
 							<li onclick="showElement('{{id}}-params')">Params</li>
