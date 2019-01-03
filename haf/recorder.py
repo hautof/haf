@@ -16,9 +16,9 @@ logger = Log.getLogger(__name__)
 
 
 class Recorder(Process):
-    def __init__(self, runner_count:int=1, report_path:str="", case_name:str="", log_dir=""):
+    def __init__(self, bus_client: BusClient, runner_count: int=1,report_path:str="", case_name:str="", log_dir=""):
         super().__init__()
-        self.bus_client = None
+        self.bus_client = bus_client
         self.daemon = True
         self.results = EndResult(f"AutoTest-{case_name}")
         self.runner_count = runner_count
@@ -44,7 +44,7 @@ class Recorder(Process):
             self.on_recorder_start()
             self.recorder_key = f"{self.pid}$%recorder$%"
             logger.info(f"{self.recorder_key} start recorder ")
-            self.bus_client = BusClient()
+            #self.bus_client = BusClient()
             self.results_handler = self.bus_client.get_result()
             self.publish_result = self.bus_client.get_publish_result()
             while True:
