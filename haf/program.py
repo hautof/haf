@@ -113,7 +113,7 @@ class Program(object):
         try:
             self.args = args
             self._init_logging_module(args)
-            self.case_name = Utils.get_case_name()
+            self.case_name = Utils.get_case_name(self.args.name)
             runner_count = args.runner_count if args.runner_count else 1
             self.only_bus(args)
 

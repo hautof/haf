@@ -26,6 +26,8 @@ def main_args():
                                      help="run cases wiht -case, path or file would be ok")
     sub_run_arg_program.add_argument("--runner-count", "-rc", dest="runner_count", type=int, default=1,
                                      help="runner count, default is 1 runner to run cases, max would be cpus*2")
+    sub_run_arg_program.add_argument("--name", "-name", dest="name", type=str, default="AutoTest",
+                                     help="test name, defautl is autotest")
     sub_run_arg_program.add_argument("--bus-server", "-bs", dest="bus_server", type=str, default=None,
                                      help="""default is localhost to run bus server;
                                              if is ip or domain, would not run local bus-server, and using ip to connect""")

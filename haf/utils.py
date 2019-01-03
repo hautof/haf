@@ -369,7 +369,7 @@ class Utils(object):
 
 
     @staticmethod
-    def get_case_name():
+    def get_case_name(name: str):
         '''
         get datetime now to str
         :return: time now str
@@ -377,7 +377,7 @@ class Utils(object):
         current_time = time.time()
         local_time = time.localtime(current_time)
         time_temp = time.strftime("%Y-%m-%d-%H.%M", local_time)
-        return f"AutoTest-{time_temp}"
+        return f"AutoTest-{name}-{time_temp}"
 
     @staticmethod
     def jsontool(input):
