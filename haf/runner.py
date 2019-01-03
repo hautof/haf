@@ -21,10 +21,10 @@ logger = Log.getLogger(__name__)
 
 
 class Runner(Process):
-    def __init__(self, log_dir:str):
+    def __init__(self, log_dir: str, bus_client: BusClient):
         super().__init__()
         self.daemon = True
-        self.bus_client = None
+        self.bus_client = bus_client
         self.benchs = {}
         self.bench = None
         self.key = ""
@@ -90,7 +90,7 @@ class Runner(Process):
 
     def run(self):
         try:
-            self.bus_client = BusClient()
+            #self.bus_client = BusClient()
             self.runner_key = f"{self.pid}$%runner$%"
             self.runner["key"] = f"{self.pid}"
             logger.info(f"{self.runner_key} start runner")

@@ -5,7 +5,7 @@ from datetime import datetime
 from openpyxl import load_workbook
 from haf.apihelper import Request, Response
 from haf.case import BaseCase
-from haf.common.database import MysqlTool, SqlServerTool
+from haf.common.database import MysqlTool, SqlServerTool, SQLConfig
 from haf.common.exception import FailLoadCaseFromPyException
 from haf.common.log import Log
 from haf.common.httprequest import HttpController
@@ -18,13 +18,13 @@ logger = Log.getLogger(__name__)
 class Utils(object):
 
     @staticmethod
-    def sql_execute(sqlconfig, sqlscript, **kwargs):
+    def sql_execute(sqlconfig: SQLConfig, sqlscript: str, **kwargs)->list:
         '''
-        连接到数据库并执行脚本
-        :参数:
-
-        * testcase ： testcase 实例
-        * caseparam : 执行的 case 中对应的 脚本名称
+        sql_execute : connect to sqlconfig & execute sqlscript
+        :param sqlconfig: SQLConfig
+        :param sqlscript: sql script
+        :param kwargs: others params
+        :return: sql execute data
         '''
         key = kwargs.get("key")
         func_obj = None
@@ -50,10 +50,11 @@ class Utils(object):
                 func_obj.close()
 
     @staticmethod
-    def get_rows_from_xlsx(filename):
+    def get_rows_from_xlsx(filename: str)->dict:
         '''
-        :param filename: 文件名
-        :return:
+        get_rows_from_xlsx : read rows from xlsx file (filename)
+        :param filename: xlsx filename
+        :return: dict
         '''
         if not filename.endswith("xlsx"):
             return {}
@@ -116,7 +117,12 @@ class Utils(object):
             logger.error(e)
 
     @staticmethod
-    def load_from_json(file_name):
+    def load_from_json(file_name: str)->dict:
+        '''
+        load_from_json : load json obj from file_name
+        :param file_name:
+        :return:
+        '''
         try:
             if os.path.exists(file_name):
                 f = open(file_name, 'r', encoding='utf-8')
@@ -130,7 +136,12 @@ class Utils(object):
             logger.error(e)
 
     @staticmethod
-    def load_from_yml(file_name):
+    def load_from_yml(file_name: str)-> dict:
+        '''
+        load_from_yml : load dict from yml file (file_name)
+        :param file_name:
+        :return:
+        '''
         try:
             if os.path.exists(file_name):
                 f = open(file_name, 'r', encoding='utf-8')
@@ -149,7 +160,12 @@ class Utils(object):
         return path, file
 
     @staticmethod
-    def get_class_from_py(module):
+    def get_class_from_py(module: str)->list:
+        '''
+        get_class_from_py : get classes from py file (module)
+        :param module: str, module file name
+        :return: list [classes]
+        '''
         built_in_list = ['__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__']
         attr_list = ['AttrNoneList', 'bench_name', 'error_msg', 'expect', 'id', 'mark', 'name', 'run', 'subid', 'type']
         attr_none_list = ["BaseCase", "PyCase", "HttpApiCase"]
@@ -163,7 +179,12 @@ class Utils(object):
         return class_list if len(class_list) > 0 else None
 
     @staticmethod
-    def get_case_from_class(class_list):
+    def get_case_from_class(class_list: list)->dict:
+        '''
+        get_case_from_class : get case from class of class_list
+        :param class_list: list
+        :return: dict
+        '''
         case_dict = {}
         for cl in class_list.keys():
             case_dict[cl] = []
@@ -193,7 +214,12 @@ class Utils(object):
         return case_dict
 
     @staticmethod
-    def load_dict_to_case(case_dict):
+    def load_dict_to_case(case_dict: dict):
+        '''
+        load_dict_to_case : load case from dict
+        :param case_dict:
+        :return:
+        '''
         cases = []
         id = 0
         name = ""
@@ -223,7 +249,12 @@ class Utils(object):
         return cases
 
     @staticmethod
-    def load_from_py(file_name):
+    def load_from_py(file_name: str)->dict:
+        '''
+        load_from_py : load from py
+        :param file_name: str, filename of python
+        :return: dict
+        '''
         try:
             py_config = {}
             py_config["config"] = []
@@ -312,7 +343,13 @@ class Utils(object):
         return timenow
 
     @staticmethod
-    def get_date_result(begin, end):
+    def get_date_result(begin: str, end: str)->int:
+        '''
+        get_date_result : get duration from begin to end
+        :param begin: str
+        :param end: str
+        :return: int
+        '''
         if begin is None or end is None:
             return 0
         try:

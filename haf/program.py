@@ -31,6 +31,11 @@ class Program(object):
         self.case_name = ""
 
     def _start_bus(self, local=True):
+        '''
+        _start_bus : start bus server with default config
+        :param local: bool, default is True
+        :return: None
+        '''
         if local:
             pass
         else:
@@ -38,20 +43,32 @@ class Program(object):
             self.bus_server.start()
             time.sleep(1)
 
-    def _start_loader(self, count, bus_client):
+    def _start_loader(self, count: int, bus_client: BusClient):
+        '''
+        _start_loader : start loader (count)
+        :param count: loader count
+        :param bus_client: bus client -> BusClient (connect to bus server)
+        :return: None
+        '''
         for x in range(count):
             loader = Loader(bus_client)
             loader.start()
             time.sleep(0.1)
 
-    def _start_runner(self, count, log_dir: str):
+    def _start_runner(self, count: int, log_dir: str, bus_client: BusClient):
+        '''
+        _start_runner : start runner (count)
+        :param count: runner count
+        :param log_dir: log
+        :return:
+        '''
         for x in range(count):
-            runner = Runner(log_dir)
+            runner = Runner(log_dir, bus_client)
             runner.start()
         time.sleep(0.5)
 
-    def _start_recorder(self, count: int=1, report_path: str="", log_dir: str=""):
-        recorder = Recorder(count, report_path, self.case_name, log_dir)
+    def _start_recorder(self, bus_client: BusClient, count: int=1, report_path: str="", log_dir: str=""):
+        recorder = Recorder(bus_client, count, report_path, self.case_name, log_dir)
         recorder.start()
         time.sleep(0.1)
 
@@ -107,16 +124,17 @@ class Program(object):
             self._init_system_logger(args.log_dir, self.bus_client)
             self._init_system_lock(args)
 
+            # only : module
             if args.only_loader:
                 self._start_loader(1, self.bus_client)
             elif args.only_runner:
-                self._start_runner(runner_count, f"{args.log_dir}/{self.case_name}")
+                self._start_runner(runner_count, f"{args.log_dir}/{self.case_name}", self.bus_client)
             elif args.only_recorder:
-                self._start_recorder(runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
+                self._start_recorder(self.bus_client, runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
             else:
                 self._start_loader(1, self.bus_client)
-                self._start_runner(runner_count, f"{args.log_dir}/{self.case_name}")
-                self._start_recorder(runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
+                self._start_runner(runner_count, f"{args.log_dir}/{self.case_name}", self.bus_client)
+                self._start_recorder(self.bus_client, runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
 
             self.start_main()
             self.put_loader_msg(args)

@@ -769,7 +769,6 @@
                     {% set id='{}.{}.{}.{}'.format(case.case.bench_name, case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
 					{% set id_temp = '{}.{}.{}'.format(case.case.ids.id, case.case.ids.subid, case.case.ids.name) %}
 					<tr class="{{infos[case.result-50]}}" id="{{id}}">
-						<td>{{suite}}</td>
 						<td>{{id_temp}}</td>
 						<td>
 							<li onclick="showElement('{{id}}-params')">Params</li>

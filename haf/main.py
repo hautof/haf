@@ -60,6 +60,7 @@ def main_args():
     main_program = Program()
 
     if args.all == "run":
+        # here : config <- file
         if args.config:
             if not os.path.exists(args.config):
                 print(f"config file {args.config} not found!")
@@ -86,6 +87,8 @@ def main_args():
                 args.case = [str(case) for case in args.case.split(",")]
         if args.runner_count:
             pass
+
+        # here : bus server <- password@host:port
         if args.bus_server:
             if "@" in args.bus_server and ":" in args.bus_server:
                 password, temp = args.bus_server.split("@")
@@ -94,6 +97,7 @@ def main_args():
         if args.web_server:
             pass
 
+        # here : case <- dir/file
         cases = []
         for case in args.case:
             cases.append(case)
