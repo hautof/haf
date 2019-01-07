@@ -57,7 +57,7 @@ LOG_PATH_DEFAULT = "D:\workspace\mine\python\haf\data"
 
 MAIN_VERSION = 2
 SUB_VERSION = 2
-FIX_VERSION = 'c2'
+FIX_VERSION = 0
 VERSION_TYPE = "dev"
 PLATFORM_VERSION = f"{VERSION_TYPE}-{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}"
 
@@ -67,7 +67,7 @@ BANNER_STRS = f"""
 (  )) | |__| |/ ___ \___| |___  
  \\\\/  |  __  || |__\ \__  ____| 
   '   | |  | ||_____\_\ | |   
-      |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}  |_|   
+      |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}   |_|   
 """
 
 BANNER_STRS_EXIT = f"""
@@ -76,5 +76,5 @@ BANNER_STRS_EXIT = f"""
 (  )) | |__| |/ ___ \___| |___  
  \\\\/  |  __  || |__\ \__  ____| 
   '   | |  | ||_____\_\ | |   
-      |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}  |_|       EXIT ...
+      |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}   |_|       EXIT ...
 """
