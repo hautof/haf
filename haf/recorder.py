@@ -20,7 +20,7 @@ class Recorder(Process):
         super().__init__()
         self.bus_client = bus_client
         self.daemon = True
-        self.results = EndResult(f"AutoTest-{case_name}")
+        self.results = EndResult(f"haf-{case_name}")
         self.runner_count = runner_count
         self.signal_end_count = 0
         self.report_path = report_path
