@@ -187,30 +187,32 @@ class Utils(object):
         '''
         case_dict = {}
         for cl in class_list.keys():
-            case_dict[cl] = []
+            case_dict[cl] = {}
+            case_dict[cl]["classes"] = []
             suites = class_list.get(cl)
             if suites is None:
                 raise FailLoadCaseFromPyException
             for suite in suites:
                 suite_dict = {}
                 for class_temp_key in suite.keys():
-                    suite_dict[class_temp_key] = []
+                    suite_dict[class_temp_key] = {"cases": [], "request": Request()}
                     class_temp = suite.get(class_temp_key)
                     for func_key in dir(class_temp):
                         func = getattr(class_temp, func_key)
                         func_temp = {}
                         if isinstance(func, test):
                             func_temp[func_key] = func
-                            suite_dict[class_temp_key].append(func_temp)
+                            suite_dict[class_temp_key]["cases"].append(func_temp)
                         elif isinstance(func, skip):
                             func_temp[func_key] = func
-                            suite_dict[class_temp_key].append(func_temp)
+                            suite_dict[class_temp_key]["cases"].append(func_temp)
                         elif inspect.isfunction(func):
                             if hasattr(func, "mark") and func.mark == "test":
                                 func_temp[func_key] = func
-                                suite_dict[class_temp_key].append(func_temp)
-
-                case_dict[cl].append(suite_dict)
+                                suite_dict[class_temp_key]["cases"].append(func_temp)
+                        elif isinstance(func, Request):
+                            suite_dict[class_temp_key]["request"] = func
+                case_dict[cl]["classes"].append(suite_dict)
         return case_dict
 
     @staticmethod
@@ -225,16 +227,18 @@ class Utils(object):
         name = ""
         for suites_key in case_dict.keys():
             suites = case_dict.get(suites_key)
-            for suite in suites:
+            for suite in suites.get("classes"):
                 for suite_key in suite.keys():
                     suite_temp = suite.get(suite_key)
                     id += 1
                     subid = 1
-                    for case in suite_temp:
+                    for case in suite_temp.get("cases"):
+
                         for key in case.keys():
                             case_temp = {"id": id, "subid": subid, "name": key, "run": case.get(key).run if hasattr(case.get(key), 'run') else False, "reason": case.get(key).reason if hasattr(case.get(key), 'reason') else None}
                             case_temp["func"] = key
                             case_temp["suite"] = suite_key
+                            case_temp["request"] = suite_temp.get("request", Request())
                             func = case.get(key)
                             if hasattr(func, "params"):
                                 for param in func.params:
