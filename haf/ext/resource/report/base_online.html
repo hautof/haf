@@ -161,41 +161,7 @@
 						</tbody>
 				</table>
 			</div>
-			<div>
-			<table class="table">
-				<thead>
-					<tr>
-						<th>Suite Name</th>
-                        <th>Base Url</th>
-						<th>Begin Time</th>
-						<th>End Time</th>
-						<th>Duration Time</th>
-						<th>Pass</th>
-						<th>Fail</th>
-						<th>Error</th>
-						<th>Skip</th>
-						<th>All</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for suite_summary in results.summary.keys() %}
-					<tr>
-					<td><a onclick="showElement('{{suite_summary}}')">{{suite_summary}}</a></td>
-                    <td>{{results.summary.get(suite_summary).base_url}}</td>
-					<td>{{results.summary.get(suite_summary).begin_time}}</td>
-					<td>{{results.summary.get(suite_summary).end_time}}</td>
-					<td>{{results.summary.get(suite_summary).duration}}</td>
-					<td><a onclick="showElements('{{suite_summary}}', 'pass')">{{results.summary.get(suite_summary).passed}}</a></td>
-					<td><a onclick="showElements('{{suite_summary}}', 'failed')">{{results.summary.get(suite_summary).failed}}</a></td>
-					<td><a onclick="showElements('{{suite_summary}}', 'error')">{{results.summary.get(suite_summary).error}}</a></td>
-					<td><a onclick="showElements('{{suite_summary}}', 'skiped')">{{results.summary.get(suite_summary).skip}}</a></td>
-					<td><a onclick="showElements('{{suite_summary}}', 'all')">{{results.summary.get(suite_summary).all}}</a></td>
-					</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		</div>
-	</div>
+
 
 	<div class="row clearfix" style="display:none" id="all_pass">
 		{% block all_pass %}
@@ -210,6 +176,10 @@
 							 </button>
                              <a class="navbar-brand" style="color:green" onclick="showElement('all_pass')">All Passed</a>
                         </div>
+						<ul class="nav navbar-nav navbar-right">
+							<li><a onclick="showElement('all_pass')" style="color:red"> Close </a></li>
+							<li><a></a></li>
+						</ul>
 					</nav>
 				</div>
 
@@ -342,6 +312,10 @@
 							 </button>
                              <a class="navbar-brand" style="color:red" onclick="showElement('all_fail')">All Failed</a>
                         </div>
+						<ul class="nav navbar-nav navbar-right">
+							<li><a onclick="showElement('all_fail')" style="color:red"> Close </a></li>
+							<li><a></a></li>
+						</ul>
 					</nav>
 				</div>
 
@@ -474,6 +448,10 @@
 							 </button>
                              <a class="navbar-brand" style="color:black" onclick="showElement('all_skip')">All Skip</a>
                         </div>
+						<ul class="nav navbar-nav navbar-right">
+							<li><a onclick="showElement('all_skip')" style="color:red"> Close </a></li>
+							<li><a></a></li>
+						</ul>
 					</nav>
 				</div>
 
@@ -604,6 +582,10 @@
 							 </button>
                              <a class="navbar-brand" style="color:yellow" onclick="showElement('all_error')">All Error</a>
                         </div>
+						<ul class="nav navbar-nav navbar-right">
+							<li><a onclick="showElement('all_error')" style="color:red"> Close </a></li>
+							<li><a></a></li>
+						</ul>
 					</nav>
 				</div>
 
@@ -720,8 +702,42 @@
 			</div>
 		</div>
 		{% endblock %}
+		</div>
+		<div>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Suite Name</th>
+						<th>Base Url</th>
+						<th>Begin Time</th>
+						<th>End Time</th>
+						<th>Duration Time</th>
+						<th>Pass</th>
+						<th>Fail</th>
+						<th>Error</th>
+						<th>Skip</th>
+						<th>All</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for suite_summary in results.summary.keys() %}
+					<tr>
+					<td><a onclick="showElement('{{suite_summary}}')">{{suite_summary}}</a></td>
+					<td>{{results.summary.get(suite_summary).base_url}}</td>
+					<td>{{results.summary.get(suite_summary).begin_time}}</td>
+					<td>{{results.summary.get(suite_summary).end_time}}</td>
+					<td>{{results.summary.get(suite_summary).duration}}</td>
+					<td><a onclick="showElements('{{suite_summary}}', 'pass')">{{results.summary.get(suite_summary).passed}}</a></td>
+					<td><a onclick="showElements('{{suite_summary}}', 'failed')">{{results.summary.get(suite_summary).failed}}</a></td>
+					<td><a onclick="showElements('{{suite_summary}}', 'error')">{{results.summary.get(suite_summary).error}}</a></td>
+					<td><a onclick="showElements('{{suite_summary}}', 'skiped')">{{results.summary.get(suite_summary).skip}}</a></td>
+					<td><a onclick="showElements('{{suite_summary}}', 'all')">{{results.summary.get(suite_summary).all}}</a></td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
 	</div>
-
 
 	<div class="row clearfix">
 		{% block suites %}
@@ -744,6 +760,7 @@
 							 <li><a onclick="showElements('{{suite}}', 'skiped')" style="color:black">SKIPED-{{results.summary.get(suite).skip}}</a></li>
 							 <li><a onclick="showElements('{{suite}}', 'error')" style="color:#FF00FF">ERROR-{{results.summary.get(suite).error}}</a></li>
 							 <li><a onclick="showElements('{{suite}}', 'all')" style="color:grey">ALL-{{results.summary.get(suite).all}}</a></li>
+							 <li><a> </a></li>
 						 </ul>
 					</nav>
 				</div>
