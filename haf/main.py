@@ -38,7 +38,7 @@ def main_args():
                                      help="""default is True,to generate html report""")
     sub_run_arg_program.add_argument("--report-output-dir", "-rod", dest="report_output_dir", type=str, default="",
                                      help="""default is "", using to generate report to this path""")
-    sub_run_arg_program.add_argument("--report-template", "-rt", type=str, default="base",
+    sub_run_arg_program.add_argument("--report-template", "-rt", type=str, default="base", dest="report_template",
                                      help="""default using base to generate report;
                                             customer template is support too""")
     sub_run_arg_program.add_argument("--log-dir", "-ld", type=str, dest="log_dir",
@@ -77,6 +77,7 @@ def main_args():
                     args.only_bus = bus_config.get("only")
                     args.bus_server = None if bus_config.get("host") is None or bus_config.get("host")=="" else f"{bus_config.get('auth_key')}@{bus_config.get('host')}:{bus_config.get('host')}"
                     args.report_output_dir = config_run.get("report").get("report_path")
+                    args.report_template = config_run.get("report").get("report_template", "None")
                     args.case = [ x.get("case_path") for x in config_run.get("case") ]
                     runner_config = config_run.get("runner")
                     args.runner_count = runner_config.get("count")

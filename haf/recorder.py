@@ -4,7 +4,7 @@ import time
 from multiprocessing import Process
 
 from haf.busclient import BusClient
-from haf.case import HttpApiCase, BaseCase
+from haf.case import HttpApiCase, BaseCase, PyCase
 from haf.common.exception import FailRecorderException
 from haf.common.log import Log
 from haf.result import HttpApiResult, EndResult, Detail, Summary
@@ -16,7 +16,7 @@ logger = Log.getLogger(__name__)
 
 
 class Recorder(Process):
-    def __init__(self, bus_client: BusClient, runner_count: int=1,report_path:str="", case_name:str="", log_dir=""):
+    def __init__(self, bus_client: BusClient, runner_count: int=1, report_path:str="", case_name:str="", log_dir="", report_template_path="base"):
         super().__init__()
         self.bus_client = bus_client
         self.daemon = True
@@ -27,6 +27,7 @@ class Recorder(Process):
         self.case_name = case_name
         self.recorder_key = ""
         self.log_dir = log_dir
+        self.report_template_path = report_template_path
 
     def on_recorder_start(self):
         self.results.begin_time = Utils.get_datetime_now()
@@ -51,7 +52,7 @@ class Recorder(Process):
                 if not self.results_handler.empty() :
                     result = self.results_handler.get()
                     if isinstance(result, HttpApiResult):
-                        if isinstance(result.case, HttpApiCase) or isinstance(result.case, BaseCase):
+                        if isinstance(result.case, HttpApiCase) or isinstance(result.case, BaseCase) or isinstance(result.case, PyCase):
                             logger.info(f"{self.recorder_key} recorder--{result.case.bench_name}.{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {result.result}")
                         else:
                             logger.info(f"{self.recorder_key} recorder ! wrong result!")
@@ -67,8 +68,9 @@ class Recorder(Process):
             raise FailRecorderException
 
     def generate_report(self):
-        Jinja2Report.write_report_to_file(Jinja2Report.report(self.results), self.report_path)
-        Jinja2Report.write_report_to_file(Jinja2Report.report(self.results), f"{self.log_dir}/report.html")
+        report = Jinja2Report.report(self.results, name=self.report_template_path)
+        Jinja2Report.write_report_to_file(report, self.report_path)
+        Jinja2Report.write_report_to_file(report, f"{self.log_dir}/report.html")
 
     def end_handler(self):
         self.on_recorder_stop()
@@ -136,13 +138,13 @@ class Recorder(Process):
         self.results.details[result.case.bench_name] = suite
 
     def result_handler(self, result:HttpApiResult):
-        logger.info(f"{self.recorder_key} from {result.begin_time} to {result.end_time}, result is {result.result}")
+        logger.info(f"{self.recorder_key} from {result.begin_time} to {result.end_time}, result is {RESULT_GROUP.get(str(result.result), None)}")
         self.add_result_to_suite(result)
         self.check_case_result(result)
         self.publish_results()
 
     def publish_results(self):
-        logger.info(f"publish results now...")
+        # logger.info(f"publish results now...")
         if self.publish_result.full():
             self.publish_result.get()
         self.publish_result.put(self.results)

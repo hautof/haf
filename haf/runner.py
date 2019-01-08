@@ -85,7 +85,7 @@ class Runner(Process):
                 }
             }
 
-        logger.info(f"{self.key} : runner {self.pid} -- put web message {self.runner}")
+        # logger.info(f"{self.key} : runner {self.pid} -- put web message {self.runner}")
         self.put_web_message("web")
 
     def run(self):
