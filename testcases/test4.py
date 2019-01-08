@@ -2,12 +2,15 @@
 
 import sys
 
+from haf.apihelper import Request
+
 sys.path.append("..")
 from haf.mark import test, skip, parameterize
 from haf.case import BaseCase
 
 
 class TestHello(BaseCase):
+    request = Request()
 
     @test("test hello11")
     def test_1(self):
@@ -33,6 +36,7 @@ class TestHello(BaseCase):
 class TestHello2(BaseCase):
     @test("test hello2")
     def test1(self):
+        self.request = Request()
         assert 1+1 == 2
 
     @test("test hello21")

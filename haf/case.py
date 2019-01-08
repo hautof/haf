@@ -70,6 +70,8 @@ class PyCase(BaseCase):
         self.func = args_init.get("func")
         self.suite = args_init.get("suite")
         self.param = args_init.get("param")
+        temp = args_init.get("request")
+        self.request = temp if temp else Request()
 
     def bind_bench(self, bench_name):
         self.bench_name = bench_name
