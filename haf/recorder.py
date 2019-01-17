@@ -70,6 +70,7 @@ class Recorder(Process):
     def generate_report(self):
         report = Jinja2Report.report(self.results, name=self.report_template_path)
         Jinja2Report.write_report_to_file(report, self.report_path)
+        report = Jinja2Report.report(self.results, name=self.report_template_path)
         Jinja2Report.write_report_to_file(report, f"{self.log_dir}/report.html")
 
     def end_handler(self):
