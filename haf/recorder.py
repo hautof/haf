@@ -149,3 +149,10 @@ class Recorder(Process):
         if self.publish_result.full():
             self.publish_result.get()
         self.publish_result.put(self.results)
+
+    def publish_to_mysql(self):
+        logger.info(f"publish results {self.results} to mysql!")
+        from haf.ext.sqlpublish.publish import Publish
+        publish = Publish()
+        publish.publish_result(self.results)
+
