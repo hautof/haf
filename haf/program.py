@@ -11,6 +11,7 @@ import time
 from multiprocessing import Process
 from haf.bus import BusServer
 from haf.busclient import BusClient
+from haf.common.database import SQLConfig
 from haf.common.lock import Lock
 from haf.config import *
 from haf.common.exception import *
@@ -67,8 +68,8 @@ class Program(object):
             runner.start()
         time.sleep(0.5)
 
-    def _start_recorder(self, bus_client: BusClient, count: int=1, report_path: str="", log_dir: str=""):
-        recorder = Recorder(bus_client, count, report_path, self.case_name, log_dir, self.args.report_template)
+    def _start_recorder(self, bus_client: BusClient, sql_config: SQLConfig=None, sql_publish: bool=False, count: int=1, report_path: str="", log_dir: str=""):
+        recorder = Recorder(bus_client, sql_config, sql_publish, count, report_path, self.case_name, log_dir, self.args.report_template)
         recorder.start()
         time.sleep(0.1)
 
@@ -130,11 +131,11 @@ class Program(object):
             elif args.only_runner:
                 self._start_runner(runner_count, f"{args.log_dir}/{self.case_name}", self.bus_client)
             elif args.only_recorder:
-                self._start_recorder(self.bus_client, runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
+                self._start_recorder(self.bus_client, args.sql_publish_db, args.sql_publish, runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
             else:
                 self._start_loader(1, self.bus_client)
                 self._start_runner(runner_count, f"{args.log_dir}/{self.case_name}", self.bus_client)
-                self._start_recorder(self.bus_client, runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
+                self._start_recorder(self.bus_client, args.sql_publish_db, args.sql_publish, runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
 
             self.start_main()
             self.put_loader_msg(args)
@@ -205,7 +206,7 @@ class Program(object):
             case_handler.get()
         self._start_runner(self.args.runner_count if self.args.runner_count else 1, f"{self.args.log_dir}/{self.case_name}", self.bus_client)
         self._start_loader(1, self.bus_client)
-        self._start_recorder(self.bus_client, self.args.runner_count, self.args.report_output_dir, f"{self.args.log_dir}/{self.case_name}")
+        self._start_recorder(self.bus_client, self.args.sql_publish_db, self.args.sql_publish,self.args.runner_count, self.args.report_output_dir, f"{self.args.log_dir}/{self.case_name}")
         self.start_main()
         self.put_loader_msg(self.args)
         self.stop_main()

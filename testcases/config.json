@@ -2,6 +2,17 @@
   "config":{
     "name": "HAF",
     "run": {
+      "sql_publish": {
+        "id": 1,
+        "sql_name": "upload",
+        "publish": true,
+        "host": "192.168.41.208",
+        "port": 3306,
+        "username": "root",
+        "password": "testzhan123",
+        "database": "haf_publish",
+        "protocol": "mysql"
+      },
       "log": {
         "log_path": "D:/workspace/mine/python/haf/data"
       },
@@ -18,15 +29,6 @@
       "case": [
         {
           "case_path": "D:/workspace/mine/python/haf/testcases/test2.json"
-        },
-        {
-          "case_path": "D:/workspace/mine/python/haf/testcases/test.xlsx"
-        },
-        {
-          "case_path": "D:/workspace/mine/python/haf/testcases/test3.yml"
-        },
-        {
-          "case_path": "D:/workspace/mine/python/haf/testcases/test4.py"
         }
       ],
       "runner":{

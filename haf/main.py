@@ -57,6 +57,10 @@ def main_args():
                                      help="api case or not, default is true")
     sub_run_arg_program.add_argument("--debug", "-debug", dest="debug", default=False, type=bool,
                                      help="open debug or not")
+    sub_run_arg_program.add_argument("--sql-publish", "-sp", dest="sql_publish", default=False, type=bool,
+                                     help="sql publish or not")
+    sub_run_arg_program.add_argument("--sql-publish-db", "-sp_db", dest="sql_publish_db", type=str, default="",
+                                     help="sql publish db config, format like : host:port@username:password@database)")
 
     args = arg_program.parse_args()
     main_program = Program()
@@ -83,6 +87,13 @@ def main_args():
                     args.runner_count = runner_config.get("count")
                     args.only_runner = runner_config.get("only")
                     args.web_server = config_run.get("web_server").get("run")
+                    publish_sql = config_run.get("sql_publish")
+                    args.sql_publish = publish_sql.get("publish")
+                    if publish_sql.get("publish"):
+                        from haf.common.database import SQLConfig
+                        sql_config = SQLConfig()
+                        sql_config.constructor(publish_sql)
+                        args.sql_publish_db = sql_config
             except Exception as e:
                 print(e)
                 sys.exit(-1)
@@ -92,6 +103,19 @@ def main_args():
                 args.case = [str(case) for case in args.case.split(",")]
         if args.runner_count:
             pass
+
+        if args.sql_publish:
+            if isinstance(args.sql_publish_db, str):
+                from haf.common.database import SQLConfig
+                sql_config = SQLConfig()
+                hp, up, db = args.sql_publish_db.split('@')
+                host, port = hp.split(':')
+                username, password = up.split(':')
+                sc_dict = {
+                    "host": host, "port": port, "username": username, "password": password, "id":0, "sql_name": "haf-publish", "protocol": "mysql"
+                }
+                sql_config.constructor(sc_dict)
+                args.sql_publish_db = sql_config
 
         # here : bus server <- password@host:port
         if args.bus_server:

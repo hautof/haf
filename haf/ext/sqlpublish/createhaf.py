@@ -1,7 +1,4 @@
-
-SET FOREIGN_KEY_CHECKS=0;
-
-DROP TABLE IF EXISTS `case`;
+create_case = [ """
 CREATE TABLE `case` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ids_id` varchar(255) DEFAULT NULL,
@@ -14,18 +11,18 @@ CREATE TABLE `case` (
   `sqlinfo_id` int(11) DEFAULT NULL,
   `type` int(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-DROP TABLE IF EXISTS `case_expect`;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;"""
+,
+                '''
 CREATE TABLE `case_expect` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `response_id` int(11) DEFAULT NULL,
   `sql_check_func` varchar(255) DEFAULT NULL,
   `sql_response_result` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-DROP TABLE IF EXISTS `case_ids`;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;'''
+,
+                '''DROP TABLE IF EXISTS `case_ids`;
 CREATE TABLE `case_ids` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `case_id` int(11) DEFAULT NULL,
@@ -33,9 +30,9 @@ CREATE TABLE `case_ids` (
   `case_name` varchar(255) DEFAULT NULL,
   `case_api_name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-DROP TABLE IF EXISTS `case_request`;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;'''
+,
+'''
 CREATE TABLE `case_request` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `header` varchar(255) DEFAULT NULL,
@@ -45,18 +42,19 @@ CREATE TABLE `case_request` (
   `protocol` varchar(255) DEFAULT NULL,
   `host_port` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;'''
 
-DROP TABLE IF EXISTS `case_response`;
+,
+                '''
 CREATE TABLE `case_response` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `header` varchar(255) DEFAULT NULL,
   `body` varchar(255) DEFAULT NULL,
   `code` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-DROP TABLE IF EXISTS `case_sqlinfo`;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;'''
+,
+                      '''
 CREATE TABLE `case_sqlinfo` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `scripts_id` int(11) DEFAULT NULL,
@@ -64,16 +62,16 @@ CREATE TABLE `case_sqlinfo` (
   `config_id` int(11) DEFAULT NULL,
   `check_list_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-DROP TABLE IF EXISTS `case_sqlinfo_checklist`;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;'''
+,
+                      '''
 CREATE TABLE `case_sqlinfo_checklist` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `sql_response` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-DROP TABLE IF EXISTS `case_sqlinfo_config`;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;'''
+,
+                                '''
 CREATE TABLE `case_sqlinfo_config` (
   `id` int(11) NOT NULL,
   `host` varchar(255) DEFAULT NULL,
@@ -82,16 +80,16 @@ CREATE TABLE `case_sqlinfo_config` (
   `username` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-DROP TABLE IF EXISTS `case_sqlinfo_script`;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;'''
+,
+                        '''
 CREATE TABLE `case_sqlinfo_script` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `sql_response` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-DROP TABLE IF EXISTS `detail`;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;'''
+,
+                             '''
 CREATE TABLE `detail` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `case_name` varchar(255) DEFAULT NULL,
@@ -104,9 +102,9 @@ CREATE TABLE `detail` (
   `log_dir` varchar(255) DEFAULT NULL,
   `runner` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-DROP TABLE IF EXISTS `main`;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;'''
+,
+'''
 CREATE TABLE `main` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
@@ -119,9 +117,9 @@ CREATE TABLE `main` (
   `error` int(255) DEFAULT NULL,
   `suite_name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
-
-DROP TABLE IF EXISTS `suite`;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;'''
+,
+ '''
 CREATE TABLE `suite` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `main_id` int(11) NOT NULL,
@@ -129,9 +127,9 @@ CREATE TABLE `suite` (
   `detail_id` int(11) NOT NULL,
   `summary_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-DROP TABLE IF EXISTS `summary`;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;'''
+,
+               '''
 CREATE TABLE `summary` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
@@ -148,4 +146,5 @@ CREATE TABLE `summary` (
   PRIMARY KEY (`id`),
   KEY `suite_id` (`suite_id`),
   CONSTRAINT `suite_id` FOREIGN KEY (`suite_id`) REFERENCES `suite` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;'''
+]

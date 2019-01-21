@@ -68,6 +68,7 @@ class MysqlTool(object):
 
         sqlconfig = sqlconfig
         self.connect_msql = None
+
         try:
 
             if "dictcursor" in kwargs.keys() and kwargs.get("dictcursor") is True:

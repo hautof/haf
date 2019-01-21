@@ -5,6 +5,7 @@ from multiprocessing import Process
 
 from haf.busclient import BusClient
 from haf.case import HttpApiCase, BaseCase, PyCase
+from haf.common.database import SQLConfig
 from haf.common.exception import FailRecorderException
 from haf.common.log import Log
 from haf.result import HttpApiResult, EndResult, Detail, Summary
@@ -16,7 +17,7 @@ logger = Log.getLogger(__name__)
 
 
 class Recorder(Process):
-    def __init__(self, bus_client: BusClient, runner_count: int=1, report_path:str="", case_name:str="", log_dir="", report_template_path="base"):
+    def __init__(self, bus_client: BusClient, sql_config: SQLConfig, sql_publish: bool=False, runner_count: int=1, report_path:str="", case_name:str="", log_dir="", report_template_path="base"):
         super().__init__()
         self.bus_client = bus_client
         self.daemon = True
@@ -28,6 +29,8 @@ class Recorder(Process):
         self.recorder_key = ""
         self.log_dir = log_dir
         self.report_template_path = report_template_path
+        self.sql_config = sql_config
+        self.sql_publish =  sql_publish
 
     def on_recorder_start(self):
         self.results.begin_time = Utils.get_datetime_now()
@@ -79,6 +82,8 @@ class Recorder(Process):
         self.generate_report()
         logger.info(f"{self.recorder_key} end recorder")
         self.send_record_end_signal()
+        self.publish_to_mysql()
+
 
     def send_record_end_signal(self):
         system_handler = self.bus_client.get_system()
@@ -151,8 +156,9 @@ class Recorder(Process):
         self.publish_result.put(self.results)
 
     def publish_to_mysql(self):
-        logger.info(f"publish results {self.results} to mysql!")
-        from haf.ext.sqlpublish.publish import Publish
-        publish = Publish()
-        publish.publish_result(self.results)
+        if self.sql_publish:
+            logger.info(f"publish results {self.results} to mysql!")
+            from haf.ext.sqlpublish.publish import Publish
+            publish = Publish(self.sql_config)
+            publish.publish_result(self.results)
 
