@@ -87,8 +87,8 @@ def main_args():
                     args.runner_count = runner_config.get("count")
                     args.only_runner = runner_config.get("only")
                     args.web_server = config_run.get("web_server").get("run")
-                    publish_sql = config_run.get("sql_publish")
-                    if publish_sql.get("publish"):
+                    publish_sql = config_run.get("sql_publish", None)
+                    if publish_sql and publish_sql.get("publish"):
                         args.sql_publish = publish_sql.get("publish")
                         from haf.common.database import SQLConfig
                         sql_config = SQLConfig()
