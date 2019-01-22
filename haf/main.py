@@ -88,12 +88,14 @@ def main_args():
                     args.only_runner = runner_config.get("only")
                     args.web_server = config_run.get("web_server").get("run")
                     publish_sql = config_run.get("sql_publish")
-                    args.sql_publish = publish_sql.get("publish")
                     if publish_sql.get("publish"):
+                        args.sql_publish = publish_sql.get("publish")
                         from haf.common.database import SQLConfig
                         sql_config = SQLConfig()
                         sql_config.constructor(publish_sql)
                         args.sql_publish_db = sql_config
+                    else:
+                        args.sql_publish = False
             except Exception as e:
                 print(e)
                 sys.exit(-1)
