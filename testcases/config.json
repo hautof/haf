@@ -29,6 +29,18 @@
       "case": [
         {
           "case_path": "D:/workspace/mine/python/haf/testcases/test2.json"
+        },
+
+        {
+          "case_path": "D:/workspace/mine/python/haf/testcases/test1.xlsx"
+        },
+
+        {
+          "case_path": "D:/workspace/mine/python/haf/testcases/test3.yml"
+        },
+
+        {
+          "case_path": "D:/workspace/mine/python/haf/testcases/test4.py"
         }
       ],
       "runner":{

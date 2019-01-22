@@ -123,9 +123,7 @@ CREATE TABLE `main` (
 CREATE TABLE `suite` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `main_id` int(11) NOT NULL,
-  `suite_name` varchar(255) NOT NULL,
-  `detail_id` int(11) NOT NULL,
-  `summary_id` int(11) NOT NULL,
+  `suite_name` varchar(255) NOT NULL
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;'''
 ,

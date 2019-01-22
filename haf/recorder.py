@@ -80,9 +80,9 @@ class Recorder(Process):
         self.on_recorder_stop()
         self.publish_results()
         self.generate_report()
-        logger.info(f"{self.recorder_key} end recorder")
         self.send_record_end_signal()
         self.publish_to_mysql()
+        logger.info(f"{self.recorder_key} end recorder")
 
 
     def send_record_end_signal(self):
