@@ -2,6 +2,10 @@
 
 ![map](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/png/HAF-2.0.0.png)
 
+## SQL
+
+![map](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/png/haf-publish.png)
+
 
 ## Loader
 
