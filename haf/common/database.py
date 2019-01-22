@@ -107,6 +107,13 @@ class MysqlTool(object):
                 self.connect_msql.close()
             return []
 
+    def close(self):
+        try:
+            if self.connect_msql is not None:
+                self.connect_msql.close()
+        except Exception as e:
+            logger.error(e)
+
 
 class SqlServerTool(object):
     '''
