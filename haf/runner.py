@@ -14,6 +14,7 @@ from haf.config import *
 from haf.case import HttpApiCase, BaseCase, PyCase
 from haf.mark import locker
 from haf.result import HttpApiResult
+from haf.suite import HttpApiSuite
 from haf.utils import Utils
 import traceback
 
@@ -197,6 +198,7 @@ class PyRunner(BaseRunner):
 
         result.case = case
         logger.info(f"{case.log_key} : PyRunner run - {case.bench_name} {case.ids.id}.{case.ids.subid}-{case.ids.name}")
+        suite = HttpApiSuite()
         try:
             module_name = case.module_name
             module_path = case.module_path
