@@ -1,3 +1,9 @@
+> version 2.2.9
+
+- add result publish to mysql database
+- fix some bugs
+- update report template
+
 > version 2.2rc2
 
 - add name support
