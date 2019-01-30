@@ -212,6 +212,7 @@ class PyRunner(BaseRunner):
             case.response = getattr(suite, "response", Response())
             result.result = RESULT_PASS
         except AssertionError as ae:
+            case.response = getattr(suite, "response", Response())
             traceback.print_exc()
             logger.error(ae)
             result.result = RESULT_FAIL
