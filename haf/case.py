@@ -155,3 +155,4 @@ class HttpApiCase(BaseCase):
             "sqlinfo": self.sqlinfo.deserialize(),
             "type": self.type
         }
+

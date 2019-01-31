@@ -71,9 +71,3 @@ class Jinja2Report(object):
             return {"status": "error", "msg": "results is None"}
         template = Jinja2Report.get_template("online")
         return template.render(results=results)
-
-
-
-
-
-
