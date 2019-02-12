@@ -193,6 +193,8 @@ class Program(object):
             result = self._version()
         elif cmd == "help" or cmd == "h":
             result = self._help()
+        elif cmd == "name" or cmd == "n":
+            result = self._case_name()
         elif cmd == "exit" or cmd == "e":
             result = self._exit()
         else:
@@ -222,9 +224,14 @@ haf-{PLATFORM_VERSION}#
 # rerun   / r     rerun the input cases
 # version / v     version of haf
 # help    / h     help information
+# name    / n     case name of this test
 # exit    / e     exit 
         """
         print(help)
+        return False
+
+    def _case_name(self):
+        print(self.case_name)
         return False
 
     def _exit(self):

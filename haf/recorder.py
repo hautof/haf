@@ -8,7 +8,7 @@ from haf.case import HttpApiCase, BaseCase, PyCase
 from haf.common.database import SQLConfig
 from haf.common.exception import FailRecorderException
 from haf.common.log import Log
-from haf.result import HttpApiResult, EndResult, Detail, Summary
+from haf.result import HttpApiResult, EndResult, Detail, Summary, AppResult
 from haf.config import *
 from haf.utils import Utils
 from haf.ext.jinjia2report.report import Jinja2Report
@@ -54,7 +54,7 @@ class Recorder(Process):
             while True:
                 if not self.results_handler.empty() :
                     result = self.results_handler.get()
-                    if isinstance(result, HttpApiResult):
+                    if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
                         if isinstance(result.case, HttpApiCase) or isinstance(result.case, BaseCase) or isinstance(result.case, PyCase):
                             logger.info(f"{self.recorder_key} recorder--{result.case.bench_name}.{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {result.result}")
                         else:
@@ -113,10 +113,10 @@ class Recorder(Process):
         self.results.summary[suite_name].error += 1
         self.results.summary[suite_name].all += 1
 
-    def check_case_result(self, result:HttpApiResult):
+    def check_case_result(self, result):
         suite_name = result.case.bench_name
         if suite_name not in self.results.summary.keys():
-            self.results.summary[suite_name] = Summary(suite_name, result.case.request.host_port)
+            self.results.summary[suite_name] = Summary(suite_name, result.case.request.host_port if isinstance(result, HttpApiResult) else None)
         if result.result == RESULT_SKIP:
             self.on_case_skip(suite_name)
         elif result.result == RESULT_PASS:
@@ -126,7 +126,7 @@ class Recorder(Process):
         elif result.result == RESULT_ERROR:
             self.on_case_error(suite_name)
 
-    def add_result_to_suite(self, result:HttpApiResult):
+    def add_result_to_suite(self, result):
         if result.case.bench_name not in self.results.suite_name:
             self.results.suite_name.append(result.case.bench_name)
             case = result.case
@@ -143,7 +143,7 @@ class Recorder(Process):
         suite.cases.append(result)
         self.results.details[result.case.bench_name] = suite
 
-    def result_handler(self, result:HttpApiResult):
+    def result_handler(self, result):
         logger.info(f"{self.recorder_key} from {result.begin_time} to {result.end_time}, result is {RESULT_GROUP.get(str(result.result), None)}")
         self.add_result_to_suite(result)
         self.check_case_result(result)
