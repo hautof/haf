@@ -366,11 +366,12 @@ class AppRunner(BaseRunner):
             result.case = case
             from appium import webdriver
             driver = webdriver.Remote(APP_DRIVER_PATH, case.desired_caps.deserialize())
+            logger.info(f"{case.log_key} : wait app start ...")
             time.sleep(10)
             logger.info(f"{case.log_key} : driver is {driver}")
             page = BasePage(driver)
             for key in range(1, len(case.stages.keys())+1):
-                logger.info(f"{case.log_key} : {key} == {case.stages.get(key)}")
+                logger.info(f"{case.log_key} : {key} == {case.stages.get(key).deserialize()}")
                 png_dir = f"{self.log_dir}"
                 png_name = f"{case.bench_name}.{case.ids.id}.{case.ids.subid}.{case.ids.name}.{key}"
                 png_before = save_screen_shot(driver, png_dir, f"{png_name}-before")
@@ -403,3 +404,4 @@ class AppRunner(BaseRunner):
         except Exception as e:
             logger.error(e)
             result.run_error = e
+            raise e

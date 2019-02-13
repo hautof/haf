@@ -219,10 +219,11 @@
                             </ul>
                         </td>
                         <td>
-                            {% for stage in case.case.stages%}
-                            <li onclick="showElement('{{id}}.stage')"><a>{{stage.id}}</a></li>
-                            <div id="{{id}}.run_error" style="display:none">
-                                <pre> {{stage}} </pre>
+                            {% for stage in case.case.stages.values()%}
+                            <li onclick="showElement('{{id}}.stage.{{stage.id}}')"><a>{{stage.id}}-{{stage.name}}</a></li>
+                            <div id="{{id}}.stage.{{stage.id}}" style="display:none">
+                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="100" height="200"/>
+                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="100" height="200"/>
                             </div>
                             {% endfor %}
                         </td>
@@ -290,6 +291,7 @@
                         <th>Suite</th>
                         <th>Case Id</th>
                         <th>Params</th>
+                        <th>Stages</th>
                         <th>RunError</th>
                         <th>Time</th>
                         <th>DependenceCase</th>
@@ -314,6 +316,15 @@
                                     <pre>{{case.case.param}}</pre>
                                 </li>
                             </ul>
+                        </td>
+                        <td>
+                            {% for stage in case.case.stages.values()%}
+                            <li onclick="showElement('{{id}}.stage.{{stage.id}}')"><a>{{stage.id}}-{{stage.name}}</a></li>
+                            <div id="{{id}}.stage.{{stage.id}}" style="display:none">
+                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="100" height="200"/>
+                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="100" height="200"/>
+                            </div>
+                            {% endfor %}
                         </td>
                         <td>                           
                             <li onclick="showElement('{{id}}.run_error')"><a>run error</a></li>
@@ -379,6 +390,7 @@
                         <th>Suite</th>
                         <th>Case Id</th>
                         <th>Params</th>
+                        <th>Stages</th>
                         <th>RunError</th>
                         <th>Time</th>
                         <th>DependenceCase</th>
@@ -403,6 +415,15 @@
                                     <pre>{{case.case.param}}</pre>
                                 </li>
                             </ul>
+                        </td>                        
+                        <td>
+                            {% for stage in case.case.stages.values()%}
+                            <li onclick="showElement('{{id}}.stage.{{stage.id}}')"><a>{{stage.id}}-{{stage.name}}</a></li>
+                            <div id="{{id}}.stage.{{stage.id}}" style="display:none">
+                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="100" height="200"/>
+                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="100" height="200"/>
+                            </div>
+                            {% endfor %}
                         </td>
                         <td>
                             <li onclick="showElement('{{id}}.run_error')"><a>run error</a></li>
@@ -466,6 +487,7 @@
                         <th>Suite</th>
                         <th>Case Id</th>
                         <th>Params</th>
+                        <th>Stages</th>
                         <th>RunError</th>
                         <th>Time</th>
                         <th>DependenceCase</th>
@@ -490,6 +512,15 @@
                                     <pre>{{case.case.param}}</pre>
                                 </li>
                             </ul>
+                        </td>
+                        <td>
+                            {% for stage in case.case.stages.values()%}
+                            <li onclick="showElement('{{id}}.stage.{{stage.id}}')"><a>{{stage.id}}-{{stage.name}}</a></li>
+                            <div id="{{id}}.stage.{{stage.id}}" style="display:none">
+                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="100" height="200"/>
+                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="100" height="200"/>
+                            </div>
+                            {% endfor %}
                         </td>
                         <td>
                             <li onclick="showElement('{{id}}.run_error')"><a>run error</a></li>
@@ -592,6 +623,7 @@
                     <tr>
                         <th>Case Id</th>
                         <th>Params</th>
+                        <th>Stages</th>
                         <th>RunError</th>
                         <th>Time</th>
                         <th>DependenceCase</th>
@@ -613,6 +645,15 @@
                                     <pre>{{case.case.param}}</pre>
                                 </li>
                             </ul>
+                        </td>
+                        <td>
+                            {% for stage in case.case.stages.values()%}
+                            <li onclick="showElement('{{id}}.stage.{{stage.id}}')"><a>{{stage.id}}-{{stage.name}}</a></li>
+                            <div id="{{id}}.stage.{{stage.id}}" style="display:none">
+                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="100" height="200"/>
+                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="100" height="200"/>
+                            </div>
+                            {% endfor %}
                         </td>
                         <td>
                             <li onclick="showElement('{{id}}.run_error')"><a>run error</a></li>

@@ -217,5 +217,6 @@ class AppCase(BaseCase):
             "bench_name": self.bench_name,
             "stage": [stage.deserialize() for stage in self.stages.values()],
             "type": self.type,
-            "desired_caps": self.desired_caps.deserialize()
+            "desired_caps": self.desired_caps.deserialize(),
+            "pngs": self.pngs
         }
