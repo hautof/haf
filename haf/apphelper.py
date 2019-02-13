@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import time, os
-from appium.webdriver import Remote
 from haf.config import *
 
 
 class BasePage:
     DEFAULT_TIMEOUT = 3
 
-    def __init__(self, driver: Remote=None):
+    def __init__(self, driver):
         self.driver = driver
 
     def find_element(self, key, value):
