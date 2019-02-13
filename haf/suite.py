@@ -22,3 +22,17 @@ class HttpApiSuite(BaseSuite):
         self.cases.append(case)
 
 
+class AppSuite(BaseSuite):
+    def __init__(self):
+        super().__init__()
+        self.name = ""
+        self.cases = []
+
+    def constructor(self, name):
+        self.name = name
+
+    def add_case(self, case):
+        self.cases.append(case)
+
+
+

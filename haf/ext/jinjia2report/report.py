@@ -30,6 +30,10 @@ class Jinja2Report(object):
             template = "base.html"
         elif key == "online":
             template = "base_online.html"
+        elif key == "online-app":
+            template = "base_online_app.html"
+        elif key == "base_app":
+            template = "base_app.html"
         else:
             template = key
             if os.path.exists(template):
@@ -53,6 +57,7 @@ class Jinja2Report(object):
             return {"status": "error", "msg": "results is None"}
         if not name:
             name = "base"
+        logger.info(f"using {name} as template")
         template = Jinja2Report.get_template(name)
         return template.generate(results=results)
 
@@ -71,9 +76,10 @@ class Jinja2Report(object):
             return {"status": "error", "msg": "results is None"}
         template = Jinja2Report.get_template("online")
         return template.render(results=results)
-
-
-
-
-
-
+    
+    @staticmethod
+    def report_online_app(results: EndResult):
+        if results is None:
+            return {"status": "error", "msg": "results is None"}
+        template = Jinja2Report.get_template("online-app")
+        return template.render(results=results)

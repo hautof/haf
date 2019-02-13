@@ -4,17 +4,18 @@ import sys
 import time
 from multiprocessing import Process
 from haf.apihelper import Request, Response
+from haf.apphelper import Stage, BasePage, save_screen_shot
 from haf.asserthelper import AssertHelper
-from haf.bench import HttpApiBench, BaseBench
+from haf.bench import HttpApiBench, BaseBench, AppBench
 from haf.busclient import BusClient
+from haf.case import HttpApiCase, BaseCase, PyCase, AppCase
 from haf.common.database import SQLConfig
 from haf.common.exception import FailRunnerException
 from haf.common.log import Log
 from haf.config import *
-from haf.case import HttpApiCase, BaseCase, PyCase
 from haf.mark import locker
-from haf.result import HttpApiResult
-from haf.suite import HttpApiSuite
+from haf.result import HttpApiResult, AppResult
+from haf.suite import HttpApiSuite, AppSuite
 from haf.utils import Utils
 import traceback
 
@@ -65,7 +66,7 @@ class Runner(Process):
         self.case_handler_queue.put(case)
 
     def result_handler(self, result):
-        if isinstance(result, HttpApiResult):
+        if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
             if result.case.run == CASE_SKIP:
                 self.runner["skip"] += 1
             self.runner["run"] = {}
@@ -78,7 +79,7 @@ class Runner(Process):
                     "result" : RESULT_GROUP.get(str(result.result))
                 }
             })
-        elif isinstance(result, HttpApiCase):
+        elif isinstance(result, HttpApiCase) or isinstance(result, AppCase):
             self.runner["run"] = {
                 f"{result.ids.id}.{result.ids.subid}-{result.ids.name}":
                 {
@@ -105,15 +106,18 @@ class Runner(Process):
                         self.end_handler()
                         break
                     result = self.run_case(case)
-                    if isinstance(result, HttpApiResult):
+                    if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
                         self.put_result("result", result)
                 time.sleep(0.1)
         except Exception as e:
             logger.error(e)
             raise FailRunnerException
 
-    def run_case(self, local_case:HttpApiCase):
-        result = HttpApiResult()
+    def run_case(self, local_case):
+        if isinstance(local_case, HttpApiCase):
+            result = HttpApiResult()
+        elif isinstance(local_case, AppCase):
+            result = AppResult()
         try:
             try:
                 self.key = local_case.log_key
@@ -126,6 +130,9 @@ class Runner(Process):
                 elif local_case.type == CASE_TYPE_PY:
                     py_runner = PyRunner(self.bench)
                     result = py_runner.run(local_case)
+                elif local_case.type == CASE_TYPE_APP:
+                    app_runner = AppRunner(self.bench, self.log_dir)
+                    result = app_runner.run(local_case)
 
                 if isinstance(result, list):
                     if result[0] == CASE_CAN_NOT_RUN_HERE:
@@ -325,3 +332,76 @@ class ApiRunner(BaseRunner):
             return [False, traceback.format_exc()]
         return result
 
+
+class AppRunner(BaseRunner):
+    '''
+    AppRunner
+    '''
+    def __init__(self, bench:AppBench, log_dir):
+        super().__init__(bench)
+        self.bench = bench
+        self.key = ""
+        self.log_dir = log_dir
+
+    def run(self, case: AppCase):
+        '''
+        run the AppCase
+        :param case: AppCase
+        :return: result: AppResult
+        '''
+        self.key = case.log_key
+        result = AppResult()
+        result.on_case_begin()
+        if not self.check_case_run_here(case) :
+            result.on_case_end()
+            return [CASE_CAN_NOT_RUN_HERE, result]
+        if not self.check_case_run(case): # not False is skip
+            result.case = case
+            result.on_case_end()
+            result.result = RESULT_SKIP
+            return [CASE_SKIP, result]
+
+        logger.info(f"{case.log_key} : AppRunner run - {case.ids.id}.{case.ids.subid}-{case.ids.name}")
+        try:
+            result.case = case
+            from appium import webdriver
+            driver = webdriver.Remote(APP_DRIVER_PATH, case.desired_caps.deserialize())
+            logger.info(f"{case.log_key} : wait app start ...")
+            time.sleep(10)
+            logger.info(f"{case.log_key} : driver is {driver}")
+            page = BasePage(driver)
+            for key in range(1, len(case.stages.keys())+1):
+                logger.info(f"{case.log_key} : {key} == {case.stages.get(key).deserialize()}")
+                png_dir = f"{self.log_dir}"
+                png_name = f"{case.bench_name}.{case.ids.id}.{case.ids.subid}.{case.ids.name}.{key}"
+                png_before = save_screen_shot(driver, png_dir, f"{png_name}-before")
+                self.run_stage(case, page, case.stages.get(key), result)
+                png_after = save_screen_shot(driver, png_dir, f"{png_name}-after")
+                case.pngs[key] = {"before": png_before, "after": png_after}
+            result.case = case
+            result.result = RESULT_PASS
+        except Exception as e:
+            logger.error(e)
+            result.run_error = e
+            result.result = RESULT_ERROR
+        result.on_case_end()
+        return result
+
+    def run_stage(self, case, page, stage: Stage=Stage(), result: AppResult=AppResult()):
+        try:
+            paths = stage.path
+            operation = stage.operation
+            logger.info(f"{case.log_key} -- {OPERATION_APP_ANTI_GROUP[operation]}")
+            if  operation== OPERATION_APP_CLICK:
+                page.click(paths)
+            elif operation == OPERATION_APP_SENDKEYS:
+                page.send_keys(paths, stage.info.get("keys"))
+            elif operation == OPERATION_APP_SWIPE:
+                page.swipe(stage.info.get("direction"))
+            
+            time.sleep(case.time_sleep)
+
+        except Exception as e:
+            logger.error(e)
+            result.run_error = e
+            raise e

@@ -1,3 +1,11 @@
+> version 2.3.1
+
+- fix bug of 2.3.0 : no suite found
+
+> version 2.3.0
+
+- add response info of report when case run error
+
 > version 2.2.9
 
 - add result publish to mysql database
