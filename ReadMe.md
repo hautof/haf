@@ -12,7 +12,9 @@
 
 ### new features
 
-- based on local test runners 
+- support mysql result publish
+
+- based on local test runners
 
 - support xlsx,json,yml,py cases
 
@@ -59,6 +61,17 @@
       "config":{
         "name": "test",
         "run": {
+          "sql_publish": {
+            "id": 1,
+            "sql_name": "upload",
+            "publish": true,
+            "host": "192.168.0.200",
+            "port": 3306,
+            "username": "root",
+            "password": "root",
+            "database": "haf_publish",
+            "protocol": "mysql"
+          },
           "log": {
             "log_path": "./data"
           },
@@ -102,7 +115,6 @@
           }
         }
       }
-    
     }
 ```
 
@@ -150,6 +162,33 @@
     # only recorder
     python -m haf run -ore=true
 ```
+
+- run with third report template
+
+```json
+    "report": {
+        "report_template": "base_app"
+    }
+```
+
+- run with mysql publish
+
+```json
+    "sql_publish": {
+        "id": 1,
+        "sql_name": "upload",
+        "publish": true,
+        "host": "192.168.0.200",
+        "port": 3306,
+        "username": "root",
+        "password": "root",
+        "database": "haf_publish",
+        "protocol": "mysql"
+    }
+```
+
+![sql](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/png/haf-publish.png)
+
 
 ### web api server suport
 
