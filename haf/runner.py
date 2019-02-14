@@ -398,10 +398,9 @@ class AppRunner(BaseRunner):
                 page.send_keys(paths, stage.info.get("keys"))
             elif operation == OPERATION_APP_SWIPE:
                 page.swipe(stage.info.get("direction"))
-            
             time.sleep(case.time_sleep)
-
         except Exception as e:
             logger.error(e)
             result.run_error = e
-            raise e
+            if not stage.show_try:
+                raise e
