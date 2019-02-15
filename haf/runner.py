@@ -377,7 +377,7 @@ class AppRunner(BaseRunner):
                 png_before = save_screen_shot(driver, png_dir, f"{png_name}-before")
                 self.run_stage(case, page, case.stages.get(key), result)
                 png_after = save_screen_shot(driver, png_dir, f"{png_name}-after")
-                case.pngs[key] = {"before": f"./png/{png_before}.png", "after": f"./png/{png_after}.png"}
+                case.pngs[key] = {"before": f"./png/{png_name}-before.png", "after": f"./png/{png_name}-after.png"}
             result.case = case
             result.result = RESULT_PASS
         except Exception as e:
