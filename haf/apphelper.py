@@ -79,6 +79,7 @@ class Stage(object):
         self.operation = ""
         self.path = ""
         self.show_try = True
+        self.time_sleep = 5
         self.info = {}
     
     def constructor(self, input: dict={}):
@@ -88,6 +89,7 @@ class Stage(object):
         self.path = input.get("path")
         self.show_try = input.get("try")
         self.info = input.get("info")
+        self.time_sleep = input.get("sleep")
 
     def deserialize(self):
         return {
@@ -96,7 +98,8 @@ class Stage(object):
             "operation": self.operation,
             "path": self.path,
             "show_try": self.show_try,
-            "info": self.info
+            "info": self.info,
+            "time_sleep": self.time_sleep
         }
 
 
@@ -155,7 +158,7 @@ class DesiredCaps(object):
 
 def save_screen_shot(driver, path, name):
     try:
-        path = f"{path}"
+        path = f"{path}/png"
         if not os.path.exists(path):
             os.mkdir(path)
         path_full = f"{path}/{name}.png"

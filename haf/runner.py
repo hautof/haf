@@ -367,17 +367,17 @@ class AppRunner(BaseRunner):
             from appium import webdriver
             driver = webdriver.Remote(APP_DRIVER_PATH, case.desired_caps.deserialize())
             logger.info(f"{case.log_key} : wait app start ...")
-            time.sleep(20)
+            time.sleep(case.time_sleep)
             logger.info(f"{case.log_key} : driver is {driver}")
             page = BasePage(driver)
             for key in range(1, len(case.stages.keys())+1):
                 logger.info(f"{case.log_key} : {key} == {case.stages.get(key).deserialize()}")
-                png_dir = "./png"
+                png_dir = f"{self.log_dir}}"
                 png_name = f"{case.bench_name}.{case.ids.id}.{case.ids.subid}.{case.ids.name}.{key}"
                 png_before = save_screen_shot(driver, png_dir, f"{png_name}-before")
                 self.run_stage(case, page, case.stages.get(key), result)
                 png_after = save_screen_shot(driver, png_dir, f"{png_name}-after")
-                case.pngs[key] = {"before": png_before, "after": png_after}
+                case.pngs[key] = {"before": f"./png/{png_before}.png", "after": f"./png/{png_after}.png"}
             result.case = case
             result.result = RESULT_PASS
         except Exception as e:
@@ -398,7 +398,7 @@ class AppRunner(BaseRunner):
                 page.send_keys(paths, stage.info.get("keys"))
             elif operation == OPERATION_APP_SWIPE:
                 page.swipe(stage.info.get("direction"))
-            time.sleep(case.time_sleep)
+            time.sleep(stage.time_sleep)
         except Exception as e:
             logger.error(e)
             result.run_error = e

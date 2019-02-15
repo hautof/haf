@@ -178,6 +178,7 @@ class AppCase(BaseCase):
         self.error = None
         self.sqlinfo = SqlInfo()
         self.time_sleep = 5
+        self.wait_time = 20
         self.pngs = {}
 
     def constructor(self, *args, **kwargs):
