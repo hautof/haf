@@ -178,7 +178,6 @@ class AppCase(BaseCase):
         self.error = None
         self.sqlinfo = SqlInfo()
         self.time_sleep = 5
-        self.wait_time = 20
         self.pngs = {}
 
     def constructor(self, *args, **kwargs):
@@ -193,7 +192,7 @@ class AppCase(BaseCase):
         else:
             args_init = kwargs
         self.ids.constructor(args_init)
-        self.time_sleep = args_init.get("sleep") or 5
+        self.time_sleep = args_init.get("wait_time") or 5
         self.run = CASE_RUN if args_init.get("run") is True else CASE_SKIP
         self.dependent = [x for x in str(args_init.get("dependent")).split(";") if args_init.get("dependent") is not None]
         self.desired_caps.constructor(args_init.get("desired_caps"))
