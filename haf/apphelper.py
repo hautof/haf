@@ -155,7 +155,7 @@ class DesiredCaps(object):
 
 def save_screen_shot(driver, path, name):
     try:
-        path = f"{path}/png"
+        path = f"{path}"
         if not os.path.exists(path):
             os.mkdir(path)
         path_full = f"{path}/{name}.png"
