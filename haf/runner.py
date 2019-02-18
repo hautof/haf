@@ -343,6 +343,27 @@ class AppRunner(BaseRunner):
         self.key = ""
         self.log_dir = log_dir
 
+    def wait_activity(self, activity, timeout, driver):
+        """Wait for an activity: block until target activity presents
+        or time out.
+        This is an Android-only method.
+        :Agrs:
+        - activity - target activity
+        - timeout - max wait time, in seconds
+        - interval - sleep interval between retries, in seconds
+        """
+        try:
+            i = 0
+            while i<timeout:
+                logger.info(f"{case.log_key}: current activity is {driver.current_activity}")
+                if driver.current_activity == activity:
+                    return
+                time.sleep(1)
+                i += 1
+        except Exception as e:
+            logger.error(f"{case.log_key}: {e}")
+            return 
+
     def run(self, case: AppCase):
         '''
         run the AppCase
@@ -367,7 +388,11 @@ class AppRunner(BaseRunner):
             from appium import webdriver
             driver = webdriver.Remote(APP_DRIVER_PATH, case.desired_caps.deserialize())
             logger.info(f"{case.log_key} : wait app start ...")
-            time.sleep(10)
+            if case.wait_activity:
+                time.sleep(5)
+                self.wait_activity(case.wait_activity, case.time_sleep, driver)
+            else:
+                time.sleep(case.time_sleep)
             logger.info(f"{case.log_key} : driver is {driver}")
             page = BasePage(driver)
             for key in range(1, len(case.stages.keys())+1):
@@ -377,7 +402,7 @@ class AppRunner(BaseRunner):
                 png_before = save_screen_shot(driver, png_dir, f"{png_name}-before")
                 self.run_stage(case, page, case.stages.get(key), result)
                 png_after = save_screen_shot(driver, png_dir, f"{png_name}-after")
-                case.pngs[key] = {"before": png_before, "after": png_after}
+                case.pngs[key] = {"before": f"./png/{png_name}-before.png", "after": f"./png/{png_name}-after.png"}
             result.case = case
             result.result = RESULT_PASS
         except Exception as e:
@@ -398,7 +423,7 @@ class AppRunner(BaseRunner):
                 page.send_keys(paths, stage.info.get("keys"))
             elif operation == OPERATION_APP_SWIPE:
                 page.swipe(stage.info.get("direction"))
-            time.sleep(case.time_sleep)
+            time.sleep(stage.time_sleep)
         except Exception as e:
             logger.error(e)
             result.run_error = e

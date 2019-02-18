@@ -174,6 +174,7 @@ class AppCase(BaseCase):
         self.bench_name = ""
         self.stages = {}
         self.log_key = ""
+        self.wait_activity = ""
         self.desired_caps = DesiredCaps()
         self.error = None
         self.sqlinfo = SqlInfo()
@@ -192,11 +193,12 @@ class AppCase(BaseCase):
         else:
             args_init = kwargs
         self.ids.constructor(args_init)
-        self.time_sleep = args_init.get("sleep") or 5
+        self.time_sleep = args_init.get("wait_time") or 5
         self.run = CASE_RUN if args_init.get("run") is True else CASE_SKIP
         self.dependent = [x for x in str(args_init.get("dependent")).split(";") if args_init.get("dependent") is not None]
         self.desired_caps.constructor(args_init.get("desired_caps"))
         self.stages = {}
+        self.wait_activity = args_init.get("wait_activity", None)
         for s in args_init.get("stage"):
             stage = Stage()
             stage.constructor(s)
@@ -218,5 +220,7 @@ class AppCase(BaseCase):
             "stage": [stage.deserialize() for stage in self.stages.values()],
             "type": self.type,
             "desired_caps": self.desired_caps.deserialize(),
-            "pngs": self.pngs
+            "pngs": self.pngs,
+            "sleep": self.time_sleep,
+            "wait_activity": self.wait_activity
         }
