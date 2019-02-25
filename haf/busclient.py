@@ -7,20 +7,14 @@ import logging
 from multiprocessing.managers import BaseManager
 from haf.config import *
 from haf.common.sigleton import SingletonType
+from haf.message import InfoManager
 
 logger = logging.getLogger(__name__)
 
 
-class InfoManager(BaseManager): pass
-
-'''
-# InfoManager
-'''
-
-
 class BusClient(metaclass=SingletonType):
     def __init__(self, domain:str=None, port:str=None, auth_key:str=None):
-        self.domain = BUS_DOMAIN if domain is None else domain
+        self.domain = BUS_CLIENT_DOMAIN if domain is None else domain
         self.port = BUS_PORT if port is None else port
         self.auth_key = BUS_AUTH_KEY if auth_key is None else auth_key
         self.queue = None
@@ -39,7 +33,7 @@ class BusClient(metaclass=SingletonType):
         InfoManager.register("get_publish_loader")
         InfoManager.register("get_case_lock")
         # connect to the bus
-        self.info_manager = InfoManager(address=('127.0.0.1', self.port), authkey=self.auth_key)
+        self.info_manager = InfoManager(address=(self.domain, self.port), authkey=self.auth_key)
         self.info_manager.connect()
 
     def get_case(self):

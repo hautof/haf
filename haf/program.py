@@ -42,7 +42,7 @@ class Program(object):
         else:
             self.bus_server = BusServer()
             self.bus_server.start()
-            time.sleep(1)
+            time.sleep(0.5)
 
     def _start_loader(self, count: int, bus_client: BusClient):
         '''
@@ -76,9 +76,9 @@ class Program(object):
     def _init_logging_module(self, args):
         logging.basicConfig(level=logging.INFO if not args.debug else logging.DEBUG, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')
 
-    def _init_system_logger(self, log_dir: str, bus_client:BusClient):
-        l = Logger(self.case_name, log_dir, bus_client)
-        l.start()
+    def _init_system_logger(self, log_dir: str, bus_client: BusClient):
+        log = Logger(self.case_name, log_dir, bus_client)
+        log.start()
         time.sleep(0.1)
 
     def _init_system_lock(self, args):
@@ -122,8 +122,8 @@ class Program(object):
 
             self._bus_client(args)
 
-            self._init_system_logger(args.log_dir, self.bus_client)
             self._init_system_lock(args)
+            self._init_system_logger(args.log_dir, self.bus_client)
 
             # only : module
             if args.only_loader:
@@ -136,7 +136,7 @@ class Program(object):
                 self._start_loader(1, self.bus_client)
                 self._start_runner(runner_count, f"{args.log_dir}/{self.case_name}", self.bus_client)
                 self._start_recorder(self.bus_client, args.sql_publish_db, args.sql_publish, runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
-
+            
             self.start_main()
             self.put_loader_msg(args)
             self.stop_main()
@@ -225,10 +225,14 @@ haf-{PLATFORM_VERSION}#
 # version / v     version of haf
 # help    / h     help information
 # name    / n     case name of this test
+# summary / s     summary of this test
 # exit    / e     exit 
         """
         print(help)
         return False
+
+    def _summary(help):
+        pass
 
     def _case_name(self):
         print(self.case_name)

@@ -2,7 +2,7 @@
 
 import json
 from haf.common.database import SQLConfig
-from haf.config import CASE_HTTP_API_METHOD_GET, CASE_HTTP_API_METHOD_POST
+from haf.config import *
 
 
 class Request(object):
@@ -41,7 +41,7 @@ class Request(object):
             "header": self.header,
             "data": data,
             "url": self.url,
-            "method": self.method,
+            "method": METHOD_GROUP.get(str(self.method)),
             "protocol": self.protocol,
             "host_port": self.host_port
         }
