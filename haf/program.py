@@ -225,10 +225,14 @@ haf-{PLATFORM_VERSION}#
 # version / v     version of haf
 # help    / h     help information
 # name    / n     case name of this test
+# summary / s     summary of this test
 # exit    / e     exit 
         """
         print(help)
         return False
+
+    def _summary(help):
+        pass
 
     def _case_name(self):
         print(self.case_name)
