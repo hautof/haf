@@ -10,10 +10,12 @@
     <style type="text/css">
         {% include "css/bootstrap.min.css" %}
     </style>
+    <script src="https://unpkg.com/echarts@4.1.0/dist/echarts.min.js"></script>
     <script type="text/javascript">
         {% include "js/base.js" %}
         {% include "js/jquery.min.js" %}
         {% include "js/bootstrap.min.js" %}
+        {% include "js/echarts.min.js" %}
 
         function showElementOnly(id){
             document.getElementById(id).style.display = "block";
@@ -162,6 +164,53 @@
                             </tr>
                         </tbody>
                 </table>
+                
+                <div id="echart" style="width:100%; height:150px">
+                <script type="text/javascript">
+                // 基于准备好的dom，初始化echarts实例
+                    var myChart = echarts.init(document.getElementById('echart'));
+                    option = {
+                        title : {
+                            text: '',
+                            subtext: '',
+                            x:'center'
+                        },
+                        tooltip : {
+                            trigger: 'item',
+                            formatter: "{a} <br/>{b} : {c} ({d}%)"
+                        },
+                        legend: {
+                            type: 'scroll',
+                            orient: 'vertical',
+                            right: 10,
+                            top: 20,
+                            bottom: 20,
+                            data: ["pass", "fail", "skip", "error"],
+                            selected: {"pass": true, "fail":true, "skip":true, "error":true}
+                        },
+                        series : [
+                            {
+                                name: 'Result',
+                                type: 'pie',
+                                radius : '55%',
+                                center: ['40%', '50%'],
+                                data: [{name: "pass", value: {{results.passed}}, itemStyle: {color: '#01B468'}}, {name: "fail", value: {{results.failed}}, itemStyle: {color: '#EA0000'}}, {name:"skip", value: {{results.skip}}, itemStyle: {color: '#8E8E8E'}}, {name: "error", value: {{results.error}}, itemStyle: {color: '#D200D2'}}],
+                                itemStyle: {
+                                    emphasis: {
+                                        shadowBlur: 10,
+                                        shadowOffsetX: 0,
+                                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                    }
+                                }
+                            }
+                        ]
+                    };
+                    myChart.on('click', function(params){
+                        showElement('all_'+params.data.name)
+                    });
+                    myChart.setOption(option);
+                </script>
+                </div>
             </div>
 
 
