@@ -427,7 +427,7 @@ class AppRunner(BaseRunner):
                 page.swipe(stage.info.get("direction"))
             time.sleep(stage.time_sleep)
         except Exception as e:
-            logger.error(f"{self.key} : {e}")
-            result.run_error = e
+            logger.error(f"{self.key} : {stage.id} -- {e}")
+            result.run_error = f"{stage.id} : {e}"
             if not stage.show_try:
                 raise e
