@@ -1,7 +1,13 @@
 #encoding='utf-8'
 
-from haf.case import HttpApiCase
-from haf.result import HttpApiResult
+from multiprocessing.managers import BaseManager
+
+
+class InfoManager(BaseManager): pass
+'''
+# InfoManager
+#
+'''
 
 
 class MessageDict(object):
@@ -21,16 +27,3 @@ class MessageDict(object):
     def __setitem__(self, key, value):
         self.set(key, value)
 
-
-class MessageGenerator(object):
-
-    @staticmethod
-    def generate(input):
-        if isinstance(input, HttpApiCase):
-            MessageGenerator.generate_httpapicase(input)
-        elif isinstance(input, HttpApiResult):
-            MessageGenerator.generate_httpapiresult(input)
-
-    @staticmethod
-    def generate_httpapicase(input):
-        pass

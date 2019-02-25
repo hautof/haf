@@ -2,6 +2,7 @@
 
 BUS_PORT = 9000
 BUS_DOMAIN = u"0.0.0.0"
+BUS_CLIENT_DOMAIN = u"127.0.0.1"
 BUS_AUTH_KEY = bytes("hafbus", encoding='utf-8')
 
 WEB_SERVER = False

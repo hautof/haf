@@ -8,19 +8,12 @@
 import logging
 import time
 from multiprocessing import Process
-from multiprocessing.managers import BaseManager
 from queue import Queue
 from haf.common.exception import FailBusException
 from haf.config import BUS_DOMAIN, BUS_PORT, BUS_AUTH_KEY, SIGNAL_BUS_END
+from haf.message import InfoManager
 
 logger = logging.getLogger(__name__)
-
-
-class InfoManager(BaseManager): pass
-'''
-# InfoManager
-#
-'''
 
 
 class BusServer(Process):
@@ -81,7 +74,7 @@ class BusServer(Process):
         InfoManager.register("get_publish_result", callable=lambda: publish_result)
         InfoManager.register("get_publish_runner", callable=lambda: publish_runner)
         InfoManager.register("get_publish_loader", callable=lambda: publish_loader)
-        self.queue_manager = InfoManager(address=('', self.port), authkey=self.auth_key)
+        self.queue_manager = InfoManager(address=(self.domain, self.port), authkey=self.auth_key)
         self.server = self.queue_manager.get_server()
 
     def run(self):

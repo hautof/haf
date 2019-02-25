@@ -2,30 +2,33 @@
 import os
 import time
 from multiprocessing import Process
-
 from haf.busclient import BusClient
-
 from haf.config import *
+from haf.common.log import Log
+
+logger = Log.getLogger(__name__)
 
 
 class Logger(Process):
-    def __init__(self, case_name, log_dir, bus_client:BusClient=None):
+    def __init__(self, case_name, log_dir, bus_client: BusClient):
         super().__init__()
-        self.bus_client = bus_client
         self.daemon = True
+        self.bus_client = bus_client
         self.case_name = case_name
         self.log_dir = log_dir
 
     def run(self):
+        logger.info("start system logger")
         log_home = f"{self.log_dir}/{self.case_name}"
         if not os.path.exists(log_home):
             os.makedirs(log_home)
-        self.bus_client = BusClient()
+        # here delete BusClient(), using input bus_client
+        # self.bus_client = BusClient()
         try:
             log_queue = self.bus_client.get_log()
             while True:
                 if log_queue.empty():
-                    time.sleep(1)
+                    time.sleep(0.1)
                     continue
                 log = log_queue.get()
                 self.log_handler(log)
