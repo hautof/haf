@@ -12,6 +12,8 @@
 
 ### new features
 
+- now support app-ui cases and generate report
+
 - support mysql result publish
 
 - based on local test runners
@@ -135,6 +137,21 @@
 ```shell
     python -m haf run -case=./testcases/test.xlsx,./testcases/test2.json -ld=./data -rh=true -rod=./data/report.html
 ```
+
+##### when running the app cases
+
+- change the config.json's "report" to add report_template
+
+```json
+    "report": 
+        {
+            "report_template": "base_app",
+            "report_path": "./data/report.html"
+        }
+```
+
+![report-app](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/report-app.gif)
+
 
 ##### other run args
 
