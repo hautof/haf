@@ -1,3 +1,10 @@
+> version 2.4.6
+
+- fix some bugs
+- add echarts support 
+- add app ui case support
+- add init command to init workspace
+
 > version 2.3.1
 
 - fix bug of 2.3.0 : no suite found

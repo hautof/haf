@@ -54,9 +54,23 @@
 
 - local bus is without --bus-server(-bs) args, when running the program, the bus would be created
 
+#### using init to init workspace
+
+```bash
+    python -m haf init
+```
+
+or 
+
+```bash
+    git clone https://github.com/tsbxmw/haf-sample
+```
+
+
 ##### modify the config.json in testcases
 
-- change the log_path and report_path and case_path to your own path
+- change the `log_path` and `report_path` and `case_path` to your own path
+- delete `config->run->sql_publish` if you don't have an haf-publish
 
 ```json
     {
@@ -120,9 +134,10 @@
     }
 ```
 
-##### create testcase
+##### create testcase or using default cases
 
 - create xlsx/json/yml/py file with template in testcases/
+- using haf-sample case template
 
 ##### run
 
