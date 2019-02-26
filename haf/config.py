@@ -1,5 +1,7 @@
 # encoding='utf-8'
 
+GITHUB_URL_BASE = 'https://github.com/tsbxmw/haf'
+
 BUS_PORT = 9000
 BUS_DOMAIN = u"0.0.0.0"
 BUS_CLIENT_DOMAIN = u"127.0.0.1"
@@ -88,7 +90,7 @@ LOG_PATH_DEFAULT = "D:\workspace\mine\python\haf\data"
 
 MAIN_VERSION = 2
 SUB_VERSION = 4
-FIX_VERSION = 5
+FIX_VERSION = 6
 VERSION_TYPE = "dev"
 PLATFORM_VERSION = f"{VERSION_TYPE}-{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}"
 

@@ -4,6 +4,7 @@ import os
 import sys
 
 from haf.program import Program
+from haf.helper import Helper
 from haf.config import BANNER_STRS
 import argparse
 
@@ -62,8 +63,12 @@ def main_args():
     sub_run_arg_program.add_argument("--sql-publish-db", "-sp_db", dest="sql_publish_db", type=str, default="",
                                      help="sql publish db config, format like : host:port@username:password@database)")
 
+    sub_init_arg_program = sub_all_arg_program.add_parser("init",
+                                                         help="init workspace, using 'python -m haf init -t=all' to init workspace of haf")
+    sub_init_arg_program.add_argument("--type", "-t", dest="init_type", type=str, default=None,
+                                     help="init workspace with type")
+
     args = arg_program.parse_args()
-    main_program = Program()
 
     if args.all == "run":
         # here : config <- file
@@ -146,7 +151,12 @@ def main_args():
                 args.case.append(path)
 
         print(args)
+        main_program = Program()
         main_program.run(args)
+    elif args.all == "init":
+        print(args)
+        helper = Helper()
+        helper.init_workspace()
     else:
         print("using python -m haf help to show help infos")
 

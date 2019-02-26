@@ -16,6 +16,7 @@ from haf.common.lock import Lock
 from haf.config import *
 from haf.common.exception import *
 from haf.ext.webserver.app import web_server
+from haf.helper import Helper
 from haf.loader import Loader
 from haf.logger import Logger
 from haf.recorder import Recorder
