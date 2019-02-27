@@ -1,8 +1,6 @@
 # encoding='utf-8'
-import pymssql
 
 from haf.common.log import Log
-import pymysql
 from contextlib import contextmanager
 
 logger = Log.getLogger(__name__)
@@ -64,6 +62,7 @@ class MysqlTool(object):
         * sqlconfig ： sqlconfig 实例
         * sqlscript : 执行的 sqlscript
         '''
+        import pymysql
         key = kwargs.get("key", "database$%common$%")
         commit = kwargs.get("commit", False)
         run_background = kwargs.get("run_background", False)
@@ -109,6 +108,7 @@ class MysqlTool(object):
 
     def close(self):
         try:
+            import pymysql
             if self.connect_msql is not None:
                 self.connect_msql.close()
         except Exception as e:
@@ -130,6 +130,7 @@ class SqlServerTool(object):
         * sqlconfig ： sqlconfig 实例
         * sqlscript : 执行的 sqlscript
         '''
+        import pymssql
         key = kwargs.get("key", "database$%common$%")
 
         sqlconfig = sqlconfig
@@ -165,6 +166,7 @@ class SqlServerTool(object):
             return []
 
     def close(self):
+        import pymssql
         if self.connect_msql is not None:
             self.connect_msql.close()
 
