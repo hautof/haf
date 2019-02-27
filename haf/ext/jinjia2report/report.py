@@ -29,9 +29,9 @@ class Jinja2Report(object):
         if key == "base":
             template = "base.html"
         elif key == "online":
-            template = "base_online.html"
+            template = "base.html"
         elif key == "online-app":
-            template = "base_online_app.html"
+            template = "base_app.html"
         elif key == "base_app":
             template = "base_app.html"
         else:
