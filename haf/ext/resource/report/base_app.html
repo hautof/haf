@@ -268,11 +268,25 @@
                         </td>
                         <td>
                             {% for stage in case.case.stages.values()%}
+                            {% set stage_dict={70: "CLICK", 71: "SEND_KEYS", 72: "SWIPE", 73: "OTHERS"} %}
                             <li onclick="showElement('{{id}}.stage.{{stage.id}}')"><a>{{stage.id}}-{{stage.name}}</a></li>
-                            <div id="{{id}}.stage.{{stage.id}}" style="display:none">
-                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="150" height="300"/>
-                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="150" height="300"/>
-                            </div>
+                            <ul id="{{id}}.stage.{{stage.id}}" style="display:none">
+                                <li> 
+                                    <a>Operation : {{stage_dict.get(stage.operation)}}</a>
+                                </li>
+                                <li> <a>paths : </a>
+                                    <ul>                                    
+                                        {% for key in stage.path.keys() %}
+                                        <li> {{key}} : {{stage.path.get(key)}} </li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                                <li onclick="showElement('{{id}}.stage.{{stage.id}}-screenshots')"><a>screen shots</a></li>
+                                <div id="{{id}}.stage.{{stage.id}}-screenshots" style="display:none">
+                                    <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="150" height="300"/>
+                                    <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="150" height="300"/>
+                                </div>
+                            </ul>
                             {% endfor %}
                         </td>
                         <td>
@@ -367,11 +381,25 @@
                         </td>
                         <td>
                             {% for stage in case.case.stages.values()%}
+                            {% set stage_dict={70: "CLICK", 71: "SEND_KEYS", 72: "SWIPE", 73: "OTHERS"} %}
                             <li onclick="showElement('{{id}}.stage.{{stage.id}}')"><a>{{stage.id}}-{{stage.name}}</a></li>
-                            <div id="{{id}}.stage.{{stage.id}}" style="display:none">
-                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="150" height="300"/>
-                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="150" height="300"/>
-                            </div>
+                            <ul id="{{id}}.stage.{{stage.id}}" style="display:none">
+                                <li> 
+                                    <a>Operation : {{stage_dict.get(stage.operation)}}</a>
+                                </li>
+                                <li> <a>paths : </a>
+                                    <ul>                                    
+                                        {% for key in stage.path.keys() %}
+                                        <li> {{key}} : {{stage.path.get(key)}} </li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                                <li onclick="showElement('{{id}}.stage.{{stage.id}}-screenshots')"><a>screen shots</a></li>
+                                <div id="{{id}}.stage.{{stage.id}}-screenshots" style="display:none">
+                                    <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="150" height="300"/>
+                                    <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="150" height="300"/>
+                                </div>
+                            </ul>
                             {% endfor %}
                         </td>
                         <td>                           
@@ -463,14 +491,28 @@
                                     <pre>{{case.case.param}}</pre>
                                 </li>
                             </ul>
-                        </td>                        
+                        </td>  
                         <td>
                             {% for stage in case.case.stages.values()%}
+                            {% set stage_dict={70: "CLICK", 71: "SEND_KEYS", 72: "SWIPE", 73: "OTHERS"} %}
                             <li onclick="showElement('{{id}}.stage.{{stage.id}}')"><a>{{stage.id}}-{{stage.name}}</a></li>
-                            <div id="{{id}}.stage.{{stage.id}}" style="display:none">
-                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="150" height="300"/>
-                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="150" height="300"/>
-                            </div>
+                            <ul id="{{id}}.stage.{{stage.id}}" style="display:none">
+                                <li> 
+                                    <a>Operation : {{stage_dict.get(stage.operation)}}</a>
+                                </li>
+                                <li> <a>paths : </a>
+                                    <ul>                                    
+                                        {% for key in stage.path.keys() %}
+                                        <li> {{key}} : {{stage.path.get(key)}} </li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                                <li onclick="showElement('{{id}}.stage.{{stage.id}}-screenshots')"><a>screen shots</a></li>
+                                <div id="{{id}}.stage.{{stage.id}}-screenshots" style="display:none">
+                                    <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="150" height="300"/>
+                                    <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="150" height="300"/>
+                                </div>
+                            </ul>
                             {% endfor %}
                         </td>
                         <td>
@@ -563,11 +605,25 @@
                         </td>
                         <td>
                             {% for stage in case.case.stages.values()%}
+                            {% set stage_dict={70: "CLICK", 71: "SEND_KEYS", 72: "SWIPE", 73: "OTHERS"} %}
                             <li onclick="showElement('{{id}}.stage.{{stage.id}}')"><a>{{stage.id}}-{{stage.name}}</a></li>
-                            <div id="{{id}}.stage.{{stage.id}}" style="display:none">
-                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="150" height="300"/>
-                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="150" height="300"/>
-                            </div>
+                            <ul id="{{id}}.stage.{{stage.id}}" style="display:none">
+                                <li> 
+                                    <a>Operation : {{stage_dict.get(stage.operation)}}</a>
+                                </li>
+                                <li> <a>paths : </a>
+                                    <ul>                                    
+                                        {% for key in stage.path.keys() %}
+                                        <li> {{key}} : {{stage.path.get(key)}} </li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                                <li onclick="showElement('{{id}}.stage.{{stage.id}}-screenshots')"><a>screen shots</a></li>
+                                <div id="{{id}}.stage.{{stage.id}}-screenshots" style="display:none">
+                                    <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="150" height="300"/>
+                                    <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="150" height="300"/>
+                                </div>
+                            </ul>
                             {% endfor %}
                         </td>
                         <td>
@@ -696,11 +752,25 @@
                         </td>
                         <td>
                             {% for stage in case.case.stages.values()%}
+                            {% set stage_dict={70: "CLICK", 71: "SEND_KEYS", 72: "SWIPE", 73: "OTHERS"} %}
                             <li onclick="showElement('{{id}}.stage.{{stage.id}}')"><a>{{stage.id}}-{{stage.name}}</a></li>
-                            <div id="{{id}}.stage.{{stage.id}}" style="display:none">
-                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="150" height="300"/>
-                                <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="150" height="300"/>
-                            </div>
+                            <ul id="{{id}}.stage.{{stage.id}}" style="display:none">
+                                <li> 
+                                    <a>Operation : {{stage_dict.get(stage.operation)}}</a>
+                                </li>
+                                <li> <a>paths : </a>
+                                    <ul>                                    
+                                        {% for key in stage.path.keys() %}
+                                        <li> {{key}} : {{stage.path.get(key)}} </li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                                <li onclick="showElement('{{id}}.stage.{{stage.id}}-screenshots')"><a>screen shots</a></li>
+                                <div id="{{id}}.stage.{{stage.id}}-screenshots" style="display:none">
+                                    <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("before")}}" width="150" height="300"/>
+                                    <img src="{{case.case.pngs.get(stage.id, {"before": "", "after": ""}).get("after")}}" width="150" height="300"/>
+                                </div>
+                            </ul>
                             {% endfor %}
                         </td>
                         <td>
