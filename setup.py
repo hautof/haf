@@ -8,6 +8,7 @@ requires = [
     'requests',
     'openpyxl',
     'pymysql',
+    'pymssql',
     'redis',
     'twine',
     'assertpy',
