@@ -1,6 +1,6 @@
 ### haf    
     
-    The http api auto test framework. 
+    The high automation framework. 
 
 [![Build Status](https://travis-ci.org/hautof/haf.svg?branch=master)](https://travis-ci.org/hautof/haf)
 [![Documentation Status](https://readthedocs.org/projects/haf/badge/?version=latest)](https://haf.readthedocs.io/en/latest/?badge=latest)
@@ -168,7 +168,12 @@ or
 ![report-app](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/report-app.gif)
 
 
-##### other run args
+#### haf samples
+
+> https://github.com/hautof/haf-sample
+
+
+#### other run args
 
 - run with multi-runners (4 runners)
 
