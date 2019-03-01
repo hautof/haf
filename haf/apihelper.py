@@ -39,7 +39,7 @@ class Request(object):
             data = str(self.data)
         return {
             "header": self.header,
-            "data": str(data).encode('utf-8').decode('unicode_escape'),
+            "data": str(data).encode('utf-8', 'ignore').decode('unicode_escape'),
             "url": self.url,
             "method": METHOD_GROUP.get(str(self.method)),
             "protocol": self.protocol,
@@ -64,8 +64,8 @@ class Response(object):
         except:
             body = str(self.body)
         return {
-            "header": str(self.header).encode('utf-8').decode('unicode_escape'),
-            "body": str(body).encode('utf-8').decode('unicode_escape'),
+            "header": str(self.header).encode('utf-8', 'ignore').decode('unicode_escape'),
+            "body": str(body).encode('utf-8', 'ignore').decode('unicode_escape'),
             "code": self.code
         }
 
