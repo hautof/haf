@@ -37,9 +37,13 @@ class Request(object):
             data = json.dumps(self.data, indent=4)
         except:
             data = str(self.data)
+        try:
+            data = str(data).encode('utf-8', 'ignore').decode('unicode_escape')
+        except:
+            data = str(data)
         return {
             "header": self.header,
-            "data": str(data).encode('utf-8', 'ignore').decode('unicode_escape'),
+            "data": data,
             "url": self.url,
             "method": METHOD_GROUP.get(str(self.method)),
             "protocol": self.protocol,
@@ -63,9 +67,17 @@ class Response(object):
             body = json.dumps(self.body, indent=4)
         except:
             body = str(self.body)
+        try:
+            body = str(body).encode('utf-8', 'ignore').decode('unicode_escape')
+        except:
+            body = str(body)
+        try:
+            header = str(self.header).encode('utf-8', 'ignore').decode('unicode_escape')
+        except:
+            headre = str(self.header)
         return {
-            "header": str(self.header).encode('utf-8', 'ignore').decode('unicode_escape'),
-            "body": str(body).encode('utf-8', 'ignore').decode('unicode_escape'),
+            "header": header,
+            "body": body,
             "code": self.code
         }
 
