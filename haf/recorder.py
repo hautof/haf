@@ -17,9 +17,10 @@ logger = Log.getLogger(__name__)
 
 
 class Recorder(Process):
-    def __init__(self, bus_client: BusClient, sql_config: SQLConfig, sql_publish: bool=False, runner_count: int=1, report_path:str="", case_name:str="", log_dir="", report_template_path="base"):
+    def __init__(self, bus_client: BusClient, sql_config: SQLConfig, sql_publish: bool=False, runner_count: int=1, report_path:str="", case_name:str="", log_dir="", report_template_path="base", args=None):
         super().__init__()
         self.bus_client = bus_client
+        self.args = args
         self.daemon = True
         self.results = EndResult(f"haf-{case_name}")
         self.runner_count = runner_count
@@ -75,6 +76,15 @@ class Recorder(Process):
         Jinja2Report.write_report_to_file(report, self.report_path)
         report = Jinja2Report.report(self.results, name=self.report_template_path)
         Jinja2Report.write_report_to_file(report, f"{self.log_dir}/report.html")
+        self.generate_export_report()
+
+    def generate_export_report(self):
+        if self.args and hasattr(self.args, "report_export_template") and self.args.report_export_template:
+            report = Jinja2Report.report(self.results, name=self.args.report_export_template)
+            if hasattr(self.args, "report_export_dir") and self.args.report_export_dir:
+                Jinja2Report.write_report_to_file(report, f"{self.args.report_export_dir}")
+            else:
+                Jinja2Report.write_report_to_file(report, f"{self.log_dir}/report-export.html")
 
     def end_handler(self):
         self.on_recorder_stop()

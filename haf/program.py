@@ -70,7 +70,7 @@ class Program(object):
         time.sleep(0.5)
 
     def _start_recorder(self, bus_client: BusClient, sql_config: SQLConfig=None, sql_publish: bool=False, count: int=1, report_path: str="", log_dir: str=""):
-        recorder = Recorder(bus_client, sql_config, sql_publish, count, report_path, self.case_name, log_dir, self.args.report_template)
+        recorder = Recorder(bus_client, sql_config, sql_publish, count, report_path, self.case_name, log_dir, self.args.report_template, self.args)
         recorder.start()
         time.sleep(0.1)
 

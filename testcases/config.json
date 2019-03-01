@@ -23,8 +23,10 @@
         "auth_key": ""
       },
       "report": {
-        "report_template": "D:/workspace/mine/python/haf/template/report/base.html",
-        "report_path": "D:/workspace/mine/python/haf/data/report.html"
+        "report_template": "D:/workspace/mine/python/haf/haf/ext/resource/report/base_email.html",
+        "report_path": "D:/workspace/mine/python/haf/data/report.html",
+        "report_export_template": "D:/workspace/mine/python/haf/haf/ext/resource/report/base_email.html",
+        "report_export_path": "D:/workspace/mine/python/haf/data/report-export.html"
       },
       "case": [
         {
