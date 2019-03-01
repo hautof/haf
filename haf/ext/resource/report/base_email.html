@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+
+    {% block head %}
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
+    {% endblock %}
+    <style type="text/css">
+        
+    table.gridtable {
+        width: 100%;
+        font-family: verdana,arial,sans-serif;
+        font-size:11px;
+        color:#333333;
+        border-width: 1px;
+        border-color: #666666;
+        border-collapse: collapse;
+    }
+    table.gridtable th {
+        border-width: 1px;
+        padding: 8px;
+        border-style: solid;
+        border-color: #666666;
+        background-color: #dedede;
+    }
+    table.gridtable td {
+        border-width: 1px;
+        padding: 8px;
+        border-style: solid;
+        border-color: #666666;
+        background-color: #ffffff;
+    }
+    </style>
+</head>
+<body>
+<div style="width:90%;margin:0 auto">
+    <div class="row clearfix">
+        <div class="col-md-12 column">
+            <div class="jumbotron well">
+                <div>
+                    <center><h2> {{results.name}} </h2></center>
+                    <br>
+                </div>
+                <table class="gridtable">
+                        <thead>
+                            <tr >
+                                <th>Platform</th>
+                                <th>Haf Version</th>
+                                <th>Suites</th>
+                                <th>Begin Time</th>
+                                <th>End Time</th>
+                                <th>Duration Time</th>
+                                <th>Pass</th>
+                                <th>Fail</th>
+                                <th>Error</th>
+                                <th>Skip</th>
+                                <th>All</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr >
+                                <td>{{results.platform}}</td>
+                                <td>{{results.version}}</td>
+                                <td>
+
+                                    <li><a onclick="showElement('all_suites')">all suites</a></li>
+                                    <ul id="all_suites" style="display:none">
+                                        {% block suite_temp %}
+                                        {% set i = 0 %}
+                                        {% for suite in results.suite_name %}
+                                        <li><a onclick="showElement('{{suite}}')">[{{suite}}]</a></li>
+                                        {% if i%3 == 0 %}
+                                        <br>
+                                        {% endif %}
+                                        {% set i = i + 1 %}
+                                        {% endfor %}
+                                        {% endblock %}
+                                    </ul>
+
+                                </td>
+                                <td>{{results.begin_time}}</td>
+                                {% if results.end_time %}
+                                <td>{{results.end_time}}</td>
+                                {% else %}
+                                <td>running...</td>
+                                {% endif %}
+                                <td>{{results.duration}}</td>
+                                <td><a onclick="showElement('all_pass')">{{results.passed}}</a></td>
+                                <td><a onclick="showElement('all_fail')">{{results.failed}}</a></td>
+                                <td><a onclick="showElement('all_error')">{{results.error}}</a></td>
+                                <td><a onclick="showElement('all_skip')">{{results.skip}}</a></td>
+                                <td>{{results.all}}</td>
+                            </tr>
+                        </tbody>
+                </table>
+                
+                <div style=" height:50px">
+                </script>
+                </div>
+            </div>
+        <div>
+            <table class="gridtable">
+                <thead>
+                    <tr>
+                        <th>Suite Name</th>
+                        <th>Base Url</th>
+                        <th>Begin Time</th>
+                        <th>End Time</th>
+                        <th>Duration Time</th>
+                        <th>Pass</th>
+                        <th>Fail</th>
+                        <th>Error</th>
+                        <th>Skip</th>
+                        <th>All</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for suite_summary in results.summary.keys() %}
+                    <tr>
+                    <td><a onclick="showElement('{{suite_summary}}')">{{suite_summary}}</a></td>
+                    <td>{{results.summary.get(suite_summary).base_url}}</td>
+                    <td>{{results.summary.get(suite_summary).begin_time}}</td>
+                    <td>{{results.summary.get(suite_summary).end_time}}</td>
+                    <td>{{results.summary.get(suite_summary).duration}}</td>
+                    <td><a onclick="showElements('{{suite_summary}}', 'pass')">{{results.summary.get(suite_summary).passed}}</a></td>
+                    <td><a onclick="showElements('{{suite_summary}}', 'failed')">{{results.summary.get(suite_summary).failed}}</a></td>
+                    <td><a onclick="showElements('{{suite_summary}}', 'error')">{{results.summary.get(suite_summary).error}}</a></td>
+                    <td><a onclick="showElements('{{suite_summary}}', 'skiped')">{{results.summary.get(suite_summary).skip}}</a></td>
+                    <td><a onclick="showElements('{{suite_summary}}', 'all')">{{results.summary.get(suite_summary).all}}</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

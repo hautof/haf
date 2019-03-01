@@ -42,6 +42,10 @@ def main_args():
     sub_run_arg_program.add_argument("--report-template", "-rt", type=str, default="base", dest="report_template",
                                      help="""default using base to generate report;
                                             customer template is support too""")
+    sub_run_arg_program.add_argument("--report-export-template", "-ret", type=str, dest="report_export_template",
+                                     help="""email report template""")
+    sub_run_arg_program.add_argument("--report-export-dir", "-red", type=str, dest="report_export_dir",
+                                     help="""email report dir""")
     sub_run_arg_program.add_argument("--log-dir", "-ld", type=str, dest="log_dir",
                                      help="""log output dir is needed!""")
     sub_run_arg_program.add_argument("--only-loader", "-ol", type=bool, default=False, dest="only_loader",
@@ -85,8 +89,13 @@ def main_args():
                     bus_config = config_run.get("bus")
                     args.only_bus = bus_config.get("only")
                     args.bus_server = None if bus_config.get("host") is None or bus_config.get("host")=="" else f"{bus_config.get('auth_key')}@{bus_config.get('host')}:{bus_config.get('host')}"
-                    args.report_output_dir = config_run.get("report").get("report_path")
-                    args.report_template = config_run.get("report").get("report_template", "None")
+
+                    config_run_report = config_run.get("report")
+                    args.report_output_dir = config_run_report.get("report_path")
+                    args.report_template = config_run_report.get("report_template", None)
+                    args.report_export_template = config_run_report.get("report_export_template", None)
+                    args.report_export_dir = config_run_report.get("report_export_path", None)
+
                     args.case = [ x.get("case_path") for x in config_run.get("case") ]
                     runner_config = config_run.get("runner")
                     args.runner_count = runner_config.get("count")
