@@ -79,12 +79,16 @@ class Recorder(Process):
         self.generate_export_report()
 
     def generate_export_report(self):
-        if self.args and hasattr(self.args, "report_export_template") and self.args.report_export_template:
-            report = Jinja2Report.report(self.results, name=self.args.report_export_template)
+        if self.args:
+            if hasattr(self.args, "report_export_template") and self.args.report_export_template:
+                report = Jinja2Report.report(self.results, name=self.args.report_export_template)
+            else:
+                report = Jinja2Report.report(self.results, name="base_email")
             if hasattr(self.args, "report_export_dir") and self.args.report_export_dir:
                 Jinja2Report.write_report_to_file(report, f"{self.args.report_export_dir}")
             else:
                 Jinja2Report.write_report_to_file(report, f"{self.log_dir}/report-export.html")
+        
 
     def end_handler(self):
         self.on_recorder_stop()

@@ -34,6 +34,8 @@ class Jinja2Report(object):
             template = "base_app.html"
         elif key == "base_app":
             template = "base_app.html"
+        elif key == "base_email":
+            template = "base_email.html"
         else:
             template = key
             if os.path.exists(template):
