@@ -33,17 +33,16 @@ class Request(object):
         self.url = f"{self.protocol}://{self.host_port}{self.url_part}"
 
     def deserialize(self):
+        flag = False
         try:
             data = json.dumps(self.data, indent=4)
+            data = str(self.data).encode('utf-8').decode('unicode')
+            flag = True
         except:
             data = str(self.data)
-        try:
-            data = str(data).encode('utf-8', 'ignore').decode('unicode_escape')
-        except:
-            data = str(data)
         return {
-            "header": self.header,
-            "data": data,
+            "header": str(self.header),
+            "data": data if flag else str(self.data),
             "url": self.url,
             "method": METHOD_GROUP.get(str(self.method)),
             "protocol": self.protocol,
@@ -63,21 +62,20 @@ class Response(object):
         self.code = inputs.get("code", {})
 
     def deserialize(self):
+        flag = False
         try:
             body = json.dumps(self.body, indent=4)
+            body = str(self.body).encode('utf-8').decode('unicode')
+            flag = True
         except:
             body = str(self.body)
         try:
-            body = str(body).encode('utf-8', 'ignore').decode('unicode_escape')
+            header = str(self.header).encode('utf-8').decode('unicode')
         except:
-            body = str(body)
-        try:
-            header = str(self.header).encode('utf-8', 'ignore').decode('unicode_escape')
-        except:
-            headre = str(self.header)
+            header = str(self.header)
         return {
-            "header": header,
-            "body": body,
+            "header": str(self.header),
+            "body": body if flag else str(self.body),
             "code": self.code
         }
 

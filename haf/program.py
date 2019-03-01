@@ -65,7 +65,7 @@ class Program(object):
         :return:
         '''
         for x in range(count):
-            runner = Runner(log_dir, bus_client)
+            runner = Runner(log_dir, bus_client, self.args)
             runner.start()
         time.sleep(0.5)
 

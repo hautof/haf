@@ -28,7 +28,7 @@ class Logger(Process):
             log_queue = self.bus_client.get_log()
             while True:
                 if log_queue.empty():
-                    time.sleep(0.1)
+                    time.sleep(0.01)
                     continue
                 log = log_queue.get()
                 self.log_handler(log)

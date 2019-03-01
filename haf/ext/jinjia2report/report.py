@@ -71,6 +71,7 @@ class Jinja2Report(object):
             stream.dump(report_path)
         except Exception as e:
             logger.error(e)
+            traceback.print_exc()
 
     @staticmethod
     def report_online(results: EndResult):
