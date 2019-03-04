@@ -43,7 +43,7 @@ class Loader(Process):
                             return
 
                 if temp is None:
-                    time.sleep(0.1)
+                    time.sleep(0.01)
                     continue
 
                 file_name = temp.get("file_name")
@@ -89,7 +89,7 @@ class Loader(Process):
                     self.put_web_message("web")
 
                 self.put_web_message("web")
-                time.sleep(0.1)
+                time.sleep(0.01)
         except Exception:
             raise FailLoaderException
 
