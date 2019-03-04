@@ -18,6 +18,7 @@ from haf.result import HttpApiResult, AppResult
 from haf.suite import HttpApiSuite, AppSuite
 from haf.utils import Utils
 import traceback
+import asyncio
 
 logger = Log.getLogger(__name__)
 
@@ -101,22 +102,35 @@ class Runner(Process):
             self.web_queue = self.bus_client.get_publish_runner()
             self.case_handler_queue = self.bus_client.get_case()
             self.result_handler_queue = self.bus_client.get_result()
+            loop = asyncio.get_event_loop()
+            cases = []
             while True:
                 if not self.case_handler_queue.empty() :
                     case = self.case_handler_queue.get()
                     if case == SIGNAL_CASE_END:
-                        self.end_handler()
                         break
-                    result = self.run_case(case)
+                    cases.append(case)
+                time.sleep(0.1)
+            try:
+                results = loop.run_until_complete(self.run_cases(cases))
+                for result in results:
                     if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
                         self.put_result("result", result)
-                
-                time.sleep(0.1)
+            finally:
+                loop.close()
+                self.end_handler()
         except Exception as e:
             logger.error(f"{self.key} : {e}")
             raise FailRunnerException
 
-    def run_case(self, local_case):
+    async def run_cases(self, local_cases):
+        done, pending = await asyncio.wait([self.run_case(local_case) for local_case in local_cases])
+        results = []
+        for r in done:
+            results.append(r.result())
+        return results
+
+    async def run_case(self, local_case):
         if isinstance(local_case, HttpApiCase):
             result = HttpApiResult()
         elif isinstance(local_case, AppCase):
@@ -128,14 +142,13 @@ class Runner(Process):
                 self.result_handler(local_case)
                 self.init_runner(local_case)
                 if local_case.type == CASE_TYPE_HTTPAPI:
-                    api_runner = ApiRunner(self.bench)
-                    result = api_runner.run(local_case)
+                    runner = ApiRunner(self.bench)
                 elif local_case.type == CASE_TYPE_PY:
-                    py_runner = PyRunner(self.bench)
-                    result = py_runner.run(local_case)
+                    runner = PyRunner(self.bench)
                 elif local_case.type == CASE_TYPE_APP:
-                    app_runner = AppRunner(self.bench, self.log_dir)
-                    result = app_runner.run(local_case)
+                    runner = AppRunner(self.bench, self.log_dir)
+                
+                result = await runner.run(local_case)
 
                 if isinstance(result, list):
                     if result[0] == CASE_CAN_NOT_RUN_HERE:
@@ -196,7 +209,7 @@ class PyRunner(BaseRunner):
         self.bench = bench
         self.key = ""
 
-    def run(self, case:PyCase):
+    async def run(self, case:PyCase):
         result = HttpApiResult()
         self.key = case.log_key
         result.on_case_begin()
@@ -252,7 +265,7 @@ class ApiRunner(BaseRunner):
         self.bench = bench
         self.key = ""
 
-    def run(self, case:HttpApiCase):
+    async def run(self, case:HttpApiCase):
         '''
         run the HttpApiCase
         :param case: HttpApiCase
@@ -369,7 +382,7 @@ class AppRunner(BaseRunner):
             logger.error(f"{self.key}: {e}")
             return 
 
-    def run(self, case: AppCase):
+    async def run(self, case: AppCase):
         '''
         run the AppCase
         :param case: AppCase
