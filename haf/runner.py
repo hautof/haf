@@ -89,13 +89,11 @@ class Runner(Process):
                     "bench_name":result.bench_name
                 }
             }
-
         # logger.info(f"{self.key} : runner {self.pid} -- put web message {self.runner}")
         self.put_web_message("web")
 
     def run(self):
         try:
-            #self.bus_client = BusClient()
             self.runner_key = f"{self.pid}$%runner$%"
             self.runner["key"] = f"{self.pid}"
             logger.info(f"{self.runner_key} start runner")
@@ -105,20 +103,33 @@ class Runner(Process):
             loop = asyncio.get_event_loop()
             cases = []
             while True:
+                flag = False
                 if not self.case_handler_queue.empty() :
                     case = self.case_handler_queue.get()
                     if case == SIGNAL_CASE_END:
-                        break
-                    cases.append(case)
-                time.sleep(0.1)
-            try:
-                results = loop.run_until_complete(self.run_cases(cases))
-                for result in results:
-                    if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
-                        self.put_result("result", result)
-            finally:
-                loop.close()
-                self.end_handler()
+                        flag = True
+                    if isinstance(case, HttpApiCase):
+                        cases.append(case)
+                        time.sleep(0.01)
+                        if len(cases)>0 and (len(cases)==3 or flag):
+                            results = loop.run_until_complete(self.run_cases(cases))
+                            for result in results:
+                                if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
+                                    self.put_result("result", result)
+                            cases = []
+                    elif isinstance(case, (AppCase, PyCase)):
+                        cases.append(case)
+                        time.sleep(0.01)
+                        if len(cases)>0 and (len(cases)==1 or flag):
+                            results = loop.run_until_complete(self.run_cases(cases))
+                            for result in results:
+                                if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
+                                    self.put_result("result", result)
+                            cases = []
+                if flag:
+                    break
+            loop.close()
+            self.end_handler()
         except Exception as e:
             logger.error(f"{self.key} : {e}")
             raise FailRunnerException
@@ -135,6 +146,8 @@ class Runner(Process):
             result = HttpApiResult()
         elif isinstance(local_case, AppCase):
             result = AppResult()
+        elif isinstance(local_case, PyCase):
+            result = HttpApiResult()
         try:
             try:
                 self.key = local_case.log_key
