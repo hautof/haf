@@ -31,7 +31,7 @@ class Loader(Process):
                 if self.get_parameter() == SIGNAL_START:
                     logger.info(f"{self.key} -- get start signal from main")
                     break
-                time.sleep(0.1)
+                time.sleep(0.01)
 
             while True:
 

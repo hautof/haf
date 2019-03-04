@@ -23,7 +23,7 @@ logger = Log.getLogger(__name__)
 
 
 class Runner(Process):
-    def __init__(self, log_dir: str, bus_client: BusClient):
+    def __init__(self, log_dir: str, bus_client: BusClient, args):
         super().__init__()
         self.daemon = True
         self.bus_client = bus_client
@@ -34,6 +34,7 @@ class Runner(Process):
         self.lock = False
         self.runner = {"get": 0, "skip": 0, "run": {}, "done":[], "key": 0}
         self.log_dir = log_dir
+        self.args = args
 
     def load(self):
         pass
@@ -56,8 +57,9 @@ class Runner(Process):
 
     @locker
     def put_web_message(self, key:str):
-        if self.web_queue.full():
-            self.web_queue.get()
+        if self.args.web_server:
+            if self.web_queue.full():
+                self.web_queue.get()
             self.web_queue.put(self.runner)
 
     @locker
@@ -108,6 +110,7 @@ class Runner(Process):
                     result = self.run_case(case)
                     if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
                         self.put_result("result", result)
+                
                 time.sleep(0.1)
         except Exception as e:
             logger.error(f"{self.key} : {e}")
