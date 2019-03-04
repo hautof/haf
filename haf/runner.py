@@ -111,7 +111,7 @@ class Runner(Process):
                     if isinstance(case, HttpApiCase):
                         cases.append(case)
                         time.sleep(0.01)
-                        if len(cases)>0 and (len(cases)==3 or flag):
+                        if len(cases)>0 and (len(cases)>=3 or flag):
                             results = loop.run_until_complete(self.run_cases(cases))
                             for result in results:
                                 if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
@@ -120,7 +120,7 @@ class Runner(Process):
                     elif isinstance(case, (AppCase, PyCase)):
                         cases.append(case)
                         time.sleep(0.01)
-                        if len(cases)>0 and (len(cases)==1 or flag):
+                        if len(cases)>0 and (len(cases)>=1 or flag):
                             results = loop.run_until_complete(self.run_cases(cases))
                             for result in results:
                                 if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
