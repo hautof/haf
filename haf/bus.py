@@ -28,7 +28,7 @@ class BusServer(Process):
         self.queue_manager = None
         self.server = None
         self.is_stop = False
-        self.daemon = True
+        self.daemon = True # Here to make bus exit when main progress end
 
     def start_manager_server(self):
         '''

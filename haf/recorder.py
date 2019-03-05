@@ -34,9 +34,15 @@ class Recorder(Process):
         self.sql_publish =  sql_publish
 
     def on_recorder_start(self):
+        '''
+        recorder start time
+        '''
         self.results.begin_time = Utils.get_datetime_now()
 
     def on_recorder_stop(self):
+        '''
+        recorder stop time
+        '''
         self.results.end_time = Utils.get_datetime_now()
         self.results.duration = Utils.get_date_result(self.results.begin_time, self.results.end_time)
         for suite_name in self.results.summary.keys():
@@ -88,7 +94,6 @@ class Recorder(Process):
                 Jinja2Report.write_report_to_file(report, f"{self.args.report_export_dir}")
             else:
                 Jinja2Report.write_report_to_file(report, f"{self.log_dir}/report-export.html")
-        
 
     def end_handler(self):
         self.on_recorder_stop()
@@ -97,7 +102,6 @@ class Recorder(Process):
         self.publish_to_mysql()
         logger.info(f"{self.recorder_key} end recorder")
         self.send_record_end_signal()
-
 
     def send_record_end_signal(self):
         system_handler = self.bus_client.get_system()
@@ -141,6 +145,9 @@ class Recorder(Process):
             self.on_case_error(suite_name)
 
     def add_result_to_suite(self, result):
+        '''
+        add result to suite which case belong to.
+        '''
         if result.case.bench_name not in self.results.suite_name:
             self.results.suite_name.append(result.case.bench_name)
             case = result.case
@@ -170,6 +177,9 @@ class Recorder(Process):
         self.publish_result.put(self.results)
 
     def publish_to_mysql(self):
+        '''
+        publish results to mysql database
+        '''
         if self.sql_publish:
             logger.info(f"publish results {self.results} to mysql!")
             from haf.ext.sqlpublish.publish import Publish

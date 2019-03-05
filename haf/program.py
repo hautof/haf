@@ -187,6 +187,7 @@ class Program(object):
         except KeyboardInterrupt as key_inter:
             self.bus_client.get_param().put(SIGNAL_STOP)
 
+    # TODO: Here need CMDER to support cmd command ...
     def _run_cmd(self, cmd):
         if cmd == "rerun" or cmd == "r":
             result = self._rerun()
