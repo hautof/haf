@@ -39,11 +39,13 @@ class Program(object):
         :return: None
         '''
         if local:
-            pass
+            return
+        elif self.args.bus_server_port:
+            self.bus_server = BusServer(self.args.bus_server_port)
         else:
             self.bus_server = BusServer()
-            self.bus_server.start()
-            time.sleep(0.5)
+        self.bus_server.start()
+        time.sleep(0.5)
 
     def _start_loader(self, count: int, bus_client: BusClient):
         '''
@@ -92,6 +94,8 @@ class Program(object):
     def _bus_client(self, args):
         if isinstance(args.bus_server, list):
             self.bus_client = BusClient(args.bus_server[1], args.bus_server[2], args.bus_server[0])
+        elif args.bus_server_port:
+            self.bus_client = BusClient(None, args.bus_server_port, None)
         else:
             self.bus_client = BusClient()
 
@@ -162,6 +166,8 @@ class Program(object):
             self._init_system_lock(args)
             while True:
                 time.sleep(1)
+        else:
+            logger.info("not only bus mode")
 
     def only_loader(self, args):
         if args.only_loader:

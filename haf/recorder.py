@@ -54,6 +54,7 @@ class Recorder(Process):
         try:
             self.on_recorder_start()
             self.recorder_key = f"{self.pid}$%recorder$%"
+            logger.bind_busclient(self.bus_client)
             logger.info(f"{self.recorder_key} start recorder ")
             #self.bus_client = BusClient()
             self.results_handler = self.bus_client.get_result()

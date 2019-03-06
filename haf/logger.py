@@ -18,6 +18,7 @@ class Logger(Process):
         self.log_dir = log_dir
 
     def run(self):
+        logger.bind_busclient(self.bus_client)
         logger.info("start system logger")
         log_home = f"{self.log_dir}/{self.case_name}"
         if not os.path.exists(log_home):

@@ -14,6 +14,9 @@ class BaseLogger(metaclass=SingletonType):
         self.logger = logging.getLogger(self.logger_name)
         self.bus_client = None
 
+    def bind_busclient(self, bus_client: BusClient):
+        self.bus_client = BusClient(bus_client.domain, bus_client.port, bus_client.auth_key)
+
     def debug(self, msg):
         self.msg_write(str(msg))
         #self.logger.debug(msg)

@@ -32,6 +32,8 @@ def main_args():
     sub_run_arg_program.add_argument("--bus-server", "-bs", dest="bus_server", type=str, default=None,
                                      help="""default is localhost to run bus server;
                                              if is ip or domain, would not run local bus-server, and using ip to connect""")
+    sub_run_arg_program.add_argument("--bus-server-port", "-bsp", dest="bus_server_port", type=int,
+                                     help="""default is 9000, using another port to start bus server""")
     sub_run_arg_program.add_argument("--web-server", "-ws", type=bool,
                                      help="""default is not run;
                                              if is True, would create web server to offer the api and html service;""")
@@ -87,6 +89,7 @@ def main_args():
                     args.name = config.get("name")
                     args.log_dir = config_run.get("log").get("log_path")
                     bus_config = config_run.get("bus")
+                    args.bus_server_port = config_run.get("bus_server_port")
                     args.only_bus = bus_config.get("only")
                     args.bus_server = None if bus_config.get("host") is None or bus_config.get("host")=="" else f"{bus_config.get('auth_key')}@{bus_config.get('host')}:{bus_config.get('host')}"
 
@@ -143,21 +146,22 @@ def main_args():
             pass
 
         # here : case <- dir/file
-        cases = []
-        for case in args.case:
-            cases.append(case)
-        args.case = []
-        for path in cases:
-            if not path.endswith(".py") and not path.endswith(".yml") and not path.endswith(".json") and not path.endswith(".xlsx"):
-                if os.path.exists(path) and os.path.isdir(path):
-                    file_list = os.listdir(path)
-                    for f in file_list:
-                        if f.startswith("test_") and (f.endswith(".py") or f.endswith(".yml") or f.endswith(".json") or f.endswith(".xlsx")):
-                            args.case.append(os.path.join(path, f))
+        if args.case:
+            cases = []
+            for case in args.case:
+                cases.append(case)
+            args.case = []
+            for path in cases:
+                if not path.endswith(".py") and not path.endswith(".yml") and not path.endswith(".json") and not path.endswith(".xlsx"):
+                    if os.path.exists(path) and os.path.isdir(path):
+                        file_list = os.listdir(path)
+                        for f in file_list:
+                            if f.startswith("test_") and (f.endswith(".py") or f.endswith(".yml") or f.endswith(".json") or f.endswith(".xlsx")):
+                                args.case.append(os.path.join(path, f))
+                    else:
+                        print("found wrong case path ...")
                 else:
-                    print("found wrong case path ...")
-            else:
-                args.case.append(path)
+                    args.case.append(path)
 
         print(args)
         main_program = Program()

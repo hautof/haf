@@ -96,6 +96,7 @@ class Runner(Process):
         try:
             self.runner_key = f"{self.pid}$%runner$%"
             self.runner["key"] = f"{self.pid}"
+            logger.bind_busclient(self.bus_client)
             logger.info(f"{self.runner_key} start runner")
             self.web_queue = self.bus_client.get_publish_runner()
             self.case_handler_queue = self.bus_client.get_case()

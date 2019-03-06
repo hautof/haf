@@ -20,10 +20,10 @@ class BusServer(Process):
     '''
     # BusServer the bus server process
     '''
-    def __init__(self):
+    def __init__(self, port: int = None):
         super().__init__()
         self.domain = BUS_DOMAIN
-        self.port = BUS_PORT
+        self.port = BUS_PORT if not port else port
         self.auth_key = BUS_AUTH_KEY
         self.queue_manager = None
         self.server = None
