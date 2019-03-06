@@ -6,7 +6,7 @@ from haf.busclient import BusClient
 from haf.common.sigleton import SingletonType
 
 
-class BaseLogger(metaclass=SingletonType):
+class BaseLogger(object):
 
     def __init__(self, logger_name):
         self.logger_name = logger_name
