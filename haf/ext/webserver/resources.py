@@ -11,6 +11,15 @@ globalenv.set_global("runners", {})
 globalenv.set_global("results", EndResult())
 
 
+class CaseResource(Resource):
+    def __init__(self):
+        super().__init__()
+        self.bus_client = BusClient()
+
+    def get(self):
+        pass
+
+
 class ResultResource(Resource):
     def __init__(self):
         super().__init__()

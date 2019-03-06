@@ -15,7 +15,7 @@ class Request(object):
         self.host_port = ""
         self.url_part = ""
 
-    def constructor(self, inputs:dict={}):
+    def constructor(self, inputs: dict={}):
         header = inputs.get("request_header")
         self.header = json.loads(header) if isinstance(header, str) else header
         data = inputs.get("request_data")

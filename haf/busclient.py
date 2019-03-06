@@ -71,3 +71,6 @@ class BusClient(metaclass=SingletonType):
 
     def get_publish_runner(self):
         return self.info_manager.get_publish_runner()
+
+    def __new__(cls, *args, **kwargs):
+        return object.__new__(cls)
