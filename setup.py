@@ -17,7 +17,8 @@ requires = [
     'jinja2',
     'pyaml',
     'deepdiff',
-    'setuptools'
+    'setuptools',
+    'hafapiserver'
         ]
 
 with open('ReadMe.md', encoding='utf8') as f:
