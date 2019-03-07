@@ -183,7 +183,13 @@ class Recorder(Process):
         '''
         if self.sql_publish:
             logger.info(f"publish results {self.results} to mysql!")
-            from haf.ext.sqlpublish.publish import Publish
-            publish = Publish(self.sql_config)
-            publish.publish_result(self.results)
+            import_ok = False
+            try:
+                from hafsqlpublish.publish import Publish
+                import_ok = True
+            except Exception as e:
+                logger.error("Plugin hafsqlpublish is not installed, using 'pip install hafapiserver -U' to install")
+            if import_ok:
+                publish = Publish(self.sql_config)
+                publish.publish_result(self.results)
 

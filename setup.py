@@ -18,7 +18,8 @@ requires = [
     'pyaml',
     'deepdiff',
     'setuptools',
-    'hafapiserver'
+    'hafapiserver',
+    'hafsqlpublish'
         ]
 
 with open('ReadMe.md', encoding='utf8') as f:
