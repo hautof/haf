@@ -1,9 +1,7 @@
 # -*- encoding:utf-8 -*-
 
 import logging
-
 from haf.busclient import BusClient
-from haf.common.sigleton import SingletonType
 
 
 class BaseLogger(object):

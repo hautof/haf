@@ -15,7 +15,6 @@ from haf.common.database import SQLConfig
 from haf.common.lock import Lock
 from haf.config import *
 from haf.common.exception import *
-from haf.ext.webserver.app import web_server
 from haf.helper import Helper
 from haf.loader import Loader
 from haf.logger import Logger
@@ -78,6 +77,7 @@ class Program(object):
 
     def _init_logging_module(self, args):
         logging.basicConfig(level=logging.INFO if not args.debug else logging.DEBUG, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')
+        pass
 
     def _init_system_logger(self, log_dir: str, bus_client: BusClient):
         log = Logger(self.case_name, log_dir, bus_client)
@@ -112,8 +112,13 @@ class Program(object):
 
     def _start_web_server(self, args):
         if args.web_server:
-            ws = Process(target=web_server, daemon=True)
-            ws.start()
+            try:
+                from hafapiserver.app import web_server
+                ws = Process(target=web_server, daemon=True)
+                ws.start()
+            except Exception as e:
+                logger.error("Plugin hafapiserver is not installed, using 'pip install hafapiserver -U' to install")
+                logger.error(e)
 
     def run(self, args):
         try:
