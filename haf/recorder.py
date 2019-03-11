@@ -188,7 +188,7 @@ class Recorder(Process):
                 from hafsqlpublish.publish import Publish
                 import_ok = True
             except Exception as e:
-                logger.error("Plugin hafsqlpublish is not installed, using 'pip install hafapiserver -U' to install")
+                logger.error("Plugin hafsqlpublish is not installed, using 'pip install hafsqlpublish -U' to install")
             if import_ok:
                 publish = Publish(self.sql_config)
                 publish.publish_result(self.results)
