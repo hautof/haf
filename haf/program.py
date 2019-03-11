@@ -114,7 +114,7 @@ class Program(object):
         if args.web_server:
             try:
                 from hafapiserver.app import web_server
-                ws = Process(target=web_server, daemon=True)
+                ws = Process(target=web_server, args=(self.bus_client,), daemon=True)
                 ws.start()
             except Exception as e:
                 logger.error("Plugin hafapiserver is not installed, using 'pip install hafapiserver -U' to install")
