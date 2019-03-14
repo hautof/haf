@@ -28,7 +28,7 @@ class Jinja2Report(object):
     def get_template(key: str) -> None:
         if key == "base" or key == "online":
             template = "base.html"
-        elif key == "online-app" or key == "base_app":
+        elif key in ["online-app", "base_app", "online-web", "base_web"]:
             template = "base_app.html"
         elif key == "base_email":
             template = "base_email.html"

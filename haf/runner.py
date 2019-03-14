@@ -6,17 +6,18 @@ from multiprocessing import Process
 from haf.apihelper import Request, Response
 from haf.apphelper import Stage, BasePage, save_screen_shot
 from haf.asserthelper import AssertHelper
-from haf.bench import HttpApiBench, BaseBench, AppBench
+from haf.bench import HttpApiBench, BaseBench, AppBench, WebBench
 from haf.busclient import BusClient
-from haf.case import HttpApiCase, BaseCase, PyCase, AppCase
+from haf.case import HttpApiCase, BaseCase, PyCase, AppCase, WebCase
 from haf.common.database import SQLConfig
 from haf.common.exception import FailRunnerException
 from haf.common.log import Log
 from haf.config import *
 from haf.mark import locker
-from haf.result import HttpApiResult, AppResult
+from haf.result import HttpApiResult, AppResult, WebResult
 from haf.suite import HttpApiSuite, AppSuite
 from haf.utils import Utils
+from haf.webhelper import *
 import traceback
 import asyncio
 
@@ -115,16 +116,16 @@ class Runner(Process):
                         if len(cases)>0 and (len(cases)>=3 or flag):
                             results = loop.run_until_complete(self.run_cases(cases))
                             for result in results:
-                                if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
+                                if isinstance(result, (HttpApiResult, AppResult, WebResult)):
                                     self.put_result("result", result)
                             cases = []
-                    elif isinstance(case, (AppCase, PyCase)):
+                    elif isinstance(case, (AppCase, PyCase, WebCase)):
                         cases.append(case)
                         time.sleep(0.01)
                         if len(cases)>0 and (len(cases)>=1 or flag):
                             results = loop.run_until_complete(self.run_cases(cases))
                             for result in results:
-                                if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
+                                if isinstance(result, (HttpApiResult, AppResult, WebResult)):
                                     self.put_result("result", result)
                             cases = []
                 if flag:
@@ -149,6 +150,8 @@ class Runner(Process):
             result = AppResult()
         elif isinstance(local_case, PyCase):
             result = HttpApiResult()
+        elif isinstance(local_case, WebCase):
+            result = WebResult()
         try:
             try:
                 self.key = local_case.log_key
@@ -161,6 +164,8 @@ class Runner(Process):
                     runner = PyRunner(self.bench)
                 elif local_case.type == CASE_TYPE_APP:
                     runner = AppRunner(self.bench, self.log_dir)
+                elif local_case.type == CASE_TYPE_WEBUI:
+                    runner = WebRunner(self.bench, self.log_dir)
                 
                 result = await runner.run(local_case)
 
@@ -432,7 +437,7 @@ class AppRunner(BaseRunner):
                 png_dir = f"{self.log_dir}"
                 png_name = f"{case.bench_name}.{case.ids.id}.{case.ids.subid}.{case.ids.name}.{key}"
                 png_before = save_screen_shot(driver, png_dir, f"{png_name}-before")
-                self.run_stage(case, page, case.stages.get(key), result)
+                self.run_stage(case, page, case.stages.get(key, Stage()), result)
                 png_after = save_screen_shot(driver, png_dir, f"{png_name}-after")
                 case.pngs[key] = {"before": f"./png/{png_name}-before.png", "after": f"./png/{png_name}-after.png"}
             result.case = case
@@ -458,6 +463,119 @@ class AppRunner(BaseRunner):
             time.sleep(stage.time_sleep)
         except Exception as e:
             logger.error(f"{self.key} : {stage.id} -- {e}")
+            result.run_error = f"{stage.id} : {e}"
+            if not stage.show_try:
+                raise e
+
+
+class WebRunner(BaseRunner):
+    '''
+    WebRunner
+    '''
+    def __init__(self, bench: WebBench, log_dir):
+        super().__init__(bench)
+        self.bench = bench
+        self.key = ""
+        self.log_dir = log_dir
+
+    def wait_activity(self, activity, timeout, driver):
+        """Wait for an activity: block until target activity presents
+        or time out.
+        This is an Android-only method.
+        :Agrs:
+        - activity - target activity
+        - timeout - max wait time, in seconds
+        - interval - sleep interval between retries, in seconds
+        """
+        try:
+            i = 0
+            while i<timeout:
+                logger.info(f"{self.key}: current activity is {driver.current_activity}")
+                if driver.current_activity == activity:
+                    return
+                time.sleep(1)
+                i += 1
+        except Exception as e:
+            logger.error(f"{self.key}: {e}")
+            return 
+    
+    def create_web_driver(self, desired_caps: WebDesiredCaps):
+        from selenium import webdriver
+        if desired_caps.platformName == "chrome":
+            return webdriver.Chrome()
+        elif desired_caps.platformName == "firefox":
+            return webdriver.Firefox()
+        elif desired_caps.platformName == "ie":
+            return webdriver.Ie()
+        elif desired_caps.platformName == "safari":
+            return webdriver.Safari()
+        elif desired_caps.platformName == "opera":
+            return webdriver.Opera()
+
+    async def run(self, case: WebCase):
+        '''
+        run the AppCase
+        :param case: AppCase
+        :return: result: AppResult
+        '''
+        self.key = case.log_key
+        result = WebResult()
+        result.on_case_begin()
+        if not self.check_case_run_here(case) :
+            result.on_case_end()
+            return [CASE_CAN_NOT_RUN_HERE, result]
+        if not self.check_case_run(case): # not False is skip
+            result.case = case
+            result.on_case_end()
+            result.result = RESULT_SKIP
+            return [CASE_SKIP, result]
+
+        logger.info(f"{self.key} : WebRunner run - {case.ids.id}.{case.ids.subid}-{case.ids.name}")
+        try:
+            result.case = case
+            driver = self.create_web_driver(case.desired_caps)
+            logger.info(f"{self.key} : wait web {case.desired_caps.platformName} start ...")
+            driver.get(case.desired_caps.start_url)
+            driver.maximize_window()
+            if case.wait_activity:
+                time.sleep(5)
+                self.wait_activity(case.wait_activity, case.time_sleep, driver)
+            else:
+                time.sleep(case.time_sleep)
+            logger.info(f"{self.key} : driver is {driver}")
+            page = BasePage(driver)
+            for key in range(1, len(case.stages.keys())+1):
+                logger.info(f"{self.key} : {key} == {case.stages.get(key).deserialize()}")
+                png_dir = f"{self.log_dir}"
+                png_name = f"{case.bench_name}.{case.ids.id}.{case.ids.subid}.{case.ids.name}.{key}"
+                png_before = web_save_screen_shot(driver, png_dir, f"{png_name}-before")
+                self.run_stage(case, page, case.stages.get(key, WebStage()), result)
+                png_after = web_save_screen_shot(driver, png_dir, f"{png_name}-after")
+                case.pngs[key] = {"before": f"./png/{png_name}-before.png", "after": f"./png/{png_name}-after.png"}
+            result.case = case
+            result.result = RESULT_PASS
+        except Exception as e:
+            logger.error(f"{self.key} : {e}")
+            result.run_error = e
+            result.result = RESULT_ERROR
+        result.on_case_end()
+        return result
+
+    def run_stage(self, case, page, stage: Stage=WebStage(), result: WebResult=WebResult()):
+        try:
+            paths = stage.path
+            operation = stage.operation
+            logger.info(f"{self.key} -- {OPERATION_WEB_ANTI_GROUP[operation]}")
+            if  operation== OPERATION_WEB_CLICK:
+                page.click(paths)
+            elif operation == OPERATION_WEB_SENDKEYS:
+                page.send_keys(paths, stage.info.get("keys"))
+            elif operation == OPERATION_WEB_SWIPE:
+                page.swipe(stage.info.get("direction"))
+            time.sleep(stage.time_sleep)
+        except Exception as e:
+            logger.error(f"{self.key} : {stage.id} -- {e}")
+            traceback.print_exc()
             result.run_error = f"{stage.id} : {e}"
             if not stage.show_try:
                 raise e

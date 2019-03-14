@@ -5,6 +5,7 @@ from haf.apihelper import Request, Response, Ids, Expect, SqlInfo
 from haf.apphelper import Stage, AppIds, DesiredCaps
 from haf.config import *
 from haf.common.log import Log
+from haf.webhelper import *
 
 logger = Log.getLogger(__name__)
 
@@ -201,6 +202,74 @@ class AppCase(BaseCase):
         self.wait_activity = args_init.get("wait_activity", None)
         for s in args_init.get("stage"):
             stage = Stage()
+            stage.constructor(s)
+            self.stages[stage.id] = stage
+
+    def bind_bench(self, bench_name):
+        self.bench_name = bench_name
+        self.generate_log_key()
+
+    def generate_log_key(self):
+        self.log_key = self.key = f"{self.bench_name}$%{self.ids.id}.{self.ids.subid}.{self.ids.name}$%"
+
+    def deserialize(self):
+        return {
+            "ids": self.ids.deserialize(),
+            "run": self.run,
+            "dependent": self.dependent,
+            "bench_name": self.bench_name,
+            "stage": [stage.deserialize() for stage in self.stages.values()],
+            "type": self.type,
+            "desired_caps": self.desired_caps.deserialize(),
+            "pngs": self.pngs,
+            "sleep": self.time_sleep,
+            "wait_activity": self.wait_activity
+        }
+
+
+class WebCase(BaseCase):
+    def __init__(self):
+        super().__init__()
+        self.mark = CASE_MARK_WEB
+        self.type = CASE_TYPE_WEBUI
+        self.message_type = MESSAGE_TYPE_CASE
+        self.log_key = ""
+        self._init_all()
+
+    def _init_all(self):
+        self.ids = WebIds()
+        self.run = CASE_RUN
+        self.dependent = []
+        self.bench_name = ""
+        self.stages = {}
+        self.log_key = ""
+        self.wait_activity = ""
+        self.desired_caps = WebDesiredCaps()
+        self.error = None
+        self.sqlinfo = SqlInfo()
+        self.time_sleep = 5
+        self.pngs = {}
+
+    def constructor(self, *args, **kwargs):
+        '''
+        :param args:
+        :param kwargs:
+        :return:
+        '''
+        args_init = {}
+        if len(args) > 0 and isinstance(args[0], dict):
+            args_init = args[0]
+        else:
+            args_init = kwargs
+        self.ids.constructor(args_init)
+        self.time_sleep = args_init.get("wait_time") or 5
+        self.run = CASE_RUN if args_init.get("run") is True else CASE_SKIP
+        self.dependent = [x for x in str(args_init.get("dependent")).split(";") if args_init.get("dependent") is not None]
+        self.desired_caps.constructor(args_init.get("desired_caps"))
+        self.stages = {}
+        self.wait_activity = args_init.get("wait_activity", None)
+        for s in args_init.get("stage"):
+            stage = WebStage()
             stage.constructor(s)
             self.stages[stage.id] = stage
 

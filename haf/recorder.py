@@ -4,11 +4,11 @@ import time
 from multiprocessing import Process
 
 from haf.busclient import BusClient
-from haf.case import HttpApiCase, BaseCase, PyCase
+from haf.case import HttpApiCase, BaseCase, PyCase, WebCase, AppCase
 from haf.common.database import SQLConfig
 from haf.common.exception import FailRecorderException
 from haf.common.log import Log
-from haf.result import HttpApiResult, EndResult, Detail, Summary, AppResult
+from haf.result import HttpApiResult, EndResult, Detail, Summary, AppResult, WebResult
 from haf.config import *
 from haf.utils import Utils
 from haf.ext.jinjia2report.report import Jinja2Report
@@ -62,8 +62,8 @@ class Recorder(Process):
             while True:
                 if not self.results_handler.empty() :
                     result = self.results_handler.get()
-                    if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
-                        if isinstance(result.case, HttpApiCase) or isinstance(result.case, BaseCase) or isinstance(result.case, PyCase):
+                    if isinstance(result, (HttpApiResult, AppResult, WebResult)):
+                        if isinstance(result.case, (HttpApiCase, BaseCase, PyCase, WebCase, AppCase)):
                             logger.info(f"{self.recorder_key} recorder--{result.case.bench_name}.{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {result.result}")
                         else:
                             logger.info(f"{self.recorder_key} recorder ! wrong result!")

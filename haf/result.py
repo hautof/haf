@@ -102,6 +102,46 @@ class AppResult(BaseResult):
         }
 
 
+class WebResult(BaseResult):
+    def __init__(self):
+        super().__init__()
+        self.message_type = MESSAGE_TYPE_RESULT
+        self._init_all()
+
+    def _init_all(self):
+        self.case = None
+        self.run_error = None
+        self.result = False
+        self.begin_time = None
+        self.end_time = None
+        self.log_dir = ""
+        self.runner = ""
+        self.pngs = {}
+
+    def on_case_begin(self):
+        self.begin_time = Utils.get_datetime_now()
+
+    def on_case_end(self):
+        self.end_time = Utils.get_datetime_now()
+        self.duration = Utils.get_date_result(self.begin_time, self.end_time)
+
+    def bind_runner(self, runner:int=0):
+        self.runner = runner
+
+    def deserialize(self):
+        return {
+            "case_name": f"{self.case.ids.id}.{self.case.ids.subid}.{self.case.ids.name}",
+            "run_error": self.run_error,
+            "result": RESULT_GROUP.get(str(self.result)),
+            "begin_time": self.begin_time,
+            "end_time": self.end_time,
+            "case": self.case.deserialize(),
+            "log_dir": self.log_dir,
+            "runner": self.runner,
+            "pngs": self.pngs
+        }
+
+
 class Detail(object):
     def __init__(self, suite_name):
         self.suite_name = suite_name
