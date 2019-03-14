@@ -1,3 +1,11 @@
+> 2.6.2
+
+- support selenium web ui case
+
+> version 2.6.1
+
+- split sqlpublish & webserver to plugin mode
+
 > version 2.4.6
 
 - fix some bugs
