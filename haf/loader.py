@@ -4,7 +4,7 @@ from multiprocessing import Process
 from haf.bench import HttpApiBench
 from haf.busclient import BusClient
 from haf.common.database import SQLConfig
-from haf.case import HttpApiCase, PyCase, AppCase
+from haf.case import HttpApiCase, PyCase, AppCase, WebCase
 from haf.common.exception import FailLoaderException
 from haf.common.log import Log
 from haf.config import *
@@ -70,8 +70,10 @@ class Loader(Process):
                         input["host_port"] = inputs.get("config")[0].get("host_port")
                     if "api_name" in input.keys():
                         case = HttpApiCase()
-                    elif "stage" in input.keys():
+                    elif input.get("type") == "app":
                         case = AppCase()
+                    elif input.get("type") == "web":
+                        case = WebCase()
                     else:
                         case = PyCase(module_name, module_path)
                     try:
