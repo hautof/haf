@@ -12,7 +12,7 @@
 
 ### new features
 
-- now support app-ui cases and generate report
+- now support app-ui/web-ui cases and generate report
 
 - support mysql result publish
 
@@ -66,6 +66,28 @@ or
     git clone https://github.com/tsbxmw/haf-sample
 ```
 
+
+#### run it in dir haf-sample
+
+##### run api case
+
+```bash
+    python -m haf run -c=config.json
+```
+
+##### run web ui case
+
+```bash
+    python -m haf run -c=config-web.json
+```
+
+#### find the report at the data dir
+
+    using chrome or other browsers to open the html file
+
+### How to run your define cases
+
+#### other running locally
 
 ##### modify the config.json in testcases
 
@@ -166,6 +188,23 @@ or
 ```
 
 ![report-app](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/report-app.gif)
+
+
+##### when runnng the web ui cases
+
+- change the config.json's "report" to add report_template
+
+
+```json
+    "report": 
+        {
+            "report_template": "base_web",
+            "report_path": "./data/report.html"
+        }
+```
+
+![report-app](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/webui.gif)
+
 
 
 #### haf samples
