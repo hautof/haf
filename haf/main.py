@@ -178,3 +178,7 @@ def main_args():
         print("using python -m haf help to show help infos")
 
 
+if __name__ == "__main__":
+    import multiprocessing
+    multiprocessing.freeze_support()
+    main_args()

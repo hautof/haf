@@ -13,7 +13,7 @@ from haf.common.database import SQLConfig
 from haf.common.exception import FailRunnerException
 from haf.common.log import Log
 from haf.config import *
-from haf.mark import locker
+from haf.mark import locker, new_locker
 from haf.result import HttpApiResult, AppResult, WebResult
 from haf.suite import HttpApiSuite, AppSuite
 from haf.utils import Utils
@@ -64,10 +64,12 @@ class Runner(Process):
                 self.web_queue.get()
             self.web_queue.put(self.runner)
 
-    @locker
+    # TODO: try new_locker here, still need some tests
+    # @locker 
     def put_case_back(self, key:str, case):
         logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name}")
-        self.case_handler_queue.put(case)
+        with new_locker(self.bus_client, key):
+            self.case_handler_queue.put(case)
 
     def result_handler(self, result):
         if isinstance(result, HttpApiResult) or isinstance(result, AppResult):

@@ -1,6 +1,7 @@
 # encoding='utf-8'
 import functools
 import inspect
+import contextlib
 import time
 from haf.common.lock import Lock
 
@@ -91,3 +92,14 @@ def locker(func):
         locker.release_lock()
         return
     return lock
+
+
+@contextlib.contextmanager
+def new_locker(bus_client, key):
+    locker = Locker(bus_client, key)
+    locker.get_lock()
+    try:
+        yield
+    finally:
+        locker.release_lock()
+        return
