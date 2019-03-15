@@ -20,7 +20,7 @@ requires = [
     'setuptools',
     'hafapiserver',
     'hafsqlpublish',
-    'json-schema'
+    'jsonschema'
         ]
 
 with open('ReadMe.md', encoding='utf8') as f:
