@@ -33,8 +33,8 @@ class Loader(Process):
                     logger.info(f"{self.key} -- get start signal from main")
                     break
                 time.sleep(0.01)
-            while True:
 
+            while True:
                 temp = self.get_parameter()
                 if temp == SIGNAL_STOP :
                     while True:
@@ -92,8 +92,10 @@ class Loader(Process):
 
                 self.put_web_message("web")
                 time.sleep(0.01)
-        except Exception:
-            raise FailLoaderException
+        except Exception as e:
+            logger.error(f"{self.key} {e}")
+            logger.error(f"{self.key} {FailLoaderException}")
+            self.end_handler(e)
 
     def get_parameter(self, param_key=None):
         params_queue = self.bus_client.get_param()
@@ -122,12 +124,15 @@ class Loader(Process):
         logger.info(f"{self.key} -- put case {case.bench_name} - {case.ids.id}.{case.ids.subid}.{case.ids.name}")
         self.case_queue.put(case)
 
-    def end_handler(self):
+    def end_handler(self, error=None):
         try:
-            logger.info(f"{self.key} end loader  ")
+            if error:
+                logger.error(f"{self.key} end loader with Error - {error}")
+            else:
+                logger.info(f"{self.key} end loader")
             self.case_queue.put(SIGNAL_CASE_END)
         except Exception as e:
-            logger.error(e)
+            logger.error(f"{self.key} {e}")
 
 
 class LoadFromConfig(object):

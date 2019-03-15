@@ -13,11 +13,11 @@ install:
   - pip install flask
   - pip install flask_restful
   - pip install jinja2
-  - pip install coupling
   - pip install pyaml
   - pip install deepdiff
   - pip install setuptools
   - pip install pymssql
+  - pip install jsonschema
 script:
   - # or py.test for Python versions 3.5 and below
   - python -m haf run -rc=1 -case=./testcases/test.xlsx,./testcases/test2.json,./testcases/test3.yml -rh=True -rod=./testcases/report.html -ld=./testcases

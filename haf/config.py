@@ -109,7 +109,7 @@ LOG_PATH_DEFAULT = "D:\workspace\mine\python\haf\data"
 
 MAIN_VERSION = 2
 SUB_VERSION = 6
-FIX_VERSION = 2
+FIX_VERSION = 3
 VERSION_TYPE = "haf"
 PLATFORM_VERSION = f"{VERSION_TYPE}-{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}"
 
@@ -130,3 +130,116 @@ BANNER_STRS_EXIT = f"""
   '   | |  | ||_____\_\ | |   
       |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}   |_|       EXIT ...
 """
+
+config_schema = {
+    "type": "object",
+    "properties": {
+        "config": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "run": {
+                    "type": "object",
+                    "properties": {
+                        "bus_server_port": {"type": "number"},
+                        "sql_publish": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "number"},
+                                "sql_name": {"type": "string"},
+                                "publish": {"type": "boolean"},
+                                "host": {"type": "string"},
+                                "port": {"type": "number"},
+                                "username": {"type": "string"},
+                                "password": {"type": "string"},
+                                "database": {"type": "string"},
+                                "protocol": {"enum": ["mysql", "mssql"]}
+                            },
+                            "required": ["id", "sql_name", "publish", "host", "port", "username", "password", "database", "protocol"]
+                        },
+                        "log":{
+                            "type": "object",
+                            "properties": {
+                                "log_path": {"type": "string"}
+                            },
+                            "required": ["log_path"]
+                        },
+                        "bus":{
+                            "type": "object",
+                            "properties": {
+                                "only": {"type": "boolean"},
+                                "host": {"type": "string"},
+                                "port": {
+                                    "oneOf": [
+                                        {"type": "string"},
+                                        {"type": "number"}
+                                    ]
+                                },
+                                "auth_key": {"type": "string"}
+                            },
+                            "required": ["only", "host", "port", "auth_key"]
+                        },
+                        "report":{
+                            "type": "object",
+                            "properties": {
+                                "report_path": {"type": "string"},
+                                "report_template": {"type": "string"},
+                                "report_export_path": {"type": "string"}
+                            },
+                            "required": ["report_path"]
+                        },
+                        "case":{
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "case_path": {"type": "string"}
+                                },
+                                "required": ["case_path"]
+                            }
+                        },
+                        "runner":{
+                            "type": "object",
+                            "properties": {
+                                "only": {"type": "boolean"},
+                                "count": {"type": "number"}
+                            },
+                            "required": ["only", "count"]
+                        },
+                        "loader":{
+                            "type": "object",
+                            "propertied": {
+                                "only": {"type": "boolean"}
+                            },
+                            "required": ["only"]
+                        },
+                        "recorder":{
+                            "type": "object",
+                            "propertied": {
+                                "only": {"type": "boolean"}
+                            },
+                            "required": ["only"]
+                        },
+                        "web_server":{
+                            "type": "object",
+                            "propertied": {
+                                "only": {"type": "boolean"},
+                                "port": {
+                                    "oneOf": [
+                                        {"type": "string"},
+                                        {"type": "number"}
+                                    ]
+                                },
+                                "host": {"type": "string"},
+                                "run": {"type": "boolean"}
+                            },
+                            "required": ["run"]
+                        }
+                    },
+                    "required": ["log", "bus", "report", "case", "runner", "recorder", "loader", "web_server"]
+                }
+            },
+            "required": ["name", "run"]
+        }
+    }
+}
