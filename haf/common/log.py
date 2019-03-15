@@ -8,31 +8,30 @@ class BaseLogger(object):
 
     def __init__(self, logger_name):
         self.logger_name = logger_name
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')
-        self.logger = logging.getLogger(self.logger_name)
         self.bus_client = None
 
     def bind_busclient(self, bus_client: BusClient):
         self.bus_client = BusClient(bus_client.domain, bus_client.port, bus_client.auth_key)
 
     def debug(self, msg):
-        self.msg_write(str(msg))
-        #self.logger.debug(msg)
+        msg = {"logger_name":self.logger_name, "level":"debug", "msg": msg}
+        self.msg_write(msg)
 
     def info(self, msg):
-        self.msg_write(str(msg))
-        self.logger.info(msg)
+        msg = {"logger_name":self.logger_name, "level":"info", "msg": msg}
+        self.msg_write(msg)
 
     def warning(self, msg):
-        self.msg_write(str(msg))
-        self.logger.warning(msg)
+        msg = {"logger_name":self.logger_name, "level":"warning", "msg": msg}
+        self.msg_write(msg)
 
     def error(self, msg):
-        self.msg_write(str(msg))
-        self.logger.error(msg)
+        msg = {"logger_name":self.logger_name, "level":"error", "msg": msg}
+        self.msg_write(msg)
 
     def critical(self, msg):
-        self.logger.critical(msg)
+        msg = {"logger_name":self.logger_name, "level":"critical", "msg": msg}
+        self.msg_write(msg)
 
     def __new__(cls, *args, **kwargs):
         return object.__new__(cls)

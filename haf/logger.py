@@ -1,6 +1,6 @@
 # encoding='utf-8'
 import os
-import time
+import time, logging
 from multiprocessing import Process
 from haf.busclient import BusClient
 from haf.config import *
@@ -16,8 +16,10 @@ class Logger(Process):
         self.bus_client = bus_client
         self.case_name = case_name
         self.log_dir = log_dir
+        self.loggers = {}
 
     def run(self):
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')
         logger.bind_busclient(self.bus_client)
         logger.info("start system logger")
         log_home = f"{self.log_dir}/{self.case_name}"
@@ -42,7 +44,30 @@ class Logger(Process):
         except Exception as ee:
             return f"log$%error$%{log}"
 
+    def log_print(self, log):
+        logger_name = log.get("logger_name")
+        level = log.get("level")
+        msg = log.get("msg")
+        if logger_name not in self.loggers:
+            self.loggers[logger_name] = logging.getLogger(logger_name)
+
+        logger = self.loggers.get(logger_name)
+        if level=="debug":
+            logger.debug(msg)
+        elif level=="info":
+            logger.info(msg)
+        elif level=="wraning":
+            logger.warning(f"\33[33m{msg}\33[0m")
+        elif level=="error":
+            logger.error(f"\33[31m >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \33[0m")
+            logger.error(f"\33[31m | {msg}\33[0m")
+            logger.error(f"\33[31m <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \33[0m")
+        elif level=="critical":
+            logger.critical(f"\33[5m{msg}\33[0m")
+
     def log_handler(self, log):
+        self.log_print(log)
+        log = log.get("msg")
         try:
             temp1, temp2, msg = self.split_log(log)
         except :

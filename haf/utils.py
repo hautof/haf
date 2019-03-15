@@ -43,9 +43,9 @@ class Utils(object):
             data = func_obj.connect_execute(sqlconfig, sqlscript, **kwargs)
             return data
         except Exception as e:
-            logger.info("{} {}".format(key, e))
+            logger.info(f"{key} {e}")
         finally:
-            logger.info("{} {}".format(key, func_obj))
+            logger.info(f"{key} {func_obj}")
             if func_obj is not None:
                 func_obj.close()
 
@@ -114,7 +114,7 @@ class Utils(object):
                 result["dbconfig"].append(dict(zip(dbconfig_header, d)))
             return result
         except Exception as e:
-            logger.error(e)
+            logger.error(f"{filename} {e} ")
 
     @staticmethod
     def load_from_json(file_name: str)->dict:
@@ -132,8 +132,7 @@ class Utils(object):
             else:
                 raise FileNotFoundError
         except Exception as e:
-            traceback.print_exc()
-            logger.error(e)
+            logger.error(f"{file_name} {e} ")
 
     @staticmethod
     def load_from_yml(file_name: str)-> dict:
@@ -151,8 +150,7 @@ class Utils(object):
             else:
                 raise FileNotFoundError
         except Exception as e:
-            traceback.print_exc()
-            logger.error(e)
+            logger.error(f"{file_name} {e} ")
 
     @staticmethod
     def get_path(path):
@@ -291,8 +289,8 @@ class Utils(object):
                 }
 
         except Exception as e:
-            traceback.print_exc()
-            logger.error(e)
+            logger.error(f"{file_name} {e} ")
+            logger.error(f"{file_name} {traceback.format_exc()}")
 
     @staticmethod
     def http_request(request:Request, **kwargs) :
@@ -390,12 +388,8 @@ class Utils(object):
         :param input:
         :return:
         '''
-        try:
-            output = json.loads(input)
-            return output
-        except Exception as e:
-            traceback.print_exc()
-            return {"input":input}
+        output = json.loads(input)
+        return output
 
     @staticmethod
     def get_random_name():

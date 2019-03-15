@@ -6,6 +6,7 @@ import sys
 from haf.program import Program
 from haf.helper import Helper
 from haf.config import BANNER_STRS
+from haf.common.schema import check_config
 import argparse
 
 
@@ -84,7 +85,10 @@ def main_args():
                 sys.exit(-1)
             try:
                 with open(args.config, 'r') as f:
-                    config = json.load(f).get("config")
+                    all_config_json  = json.load(f)
+                    if not check_config(all_config_json):
+                        sys.exit(-1)
+                    config = all_config_json.get("config")
                     config_run = config.get("run")
                     args.name = config.get("name")
                     args.log_dir = config_run.get("log").get("log_path")

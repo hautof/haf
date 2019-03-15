@@ -19,7 +19,8 @@ requires = [
     'deepdiff',
     'setuptools',
     'hafapiserver',
-    'hafsqlpublish'
+    'hafsqlpublish',
+    'json-schema'
         ]
 
 with open('ReadMe.md', encoding='utf8') as f:
