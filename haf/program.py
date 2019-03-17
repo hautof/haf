@@ -187,6 +187,7 @@ class Program(object):
                         self.signal = system_signal.get()
                         if self.signal == SIGNAL_RECORD_END or self.signal == SIGNAL_STOP:
                             logger.info("main -- stop")
+                            
                             system_signal.put(SIGNAL_BUS_END)
                             break
                     time.sleep(0.1)

@@ -88,9 +88,9 @@ def locker(func):
             key = kwargs.get("key")
         locker = Locker(self.bus_client, key)
         locker.get_lock()
-        func(self, *args, **kwargs)
+        result = func(self, *args, **kwargs)
         locker.release_lock()
-        return
+        return result
     return lock
 
 

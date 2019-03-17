@@ -109,26 +109,26 @@ LOG_PATH_DEFAULT = "D:\workspace\mine\python\haf\data"
 
 MAIN_VERSION = 2
 SUB_VERSION = 6
-FIX_VERSION = 4
+FIX_VERSION = 5
 VERSION_TYPE = "haf"
 PLATFORM_VERSION = f"{VERSION_TYPE}-{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}"
 
 BANNER_STRS = f"""
-  .                       ___
- /\\\\  | |  | |  ____    /  _/
-(  )) | |__| |/ ___ \___| |___  
- \\\\/  |  __  || |__\ \__  ____| 
-  '   | |  | ||_____\_\ | |   
-      |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}   |_|   
+  .                     ____
+ /\\\\  | |  | | ____    /. _/
+( ( ) | |__| |/ __ \___| |___  
+ \\\\/  |  __  | (__\  __   ___|
+  '   | |  | |\______\ | |   
+      |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}  |_|
 """
 
 BANNER_STRS_EXIT = f"""
-  .                       ___
- /\\\\  | |  | |  ____    /  _/
-(  )) | |__| |/ ___ \___| |___  
- \\\\/  |  __  || |__\ \__  ____| 
-  '   | |  | ||_____\_\ | |   
-      |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}   |_|       EXIT ...
+  .                     ____
+ /\\\\  | |  | | ____    /. _/
+( ( ) | |__| |/ __ \___| |___  
+ \\\\/  |  __  | (__\  __   ___|
+  '   | |  | |\______\ | |   
+      |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}  |_|   EXIT
 """
 
 config_schema = {
