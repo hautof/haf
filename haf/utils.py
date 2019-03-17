@@ -43,9 +43,9 @@ class Utils(object):
             data = func_obj.connect_execute(sqlconfig, sqlscript, **kwargs)
             return data
         except Exception as e:
-            logger.info(f"{key} {e}")
+            logger.info(f"{key} {e}", __name__)
         finally:
-            logger.info(f"{key} {func_obj}")
+            logger.info(f"{key} {func_obj}", __name__)
             if func_obj is not None:
                 func_obj.close()
 
@@ -59,7 +59,7 @@ class Utils(object):
         if not filename.endswith("xlsx"):
             return {}
         if not os.path.exists(filename):
-            logger.error("{} not fount file : {}".format("system$%util$%", filename))
+            logger.error("{} not fount file : {}".format("system$%util$%", filename), __name__)
             raise FileNotFoundError
         try:
             header = []
@@ -77,7 +77,7 @@ class Utils(object):
             xlsx = load_workbook(filename)
             sheet_names = xlsx.sheetnames
             if "testcases" not in sheet_names or "config" not in sheet_names:
-                logger.log(f"not fount sheet in {filename}")
+                logger.log(f"not fount sheet in {filename}", __name__)
                 return {}
             testcases = xlsx["testcases"].rows
             config = xlsx["config"].rows
@@ -114,7 +114,7 @@ class Utils(object):
                 result["dbconfig"].append(dict(zip(dbconfig_header, d)))
             return result
         except Exception as e:
-            logger.error(f"{filename} {e} ")
+            logger.error(f"{filename} {e} ", __name__)
 
     @staticmethod
     def load_from_json(file_name: str)->dict:
@@ -132,7 +132,7 @@ class Utils(object):
             else:
                 raise FileNotFoundError
         except Exception as e:
-            logger.error(f"{file_name} {e} ")
+            logger.error(f"{file_name} {e} ", __name__)
 
     @staticmethod
     def load_from_yml(file_name: str)-> dict:
@@ -150,7 +150,7 @@ class Utils(object):
             else:
                 raise FileNotFoundError
         except Exception as e:
-            logger.error(f"{file_name} {e} ")
+            logger.error(f"{file_name} {e} ", __name__)
 
     @staticmethod
     def get_path(path):
@@ -261,7 +261,7 @@ class Utils(object):
             py_config = {}
             py_config["config"] = []
             config_temp = {}
-            logger.info("{} found python file : {}".format("system$%util$%", file_name))
+            logger.info("{} found python file : {}".format("system$%util$%", file_name), __name__)
             if os.path.exists(file_name):
                 path, file = Utils.get_path(file_name)
                 sys.path.append(path)
@@ -289,8 +289,8 @@ class Utils(object):
                 }
 
         except Exception as e:
-            logger.error(f"{file_name} {e} ")
-            logger.error(f"{file_name} {traceback.format_exc()}")
+            logger.error(f"{file_name} {e} ", __name__)
+            logger.error(f"{file_name} {traceback.format_exc()}", __name__)
 
     @staticmethod
     def http_request(request:Request, **kwargs) :
@@ -315,7 +315,7 @@ class Utils(object):
         if method == CASE_HTTP_API_METHOD_PUT:
             result = HttpController.put(url, data, header)
 
-        logger.info("{} {}".format(key, result))
+        logger.info("{} {}".format(key, result), __name__)
         if isinstance(result, HTTPResponse):
             response.header = result.headers
             try:
@@ -328,7 +328,7 @@ class Utils(object):
             response.code = result.code if hasattr(result, "code") else None
             response.header = result.info() if hasattr(result, "info") else None
 
-        logger.info(f"{key} {result}")
+        logger.info(f"{key} {result}", __name__)
         return response
 
     @staticmethod

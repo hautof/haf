@@ -4,9 +4,8 @@ import time, logging
 from multiprocessing import Process
 from haf.busclient import BusClient
 from haf.config import *
-from haf.common.log import Log
 
-logger = Log.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Logger(Process):
@@ -18,14 +17,16 @@ class Logger(Process):
         self.log_dir = log_dir
         self.loggers = {}
 
+    def reconnect_bus(self):
+        self.bus_client = BusClient(self.bus_client.domain, self.bus_client.port, self.bus_client.auth_key)
+
     def run(self):
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')
-        logger.bind_busclient(self.bus_client)
-        logger.info("start system logger")
+        self.reconnect_bus()
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
         log_home = f"{self.log_dir}/{self.case_name}"
         if not os.path.exists(log_home):
             os.makedirs(log_home)
-        # here delete BusClient(), using input bus_client
+        # here delete BusClient(), using input bus_clients
         # self.bus_client = BusClient()
         try:
             log_queue = self.bus_client.get_log()
@@ -47,11 +48,12 @@ class Logger(Process):
     def log_print(self, log):
         logger_name = log.get("logger_name")
         level = log.get("level")
-        msg = log.get("msg")
-        if logger_name not in self.loggers:
-            self.loggers[logger_name] = logging.getLogger(logger_name)
-
-        logger = self.loggers.get(logger_name)
+        msg_origin = log.get("msg")
+        process = log.get("process")
+        if process not in self.loggers:
+            self.loggers[process] = logging.getLogger(logger_name)
+        logger = self.loggers.get(process)
+        msg = f"<{process}> [{logger_name}] {msg_origin}"
         if level=="debug":
             logger.debug(msg)
         elif level=="info":

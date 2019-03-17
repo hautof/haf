@@ -15,7 +15,7 @@ logger = Log.getLogger(__name__)
 
 
 class Loader(Process):
-    def __init__(self, bus_client:BusClient=None):
+    def __init__(self, bus_client:BusClient=None, args:list=None):
         super().__init__()
         self.bus_client = bus_client
         self.daemon = True
@@ -24,13 +24,14 @@ class Loader(Process):
 
     def run(self):
         try:
+            logger.bind_process(self.pid)
             self.key = f"{self.pid}$%loader$%"
             logger.bind_busclient(self.bus_client)
-            logger.info(f"{self.key} start loader")
+            logger.info(f"{self.key} start loader", __name__)
             self.case_queue = self.bus_client.get_case()
             while True:
                 if self.get_parameter() == SIGNAL_START:
-                    logger.info(f"{self.key} -- get start signal from main")
+                    logger.info(f"{self.key} -- get start signal from main", __name__)
                     break
                 time.sleep(0.01)
 
@@ -49,7 +50,7 @@ class Loader(Process):
                 file_name = temp.get("file_name")
                 inputs = LoadFromConfig.load_from_file(file_name)
 
-                logger.info(f"{self.key} -- {inputs}")
+                # logger.info(f"{self.key} -- {inputs}", __name__)
                 input = inputs.get("config")[0]
                 bench_name = input.get("name")
                 module_name = input.get("module_name")
@@ -93,8 +94,8 @@ class Loader(Process):
                 self.put_web_message("web")
                 time.sleep(0.01)
         except Exception as e:
-            logger.error(f"{self.key} {e}")
-            logger.error(f"{self.key} {FailLoaderException}")
+            logger.error(f"{self.key} {e}", __name__)
+            logger.error(f"{self.key} {FailLoaderException}", __name__)
             self.end_handler(e)
 
     def get_parameter(self, param_key=None):
@@ -121,18 +122,18 @@ class Loader(Process):
 
     @locker
     def put_case(self, key:str, case):
-        logger.info(f"{self.key} -- put case {case.bench_name} - {case.ids.id}.{case.ids.subid}.{case.ids.name}")
+        logger.info(f"{self.key} -- put case {case.bench_name} - {case.ids.id}.{case.ids.subid}.{case.ids.name}", __name__)
         self.case_queue.put(case)
 
     def end_handler(self, error=None):
         try:
             if error:
-                logger.error(f"{self.key} end loader with Error - {error}")
+                logger.error(f"{self.key} end loader with Error - {error}", __name__)
             else:
-                logger.info(f"{self.key} end loader")
+                logger.info(f"{self.key} end loader", __name__)
             self.case_queue.put(SIGNAL_CASE_END)
         except Exception as e:
-            logger.error(f"{self.key} {e}")
+            logger.error(f"{self.key} {e}", __name__)
 
 
 class LoadFromConfig(object):

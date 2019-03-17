@@ -84,24 +84,24 @@ class MysqlTool(object):
                 for ss in sqlscript:
                     if ss != None and ss != "None" and len(ss) > 5:
                         if not run_background:
-                            logger.info(f"{key} start {sqlconfig.host} execute {ss}")
+                            logger.info(f"{key} start {sqlconfig.host} execute {ss}", __name__)
                         cursor_m.execute(ss)
                         data.append(cursor_m.fetchall())
                         if not run_background:
-                            logger.info(f"{key} result {str(data)}")
+                            logger.info(f"{key} result {str(data)}", __name__)
             elif isinstance(sqlscript, str):
                 if sqlscript != None and sqlscript != "None" and "None" not in sqlscript and len(sqlscript) > 5:
                     if not run_background:
-                        logger.info(f"{key} start {sqlconfig.host} execute {sqlscript}")
+                        logger.info(f"{key} start {sqlconfig.host} execute {sqlscript}", __name__)
                     cursor_m.execute(sqlscript)
                     data.append(cursor_m.fetchall())
                     if not run_background:
-                        logger.info(f"{key} result {str(data)}")
+                        logger.info(f"{key} result {str(data)}", __name__)
             if commit:
                 self.connect_msql.commit()
             return data
         except Exception as e:
-            logger.error(str(e))
+            logger.error(str(e), __name__)
             if self.connect_msql.open:
                 self.connect_msql.close()
             return []
@@ -112,7 +112,7 @@ class MysqlTool(object):
             if self.connect_msql is not None:
                 self.connect_msql.close()
         except Exception as e:
-            logger.error(e)
+            logger.error(e, __name__)
 
 
 class SqlServerTool(object):
@@ -147,20 +147,20 @@ class SqlServerTool(object):
             if isinstance(sqlscript, list):
                 for ss in sqlscript:
                     if ss != None and ss != "None" and "None" not in ss and len(ss) > 5:
-                        logger.info(f"{key} [{sqlconfig.host}] start execute {ss}")
+                        logger.info(f"{key} [{sqlconfig.host}] start execute {ss}", __name__)
                         cursor_m.execute(ss)
                         data.append(cursor_m.fetchall())
-                        logger.info(f"{key} result {str(data)}")
+                        logger.info(f"{key} result {str(data)}", __name__)
             elif isinstance(sqlscript, str):
                 if sqlscript != None and sqlscript != "None" and "None" not in sqlscript and len(sqlscript) > 5:
-                    logger.info(f"{key} start [{sqlconfig.host}] execute {sqlscript}")
+                    logger.info(f"{key} start [{sqlconfig.host}] execute {sqlscript}", __name__)
                     cursor_m.execute(sqlscript)
                     data.append(cursor_m.fetchall())
-                    logger.info(f"{key} result {str(data)}")
+                    logger.info(f"{key} result {str(data)}", __name__)
 
             return data
         except Exception as e:
-            logger.error(str(e))
+            logger.error(str(e), __name__)
             if self.connect_msql.open:
                 self.connect_msql.close()
             return []
