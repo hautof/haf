@@ -22,7 +22,7 @@ from haf.recorder import Recorder
 from haf.runner import Runner
 from haf.utils import Utils
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s [%(name)s] <%(process)d> %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -54,7 +54,7 @@ class Program(object):
         :return: None
         '''
         for x in range(count):
-            loader = Loader(bus_client)
+            loader = Loader(bus_client, self.args)
             loader.start()
             time.sleep(0.1)
 
@@ -76,7 +76,7 @@ class Program(object):
         time.sleep(0.1)
 
     def _init_logging_module(self, args):
-        logging.basicConfig(level=logging.INFO if not args.debug else logging.DEBUG, format='%(asctime)s %(levelname)s <%(process)d> [%(name)s] %(message)s')
+        logging.basicConfig(level=logging.INFO if not args.debug else logging.DEBUG, format='%(asctime)s %(levelname)s [%(name)s] %(message)s')
         pass
 
     def _init_system_logger(self, log_dir: str, bus_client: BusClient):

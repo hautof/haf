@@ -54,7 +54,7 @@ class HttpController(object):
         key = kwargs.get("key")
         try:
             url = url + HttpController.getdata(data)
-            logger.info(f'{key} [url] {url}')
+            logger.info(f'{key} [url] {url}', __name__)
             request = ur.Request(url=url, headers=headers, method="GET")
             if headers is not None:
                 for key in headers.keys():
@@ -64,18 +64,18 @@ class HttpController(object):
             if response is None:
                 return {"result": "None"}
             else:
-                logger.info(f"{key} {str(response)}")
+                logger.info(f"{key} {str(response)}", __name__)
 
             return response
         except ur.URLError as e:
-            logger.info(f"{key}{str(e)}")
-            logger.info(f"{key}{traceback.format_exc()}")
+            logger.info(f"{key}{str(e)}", __name__)
+            logger.info(f"{key}{traceback.format_exc()}", __name__)
             traceback.print_exc()
             return e
         except Exception as ee:
             traceback.print_exc()
             logger.info(f"{key}{str(ee)}")
-            logger.info(f"{key}{traceback.format_exc()}")
+            logger.info(f"{key}{traceback.format_exc()}", __name__)
             return ee
 
     @staticmethod
@@ -93,19 +93,19 @@ class HttpController(object):
             if response is None:
                 return {"result": "None"}
             else:
-                logger.info(f"{key} {str(response)}")
+                logger.info(f"{key} {str(response)}", __name__)
 
             return response
         except ur.URLError as e:
-            logger.error(f"{key} {str(e)}")
+            logger.error(f"{key} {str(e)}", __name__)
             traceback.print_exc()
             return e
         except urlerror.HTTPError as httpe:
-            logger.error(f"{key} { str(httpe)}")
+            logger.error(f"{key} { str(httpe)}", __name__)
             traceback.print_exc()
             return httpe
         except Exception as ee:
-            logger.error(f"{key} {str(ee)}")
+            logger.error(f"{key} {str(ee)}", __name__)
             traceback.print_exc()
             return ee
 
@@ -120,10 +120,10 @@ class HttpController(object):
             return result
         except ur.URLError as e:
             traceback.print_exc()
-            logger.error(f"{key} {str(e)}")
+            logger.error(f"{key} {str(e)}", __name__)
         except Exception as ee:
             traceback.print_exc()
-            logger.error(f"{key} {str(ee)}")
+            logger.error(f"{key} {str(ee)}", __name__)
 
     def delete(self, url, data=None):
         data = bytes(data, encoding='utf8') if data is not None else None
@@ -135,6 +135,6 @@ class HttpController(object):
             data = data.encode() if data is not None else None
             return result
         except ur.URLError as e:
-            logger.error(str(e))
+            logger.error(str(e), __name__)
         except Exception as ee:
-            logger.error(str(ee))
+            logger.error(str(ee), __name__)

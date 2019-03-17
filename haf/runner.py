@@ -54,7 +54,7 @@ class Runner(Process):
 
     @locker
     def put_result(self,  key:str, result:HttpApiResult):
-        logger.info(f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}")
+        logger.info(f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}", __name__)
         self.result_handler_queue.put(result)
 
     @locker
@@ -67,7 +67,7 @@ class Runner(Process):
     # TODO: try new_locker here, still need some tests
     # @locker 
     def put_case_back(self, key:str, case):
-        logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name}")
+        logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name}", __name__)
         with new_locker(self.bus_client, key):
             self.case_handler_queue.put(case)
 
@@ -100,7 +100,8 @@ class Runner(Process):
             self.runner_key = f"{self.pid}$%runner$%"
             self.runner["key"] = f"{self.pid}"
             logger.bind_busclient(self.bus_client)
-            logger.info(f"{self.runner_key} start runner")
+            logger.bind_process(self.pid)
+            logger.info(f"{self.runner_key} start runner", __name__)
             self.web_queue = self.bus_client.get_publish_runner()
             self.case_handler_queue = self.bus_client.get_case()
             self.result_handler_queue = self.bus_client.get_result()
@@ -135,7 +136,7 @@ class Runner(Process):
             loop.close()
             self.end_handler()
         except Exception as e:
-            logger.error(f"{self.key} : {e}")
+            logger.error(f"{self.key} : {e}", __name__)
             raise FailRunnerException
 
     async def run_cases(self, local_cases):
@@ -157,7 +158,7 @@ class Runner(Process):
         try:
             try:
                 self.key = local_case.log_key
-                logger.info(f"{self.key} : runner {self.pid} -- get {local_case.ids.id}.{local_case.ids.subid}-{local_case.ids.name}")
+                logger.info(f"{self.key} : runner {self.pid} -- get {local_case.ids.id}.{local_case.ids.subid}-{local_case.ids.name}", __name__)
                 self.result_handler(local_case)
                 self.init_runner(local_case)
                 if local_case.type == CASE_TYPE_HTTPAPI:
@@ -182,18 +183,18 @@ class Runner(Process):
                 self.result_handler(result)
                 return result
             except Exception as runerror:
-                logger.error(f"{self.key} : {runerror}")
+                logger.error(f"{self.key} : {runerror}", __name__)
                 result.run_error = traceback.format_exc()
                 result.result = RESULT_ERROR
                 return result
         except Exception as e:
-            logger.error(f"{self.key} : {e}")
+            logger.error(f"{self.key} : {e}", __name__)
             result.run_error = traceback.format_exc()
             result.result = RESULT_ERROR
             return result
 
     def end_handler(self):
-        logger.info(f"{self.runner_key} : end runner")
+        logger.info(f"{self.runner_key} : end runner", __name__)
         self.result_handler_queue.put(SIGNAL_RESULT_END)
         self.case_handler_queue.put(SIGNAL_CASE_END)
 
@@ -241,7 +242,7 @@ class PyRunner(BaseRunner):
             return [CASE_SKIP, result]
 
         result.case = case
-        logger.info(f"{self.key} : PyRunner run - {case.bench_name} {case.ids.id}.{case.ids.subid}-{case.ids.name}")
+        logger.info(f"{self.key} : PyRunner run - {case.bench_name} {case.ids.id}.{case.ids.subid}-{case.ids.name}", __name__)
         suite = HttpApiSuite()
         try:
             module_name = case.module_name
@@ -260,14 +261,14 @@ class PyRunner(BaseRunner):
         except AssertionError as ae:
             case.response = getattr(suite, "response", Response())
             traceback.print_exc()
-            logger.error(f"{self.key} : {traceback.format_exc()}")
+            logger.error(f"{self.key} : {traceback.format_exc()}", __name__)
             result.result = RESULT_FAIL
             result.run_error = traceback.format_exc()
             result.on_case_end()
             return result
         except Exception as e:
             traceback.print_exc()
-            logger.error(f"{self.key} : {traceback.format_exc()}")
+            logger.error(f"{self.key} : {traceback.format_exc()}", __name__)
             result.result = RESULT_ERROR
             result.run_error = traceback.format_exc()
             result.on_case_end()
@@ -304,7 +305,7 @@ class ApiRunner(BaseRunner):
             result.result = RESULT_SKIP
             return [CASE_SKIP, result]
 
-        logger.info(f"{self.key} : ApiRunner run - {case.ids.id}.{case.ids.subid}-{case.ids.name}")
+        logger.info(f"{self.key} : ApiRunner run - {case.ids.id}.{case.ids.subid}-{case.ids.name}", __name__)
         try:
             result.case = case
             case.response = self.request(case.request)
@@ -317,7 +318,7 @@ class ApiRunner(BaseRunner):
             result.case = case
             result.result = RESULT_PASS if False not in result.result_check_response and result.result_check_sql_response is True else RESULT_FAIL
         except Exception as e:
-            logger.error(f"{self.key} : {e}")
+            logger.error(f"{self.key} : {e}", __name__)
             result.run_error = e
             result.result = RESULT_ERROR
         result.on_case_end()
@@ -356,17 +357,17 @@ class ApiRunner(BaseRunner):
             if case.expect.sql_check_func is None or case.expect.sql_response_result is None:
                 return [True, "ok"]
             data = case.response.body
-            logger.info(f"{self.key} : check sql response : {case.expect.sql_check_func}")
+            logger.info(f"{self.key} : check sql response : {case.expect.sql_check_func}", __name__)
             class_content = importlib.import_module(case.expect.sql_check_func[0])
             check_func = getattr(getattr(class_content, case.expect.sql_check_func[1]), case.expect.sql_check_func[2])
-            logger.info(f"{self.key} : check func : {check_func}")
-            logger.info(f"{self.key} : check list is {case.sqlinfo.check_list}")
+            logger.info(f"{self.key} : check func : {check_func}", __name__)
+            logger.info(f"{self.key} : check list is {case.sqlinfo.check_list}", __name__)
             if case.sqlinfo.check_list is not None:
                 check_func(case.expect.sql_response_result, data, case.sqlinfo.check_list["sql_response"])
             else:
                 check_func(case.expect.sql_response_result, data)
         except Exception as e:
-            logger.error(f"{self.key} : {e}")
+            logger.error(f"{self.key} : {e}", __name__)
             traceback.print_exc()
             return [False, traceback.format_exc()]
         return result
@@ -394,13 +395,13 @@ class AppRunner(BaseRunner):
         try:
             i = 0
             while i<timeout:
-                logger.info(f"{self.key}: current activity is {driver.current_activity}")
+                logger.info(f"{self.key}: current activity is {driver.current_activity}", __name__)
                 if driver.current_activity == activity:
                     return
                 time.sleep(1)
                 i += 1
         except Exception as e:
-            logger.error(f"{self.key}: {e}")
+            logger.error(f"{self.key}: {e}", __name__)
             return 
 
     async def run(self, case: AppCase):
@@ -421,21 +422,21 @@ class AppRunner(BaseRunner):
             result.result = RESULT_SKIP
             return [CASE_SKIP, result]
 
-        logger.info(f"{self.key} : AppRunner run - {case.ids.id}.{case.ids.subid}-{case.ids.name}")
+        logger.info(f"{self.key} : AppRunner run - {case.ids.id}.{case.ids.subid}-{case.ids.name}", __name__)
         try:
             result.case = case
             from appium import webdriver
             driver = webdriver.Remote(APP_DRIVER_PATH, case.desired_caps.deserialize())
-            logger.info(f"{self.key} : wait app start ...")
+            logger.info(f"{self.key} : wait app start ...", __name__)
             if case.wait_activity:
                 time.sleep(5)
                 self.wait_activity(case.wait_activity, case.time_sleep, driver)
             else:
                 time.sleep(case.time_sleep)
-            logger.info(f"{self.key} : driver is {driver}")
+            logger.info(f"{self.key} : driver is {driver}", __name__)
             page = BasePage(driver)
             for key in range(1, len(case.stages.keys())+1):
-                logger.info(f"{self.key} : {key} == {case.stages.get(key).deserialize()}")
+                logger.info(f"{self.key} : {key} == {case.stages.get(key).deserialize()}", __name__)
                 png_dir = f"{self.log_dir}"
                 png_name = f"{case.bench_name}.{case.ids.id}.{case.ids.subid}.{case.ids.name}.{key}"
                 png_before = save_screen_shot(driver, png_dir, f"{png_name}-before")
@@ -445,7 +446,7 @@ class AppRunner(BaseRunner):
             result.case = case
             result.result = RESULT_PASS
         except Exception as e:
-            logger.error(f"{self.key} : {e}")
+            logger.error(f"{self.key} : {e}", __name__)
             result.run_error = e
             result.result = RESULT_ERROR
         result.on_case_end()
@@ -455,7 +456,7 @@ class AppRunner(BaseRunner):
         try:
             paths = stage.path
             operation = stage.operation
-            logger.info(f"{self.key} -- {OPERATION_APP_ANTI_GROUP[operation]}")
+            logger.info(f"{self.key} -- {OPERATION_APP_ANTI_GROUP[operation]}", __name__)
             if  operation== OPERATION_APP_CLICK:
                 page.click(paths)
             elif operation == OPERATION_APP_SENDKEYS:
@@ -464,7 +465,7 @@ class AppRunner(BaseRunner):
                 page.swipe(stage.info.get("direction"))
             time.sleep(stage.time_sleep)
         except Exception as e:
-            logger.error(f"{self.key} : {stage.id} -- {e}")
+            logger.error(f"{self.key} : {stage.id} -- {e}", __name__)
             result.run_error = f"{stage.id} : {e}"
             if not stage.show_try:
                 raise e
@@ -492,13 +493,13 @@ class WebRunner(BaseRunner):
         try:
             i = 0
             while i<timeout:
-                logger.info(f"{self.key}: current activity is {driver.current_activity}")
+                logger.info(f"{self.key}: current activity is {driver.current_activity}", __name__)
                 if driver.current_activity == activity:
                     return
                 time.sleep(1)
                 i += 1
         except Exception as e:
-            logger.error(f"{self.key}: {e}")
+            logger.error(f"{self.key}: {e}", __name__)
             return 
     
     def create_web_driver(self, desired_caps: WebDesiredCaps):
@@ -532,11 +533,11 @@ class WebRunner(BaseRunner):
             result.result = RESULT_SKIP
             return [CASE_SKIP, result]
 
-        logger.info(f"{self.key} : WebRunner run - {case.ids.id}.{case.ids.subid}-{case.ids.name}")
+        logger.info(f"{self.key} : WebRunner run - {case.ids.id}.{case.ids.subid}-{case.ids.name}", __name__)
         try:
             result.case = case
             driver = self.create_web_driver(case.desired_caps)
-            logger.info(f"{self.key} : wait web {case.desired_caps.platformName} start ...")
+            logger.info(f"{self.key} : wait web {case.desired_caps.platformName} start ...", __name__)
             driver.get(case.desired_caps.start_url)
             driver.maximize_window()
             if case.wait_activity:
@@ -544,10 +545,10 @@ class WebRunner(BaseRunner):
                 self.wait_activity(case.wait_activity, case.time_sleep, driver)
             else:
                 time.sleep(case.time_sleep)
-            logger.info(f"{self.key} : driver is {driver}")
+            logger.info(f"{self.key} : driver is {driver}", __name__)
             page = BasePage(driver)
             for key in range(1, len(case.stages.keys())+1):
-                logger.info(f"{self.key} : {key} == {case.stages.get(key).deserialize()}")
+                logger.info(f"{self.key} : {key} == {case.stages.get(key).deserialize()}", __name__)
                 png_dir = f"{self.log_dir}"
                 png_name = f"{case.bench_name}.{case.ids.id}.{case.ids.subid}.{case.ids.name}.{key}"
                 png_before = web_save_screen_shot(driver, png_dir, f"{png_name}-before")
@@ -557,7 +558,7 @@ class WebRunner(BaseRunner):
             result.case = case
             result.result = RESULT_PASS
         except Exception as e:
-            logger.error(f"{self.key} : {e}")
+            logger.error(f"{self.key} : {e}", __name__)
             result.run_error = e
             result.result = RESULT_ERROR
         result.on_case_end()
@@ -567,7 +568,7 @@ class WebRunner(BaseRunner):
         try:
             paths = stage.path
             operation = stage.operation
-            logger.info(f"{self.key} -- {OPERATION_WEB_ANTI_GROUP[operation]}")
+            logger.info(f"{self.key} -- {OPERATION_WEB_ANTI_GROUP[operation]}", __name__)
             if  operation== OPERATION_WEB_CLICK:
                 page.click(paths)
             elif operation == OPERATION_WEB_SENDKEYS:
@@ -576,7 +577,7 @@ class WebRunner(BaseRunner):
                 page.swipe(stage.info.get("direction"))
             time.sleep(stage.time_sleep)
         except Exception as e:
-            logger.error(f"{self.key} : {stage.id} -- {e}")
+            logger.error(f"{self.key} : {stage.id} -- {e}", __name__)
             traceback.print_exc()
             result.run_error = f"{stage.id} : {e}"
             if not stage.show_try:

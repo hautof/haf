@@ -55,7 +55,8 @@ class Recorder(Process):
             self.on_recorder_start()
             self.recorder_key = f"{self.pid}$%recorder$%"
             logger.bind_busclient(self.bus_client)
-            logger.info(f"{self.recorder_key} start recorder ")
+            logger.bind_process(self.pid)
+            logger.info(f"{self.recorder_key} start recorder ", __name__)
             #self.bus_client = BusClient()
             self.results_handler = self.bus_client.get_result()
             self.publish_result = self.bus_client.get_publish_result()
@@ -64,10 +65,10 @@ class Recorder(Process):
                     result = self.results_handler.get()
                     if isinstance(result, (HttpApiResult, AppResult, WebResult)):
                         if isinstance(result.case, (HttpApiCase, BaseCase, PyCase, WebCase, AppCase)):
-                            logger.info(f"{self.recorder_key} recorder--{result.case.bench_name}.{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {result.result}")
+                            logger.info(f"{self.recorder_key} {result.case.bench_name}.{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {RESULT_GROUP.get(str(result.result), None)}", __name__)
                         else:
-                            logger.info(f"{self.recorder_key} recorder ! wrong result!")
-                            logger.info(f"{self.recorder_key} recorder {result.run_error}")
+                            logger.info(f"{self.recorder_key} recorder ! wrong result!", __name__)
+                            logger.info(f"{self.recorder_key} recorder {result.run_error}", __name__)
                         self.result_handler(result)
                     elif result == SIGNAL_RESULT_END:
                         self.signal_end_count += 1
@@ -102,7 +103,7 @@ class Recorder(Process):
         self.generate_report()
         self.show_in_cs()
         self.publish_to_mysql()
-        logger.info(f"{self.recorder_key} end recorder")
+        logger.info(f"{self.recorder_key} end recorder", __name__)
         self.send_record_end_signal()
 
     def send_record_end_signal(self):
@@ -167,7 +168,6 @@ class Recorder(Process):
         self.results.details[result.case.bench_name] = suite
 
     def result_handler(self, result):
-        logger.info(f"{self.recorder_key} from {result.begin_time} to {result.end_time}, result is {RESULT_GROUP.get(str(result.result), None)}")
         self.add_result_to_suite(result)
         self.check_case_result(result)
         self.publish_results()
@@ -183,23 +183,23 @@ class Recorder(Process):
         result_summary = "|{:^8}|{:^8}|{:^8}|{:^8}|{:^8}|".format(self.results.passed, self.results.failed, self.results.skip, self.results.error, \
             self.results.all)
 
-        logger.info("----------------------------------------------")
-        logger.info("|--\33[32mPASS\33[0m--|--\33[31mFAIL\33[0m--|--\33[37mSKIP\33[0m--|--\33[35mERROR\33[0m-|---\33[36mALL\33[0m--|")
-        logger.info(result_summary)
-        logger.info("----------------------------------------------")
+        logger.info("----------------------------------------------", __name__)
+        logger.info("|--\33[32mPASS\33[0m--|--\33[31mFAIL\33[0m--|--\33[37mSKIP\33[0m--|--\33[35mERROR\33[0m-|---\33[36mALL\33[0m--|", __name__)
+        logger.info(result_summary, __name__)
+        logger.info("----------------------------------------------", __name__)
         
     def publish_to_mysql(self):
         '''
         publish results to mysql database
         '''
         if self.sql_publish:
-            logger.info(f"publish results {self.results} to mysql!")
+            logger.info(f"publish results {self.results} to mysql!", __name__)
             import_ok = False
             try:
                 from hafsqlpublish.publish import Publish
                 import_ok = True
             except Exception as e:
-                logger.error("Plugin hafsqlpublish is not installed, using 'pip install hafsqlpublish -U' to install")
+                logger.error("Plugin hafsqlpublish is not installed, using 'pip install hafsqlpublish -U' to install", __name__)
             if import_ok:
                 publish = Publish(self.sql_config)
                 publish.publish_result(self.results)
