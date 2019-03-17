@@ -174,6 +174,13 @@ or
     python -m haf run -case=./testcases/test.xlsx,./testcases/test2.json -ld=./data -rh=true -rod=./data/report.html
 ```
 
+##### when running the api cases
+
+
+![report](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/report.gif)
+
+
+
 ##### when running the app cases
 
 - change the config.json's "report" to add report_template

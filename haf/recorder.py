@@ -100,6 +100,7 @@ class Recorder(Process):
         self.on_recorder_stop()
         self.publish_results()
         self.generate_report()
+        self.show_in_cs()
         self.publish_to_mysql()
         logger.info(f"{self.recorder_key} end recorder")
         self.send_record_end_signal()
@@ -177,6 +178,16 @@ class Recorder(Process):
             self.publish_result.get()
         self.publish_result.put(self.results)
 
+    # show end results here before publish to mysql
+    def show_in_cs(self):
+        result_summary = "|{:^8}|{:^8}|{:^8}|{:^8}|{:^8}|".format(self.results.passed, self.results.failed, self.results.skip, self.results.error, \
+            self.results.all)
+
+        logger.info("----------------------------------------------")
+        logger.info("|--\33[32mPASS\33[0m--|--\33[31mFAIL\33[0m--|--\33[37mSKIP\33[0m--|--\33[35mERROR\33[0m-|---\33[36mALL\33[0m--|")
+        logger.info(result_summary)
+        logger.info("----------------------------------------------")
+        
     def publish_to_mysql(self):
         '''
         publish results to mysql database

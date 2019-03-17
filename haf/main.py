@@ -24,20 +24,32 @@ def main_args():
 
     sub_run_arg_program = sub_all_arg_program.add_parser("run",
                                                          help="run case, using `python -m haf run ` or `python -m haf` to run all case in local path ")
-    sub_run_arg_program.add_argument("--case", "-case", dest="case", type=str,
-                                     help="run cases wiht -case, path or file would be ok")
-    sub_run_arg_program.add_argument("--runner-count", "-rc", dest="runner_count", type=int, default=1,
-                                     help="runner count, default is 1 runner to run cases, max would be cpus*2")
+    # name
     sub_run_arg_program.add_argument("--name", "-name", dest="name", type=str, default="AutoTest",
                                      help="test name, defautl is autotest")
+    # case
+    sub_run_arg_program.add_argument("--case", "-case", dest="case", type=str,
+                                     help="run cases wiht -case, path or file would be ok")
+    sub_run_arg_program.add_argument("--api", "-api", dest="api", default=True, type=bool,
+                                     help="api case or not, default is true")
+    # runner
+    sub_run_arg_program.add_argument("--only-runner", "-or", type=bool, default=False, dest="only_runner",
+                                     help="""if true, only start runner""")
+    sub_run_arg_program.add_argument("--runner-count", "-rc", dest="runner_count", type=int, default=1,
+                                     help="runner count, default is 1 runner to run cases, max would be cpus*2")
+    # bus server
     sub_run_arg_program.add_argument("--bus-server", "-bs", dest="bus_server", type=str, default=None,
                                      help="""default is localhost to run bus server;
                                              if is ip or domain, would not run local bus-server, and using ip to connect""")
     sub_run_arg_program.add_argument("--bus-server-port", "-bsp", dest="bus_server_port", type=int,
                                      help="""default is 9000, using another port to start bus server""")
+    sub_run_arg_program.add_argument("--only-bus", "-ob", type=bool, default=False, dest="only_bus",
+                                     help="""if true, only start bus""")
+    # web server
     sub_run_arg_program.add_argument("--web-server", "-ws", type=bool,
                                      help="""default is not run;
                                              if is True, would create web server to offer the api and html service;""")
+    # report
     sub_run_arg_program.add_argument("--report-html", "-rh", type=bool, default=True,
                                      help="""default is True,to generate html report""")
     sub_run_arg_program.add_argument("--report-output-dir", "-rod", dest="report_output_dir", type=str, default="",
@@ -49,31 +61,37 @@ def main_args():
                                      help="""email report template""")
     sub_run_arg_program.add_argument("--report-export-dir", "-red", type=str, dest="report_export_dir",
                                      help="""email report dir""")
+    # log
     sub_run_arg_program.add_argument("--log-dir", "-ld", type=str, dest="log_dir",
                                      help="""log output dir is needed!""")
+    # loader
     sub_run_arg_program.add_argument("--only-loader", "-ol", type=bool, default=False, dest="only_loader",
                                      help="""if true, only start loader""")
-    sub_run_arg_program.add_argument("--only-bus", "-ob", type=bool, default=False, dest="only_bus",
-                                     help="""if true, only start bus""")
-    sub_run_arg_program.add_argument("--only-runner", "-or", type=bool, default=False, dest="only_runner",
-                                     help="""if true, only start runner""")
+    # recorder
     sub_run_arg_program.add_argument("--only-recorder", "-ore", type=bool, default=False, dest="only_recorder",
                                      help="""if true, only start recorder""")
+    # config
     sub_run_arg_program.add_argument("--config", "-c", type=str, dest="config",
                                      help="""customer config""")
-    sub_run_arg_program.add_argument("--api", "-api", dest="api", default=True, type=bool,
-                                     help="api case or not, default is true")
+    # debug
     sub_run_arg_program.add_argument("--debug", "-debug", dest="debug", default=False, type=bool,
                                      help="open debug or not")
+    # sql publish
     sub_run_arg_program.add_argument("--sql-publish", "-sp", dest="sql_publish", default=False, type=bool,
                                      help="sql publish or not")
     sub_run_arg_program.add_argument("--sql-publish-db", "-sp_db", dest="sql_publish_db", type=str, default="",
                                      help="sql publish db config, format like : host:port@username:password@database)")
-
+    # init
     sub_init_arg_program = sub_all_arg_program.add_parser("init",
                                                          help="init workspace, using 'python -m haf init -t=all' to init workspace of haf")
     sub_init_arg_program.add_argument("--type", "-t", dest="init_type", type=str, default=None,
                                      help="init workspace with type")
+
+    # help
+    sub_help_arg_program = sub_all_arg_program.add_parser("help",
+                                                         help="help, using 'python -m haf help' to show this")
+    sub_help_arg_program.add_argument("--all", dest="help-all", type=str, default=None,
+                                     help="show all help informations")
 
     args = arg_program.parse_args()
 
@@ -163,10 +181,10 @@ def main_args():
                             if f.startswith("test_") and (f.endswith(".py") or f.endswith(".yml") or f.endswith(".json") or f.endswith(".xlsx")):
                                 args.case.append(os.path.join(path, f))
                     else:
-                        print("found wrong case path ...")
+                        print(f"found wrong case path ... {path}")
+                        sys.exit(-2)
                 else:
                     args.case.append(path)
-
         print(args)
         main_program = Program()
         main_program.run(args)
@@ -174,8 +192,10 @@ def main_args():
         print(args)
         helper = Helper()
         helper.init_workspace()
+    elif args.all == "help":
+        Helper.print_help()
     else:
-        print("using python -m haf help to show help infos")
+        print("Wrong args, using 'python -m haf help' to get the usage information.")
 
 
 if __name__ == "__main__":
