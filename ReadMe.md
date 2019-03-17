@@ -6,7 +6,6 @@
 [![Documentation Status](https://readthedocs.org/projects/haf/badge/?version=latest)](https://haf.readthedocs.io/en/latest/?badge=latest)
                 
 
-![report](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/report.gif)
 ![all](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/all.gif)
 
 
