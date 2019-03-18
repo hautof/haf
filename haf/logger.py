@@ -9,13 +9,14 @@ logger = logging.getLogger(__name__)
 
 
 class Logger(Process):
-    def __init__(self, case_name, log_dir, bus_client: BusClient):
+    def __init__(self, case_name, log_dir, bus_client: BusClient, args: tuple):
         super().__init__()
         self.daemon = True
         self.bus_client = bus_client
         self.case_name = case_name
         self.log_dir = log_dir
         self.loggers = {}
+        self.args = args
 
     def reconnect_bus(self):
         self.bus_client = BusClient(self.bus_client.domain, self.bus_client.port, self.bus_client.auth_key)
@@ -55,7 +56,8 @@ class Logger(Process):
         logger = self.loggers.get(process)
         msg = f"<{process}> [{logger_name}] {msg_origin}"
         if level=="debug":
-            logger.debug(msg)
+            if hasattr(self.args, "debug") and self.args.debug:
+                logger.debug(msg)
         elif level=="info":
             logger.info(msg)
         elif level=="wraning":
