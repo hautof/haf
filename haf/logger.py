@@ -54,18 +54,23 @@ class Logger(Process):
         if process not in self.loggers:
             self.loggers[process] = logging.getLogger(logger_name)
         logger = self.loggers.get(process)
-        msg = f"<{process}> [{logger_name}] {msg_origin}"
         if level=="debug":
+            msg = f"<{process}> [{logger_name}] {msg_origin}"
             if hasattr(self.args, "debug") and self.args.debug:
                 logger.debug(msg)
         elif level=="info":
+            msg = f"<{process}> [{logger_name}] {msg_origin}"
             logger.info(msg)
-        elif level=="wraning":
-            logger.warning(f"\33[33m{msg}\33[0m")
+        elif level=="warning":
+            msg = f"{msg_origin}"
+            logger.warning(f"<{process}> [{logger_name}]\33[33m ####################################### \33[0m")
+            logger.warning(f"<{process}> [{logger_name}] \33[33m{msg}\33[0m")
+            logger.warning(f"<{process}> [{logger_name}]\33[33m ####################################### \33[0m")
         elif level=="error":
-            logger.error(f"\33[31m >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \33[0m")
-            logger.error(f"\33[31m | {msg}\33[0m")
-            logger.error(f"\33[31m <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \33[0m")
+            msg = f"{msg_origin}"
+            logger.error(f"<{process}> [{logger_name}]\33[31m >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \33[0m")
+            logger.error(f"<{process}> [{logger_name}]\33[31m | {msg}\33[0m")
+            logger.error(f"<{process}> [{logger_name}]\33[31m <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \33[0m")
         elif level=="critical":
             logger.critical(f"\33[5m{msg}\33[0m")
 
