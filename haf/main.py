@@ -99,7 +99,7 @@ def main_args():
         # here : config <- file
         if args.config:
             if not os.path.exists(args.config):
-                print(f"config file {args.config} not found!")
+                print(f"config file <{args.config}> not found!")
                 sys.exit(-1)
             try:
                 with open(args.config, 'r') as f:
@@ -114,6 +114,8 @@ def main_args():
                     args.bus_server_port = config_run.get("bus_server_port")
                     args.only_bus = bus_config.get("only")
                     args.bus_server = None if bus_config.get("host") is None or bus_config.get("host")=="" else f"{bus_config.get('auth_key')}@{bus_config.get('host')}:{bus_config.get('host')}"
+                    
+                    args.debug = config_run.get("debug", False)
 
                     config_run_report = config_run.get("report")
                     args.report_output_dir = config_run_report.get("report_path")

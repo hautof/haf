@@ -80,7 +80,7 @@ class Program(object):
         pass
 
     def _init_system_logger(self, log_dir: str, bus_client: BusClient):
-        log = Logger(self.case_name, log_dir, bus_client)
+        log = Logger(self.case_name, log_dir, bus_client, self.args)
         log.start()
         time.sleep(0.1)
 
