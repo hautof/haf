@@ -36,11 +36,11 @@ class Jinja2Report(object):
             template = key
             if os.path.exists(template):
                 try:
-                    logger.info(f"try using customer template {template}")
+                    logger.info(f"try using customer template {template}", __name__)
                     return Jinja2Report.get_template_customer(template)
                 except Exception as e:
-                    logger.error(f"Jinja2Report Customer Template Error : {traceback.format_exc()}")
-                    logger.info("continue using default template to generate report !!!")
+                    logger.error(f"Jinja2Report Customer Template Error : {traceback.format_exc()}", __name__)
+                    logger.info("continue using default template to generate report !!!", __name__)
             template = "base.html"
 
         local_dir = os.path.dirname(__file__)
@@ -55,18 +55,18 @@ class Jinja2Report(object):
             return {"status": "error", "msg": "results is None"}
         if not name:
             name = "base"
-        logger.info(f"using {name} as template")
+        logger.info(f"using {name} as template", __name__)
         template = Jinja2Report.get_template(name)
         return template.generate(results=results)
 
     @staticmethod
     def write_report_to_file(info, report_path: str):
         try:
-            logger.info(f"generate report to {report_path}")
+            logger.info(f"generate report to {report_path}", __name__)
             stream = TemplateStream(info)
             stream.dump(report_path)
         except Exception as e:
-            logger.error(e)
+            logger.error(e, __name__)
             traceback.print_exc()
 
     @staticmethod
