@@ -445,6 +445,7 @@ class AppRunner(BaseRunner):
                 case.pngs[key] = {"before": f"./png/{png_name}-before.png", "after": f"./png/{png_name}-after.png"}
             result.case = case
             result.result = RESULT_PASS
+            result.run_error = None
         except Exception as e:
             logger.error(f"{self.key} : {e}", __name__)
             result.run_error = e
@@ -463,9 +464,12 @@ class AppRunner(BaseRunner):
                 page.send_keys(paths, stage.info.get("keys"))
             elif operation == OPERATION_APP_SWIPE:
                 page.swipe(stage.info.get("direction"))
+            stage.result = "PASS"
             time.sleep(stage.time_sleep)
         except Exception as e:
+            stage.result = str(e)
             if stage.show_try:
+                stage.result = "PASS"
                 logger.warning(f"{self.key} : <<could failed stage>> : [{stage.id}] -- {e}", __name__)
             result.run_error = f"{stage.id} : {e}"
             if not stage.show_try:
@@ -558,6 +562,7 @@ class WebRunner(BaseRunner):
                 case.pngs[key] = {"before": f"./png/{png_name}-before.png", "after": f"./png/{png_name}-after.png"}
             result.case = case
             result.result = RESULT_PASS
+            result.run_error = None
         except Exception as e:
             logger.error(f"{self.key} : {e}", __name__)
             result.run_error = e
@@ -576,9 +581,12 @@ class WebRunner(BaseRunner):
                 page.send_keys(paths, stage.info.get("keys"))
             elif operation == OPERATION_WEB_SWIPE:
                 page.swipe(stage.info.get("direction"))
+            stage.result = "PASS"
             time.sleep(stage.time_sleep)
         except Exception as e:
+            stage.result = str(e)
             if stage.show_try:
+                stage.result = "PASS"
                 logger.warning(f"{self.key} : <<could failed stage>> : [{stage.id}] -- {e}", __name__)
             result.run_error = f"{stage.id} : {e}"
             if not stage.show_try:

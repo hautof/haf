@@ -81,6 +81,7 @@ class WebStage(object):
         self.show_try = True
         self.time_sleep = 5
         self.info = {}
+        self.result = "PASS"
     
     def constructor(self, input: dict={}):
         self.id = input.get("id")
@@ -99,7 +100,8 @@ class WebStage(object):
             "path": self.path,
             "show_try": self.show_try,
             "info": self.info,
-            "time_sleep": self.time_sleep
+            "time_sleep": self.time_sleep,
+            "result": self.result
         }
 
 
