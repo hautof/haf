@@ -427,7 +427,7 @@ class AppRunner(BaseRunner):
             result.case = case
             from appium import webdriver
             driver = webdriver.Remote(APP_DRIVER_PATH, case.desired_caps.deserialize())
-            logger.info(f"{self.key} : wait app start ...", __name__)
+            logger.info(f"{self.key} : wait app start ... [{case.time_sleep}s]", __name__)
             if case.wait_activity:
                 time.sleep(5)
                 self.wait_activity(case.wait_activity, case.time_sleep, driver)
@@ -537,7 +537,7 @@ class WebRunner(BaseRunner):
         try:
             result.case = case
             driver = self.create_web_driver(case.desired_caps)
-            logger.info(f"{self.key} : wait web {case.desired_caps.platformName} start ...", __name__)
+            logger.info(f"{self.key} : wait web {case.desired_caps.platformName} start ... [{case.time_sleep}s]", __name__)
             driver.get(case.desired_caps.start_url)
             driver.maximize_window()
             if case.wait_activity:
