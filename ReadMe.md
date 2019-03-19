@@ -4,6 +4,7 @@
 
 [![Build Status](https://travis-ci.org/hautof/haf.svg?branch=master)](https://travis-ci.org/hautof/haf)
 [![Documentation Status](https://readthedocs.org/projects/haf/badge/?version=latest)](https://haf.readthedocs.io/en/latest/?badge=latest)
+[![PyPI](https://img.shields.io/pypi/v/haf.svg)](https://img.shields.io/pypi/v/haf.svg)
                 
 
 ![all](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/all.gif)
