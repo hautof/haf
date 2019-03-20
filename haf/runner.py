@@ -439,17 +439,18 @@ class AppRunner(BaseRunner):
                 logger.info(f"{self.key} : {key} == {case.stages.get(key).deserialize()}", __name__)
                 png_dir = f"{self.log_dir}"
                 png_name = f"{case.bench_name}.{case.ids.id}.{case.ids.subid}.{case.ids.name}.{key}"
+                case.pngs[key] = {"before": f"./png/{png_name}-before.png", "after": f"./png/{png_name}-after.png"}
                 png_before = save_screen_shot(driver, png_dir, f"{png_name}-before")
                 self.run_stage(case, page, case.stages.get(key, Stage()), result)
                 png_after = save_screen_shot(driver, png_dir, f"{png_name}-after")
-                case.pngs[key] = {"before": f"./png/{png_name}-before.png", "after": f"./png/{png_name}-after.png"}
             result.case = case
             result.result = RESULT_PASS
             result.run_error = None
         except Exception as e:
             logger.error(f"{self.key} : {e}", __name__)
             result.run_error = e
-            result.result = RESULT_ERROR
+            # TODO : make the result to error and fail
+            result.result = RESULT_FAIL # RESULT_ERROR, fix #134
         result.on_case_end()
         return result
 
@@ -573,17 +574,18 @@ class WebRunner(BaseRunner):
                 logger.info(f"{self.key} : {key} == {case.stages.get(key).deserialize()}", __name__)
                 png_dir = f"{self.log_dir}"
                 png_name = f"{case.bench_name}.{case.ids.id}.{case.ids.subid}.{case.ids.name}.{key}"
+                case.pngs[key] = {"before": f"./png/{png_name}-before.png", "after": f"./png/{png_name}-after.png"}
                 png_before = web_save_screen_shot(driver, png_dir, f"{png_name}-before")
                 self.run_stage(case, page, case.stages.get(key, WebStage()), result)
                 png_after = web_save_screen_shot(driver, png_dir, f"{png_name}-after")
-                case.pngs[key] = {"before": f"./png/{png_name}-before.png", "after": f"./png/{png_name}-after.png"}
             result.case = case
             result.result = RESULT_PASS
             result.run_error = None
         except Exception as e:
             logger.error(f"{self.key} : {e}", __name__)
             result.run_error = e
-            result.result = RESULT_ERROR
+            # TODO : make the result to error and fail
+            result.result = RESULT_FAIL # RESULT_ERROR, fix #134
         result.on_case_end()
         return result
 
