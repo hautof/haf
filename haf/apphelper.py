@@ -81,7 +81,7 @@ class Stage(object):
         self.show_try = True
         self.time_sleep = 5
         self.info = {}
-        self.result = "PASS"
+        self.result = "NOT RUN"
         self.run_count = 0
     
     def constructor(self, input: dict={}):
