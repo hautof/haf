@@ -82,6 +82,7 @@ class WebStage(object):
         self.time_sleep = 5
         self.info = {}
         self.result = "PASS"
+        self.run_count = 1
     
     def constructor(self, input: dict={}):
         self.id = input.get("id")
@@ -91,6 +92,7 @@ class WebStage(object):
         self.show_try = input.get("try")
         self.info = input.get("info")
         self.time_sleep = input.get("sleep")
+        self.run_count = input.get("run_count")
 
     def deserialize(self):
         return {
@@ -101,7 +103,8 @@ class WebStage(object):
             "show_try": self.show_try,
             "info": self.info,
             "time_sleep": self.time_sleep,
-            "result": self.result
+            "result": self.result,
+            "run_count": self.run_count
         }
 
 

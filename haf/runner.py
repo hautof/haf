@@ -453,23 +453,40 @@ class AppRunner(BaseRunner):
         result.on_case_end()
         return result
 
+    def run_operation(self, page, operation, paths, info):
+        if  operation== OPERATION_APP_CLICK:
+            page.click(paths)
+        elif operation == OPERATION_APP_SENDKEYS:
+            page.send_keys(paths, info.get("keys"))
+        elif operation == OPERATION_APP_SWIPE:
+            page.swipe(info.get("direction"))
+
     def run_stage(self, case, page, stage: Stage=Stage(), result: AppResult=AppResult()):
+        count_now = 0
         try:
             paths = stage.path
             operation = stage.operation
             logger.info(f"{self.key} -- {OPERATION_APP_ANTI_GROUP[operation]}", __name__)
-            if  operation== OPERATION_APP_CLICK:
-                page.click(paths)
-            elif operation == OPERATION_APP_SENDKEYS:
-                page.send_keys(paths, stage.info.get("keys"))
-            elif operation == OPERATION_APP_SWIPE:
-                page.swipe(stage.info.get("direction"))
-            stage.result = "PASS"
+            info = stage.info
+            run_count = stage.run_count
+            stage.result = []
+            if isinstance(run_count, int):
+                for x in range(1, run_count+1):
+                    logger.info(f"{self.key} -- {stage.id} - {OPERATION_APP_ANTI_GROUP[operation]} - {x}", __name__)
+                    count_now = x
+                    self.run_operation(page, operation, paths, info)
+                    stage.result.append(f"{x}-PASS")
+            else:
+                self.run_operation(page, operation, paths, info)
+            if run_count == 1 or run_count is None:
+                stage.result = "PASS"
+            elif run_count == 0:
+                stage.result = "SKIP"
             time.sleep(stage.time_sleep)
         except Exception as e:
             stage.result = str(e)
             if stage.show_try:
-                stage.result = "PASS"
+                stage.result = "PASS [can fail]"
                 logger.warning(f"{self.key} : <<could failed stage>> : [{stage.id}] -- {e}", __name__)
             result.run_error = f"{stage.id} : {e}"
             if not stage.show_try:
@@ -570,23 +587,40 @@ class WebRunner(BaseRunner):
         result.on_case_end()
         return result
 
-    def run_stage(self, case, page, stage: Stage=WebStage(), result: WebResult=WebResult()):
+    def run_operation(self, page, operation, paths, info):
+        if  operation== OPERATION_WEB_CLICK:
+            page.click(paths)
+        elif operation == OPERATION_WEB_SENDKEYS:
+            page.send_keys(paths, info.get("keys"))
+        elif operation == OPERATION_WEB_SWIPE:
+            page.swipe(info.get("direction"))
+
+    def run_stage(self, case, page, stage: WebStage=WebStage(), result: WebResult=WebResult()):
+        count_now = 0
         try:
             paths = stage.path
             operation = stage.operation
             logger.info(f"{self.key} -- {OPERATION_WEB_ANTI_GROUP[operation]}", __name__)
-            if  operation== OPERATION_WEB_CLICK:
-                page.click(paths)
-            elif operation == OPERATION_WEB_SENDKEYS:
-                page.send_keys(paths, stage.info.get("keys"))
-            elif operation == OPERATION_WEB_SWIPE:
-                page.swipe(stage.info.get("direction"))
-            stage.result = "PASS"
+            info = stage.info
+            run_count = stage.run_count
+            stage.result = []
+            if isinstance(run_count, int):
+                for x in range(1, run_count+1):
+                    logger.info(f"{self.key} -- {stage.id} - {OPERATION_WEB_ANTI_GROUP[operation]} - {x}", __name__)
+                    count_now = x
+                    self.run_operation(page, operation, paths, info)
+                    stage.result.append(f"{x}-PASS")
+            else:
+                self.run_operation(page, operation, paths, info)
+            if run_count == 1 or run_count is None:
+                stage.result = "PASS"
+            elif run_count == 0:
+                stage.result = "SKIP"
             time.sleep(stage.time_sleep)
         except Exception as e:
             stage.result = str(e)
             if stage.show_try:
-                stage.result = "PASS"
+                stage.result = "PASS [can fail]"
                 logger.warning(f"{self.key} : <<could failed stage>> : [{stage.id}] -- {e}", __name__)
             result.run_error = f"{stage.id} : {e}"
             if not stage.show_try:
