@@ -6,7 +6,7 @@ from multiprocessing import Process
 from haf.apihelper import Request, Response
 from haf.apphelper import Stage, BasePage, save_screen_shot
 from haf.asserthelper import AssertHelper
-from haf.bench import HttpApiBench, BaseBench, AppBench, WebBench
+from haf.bench import HttpApiBench, BaseBench, AppBench, WebBench, PyBench
 from haf.busclient import BusClient
 from haf.case import HttpApiCase, BaseCase, PyCase, AppCase, WebCase
 from haf.common.database import SQLConfig
@@ -47,7 +47,14 @@ class Runner(Process):
     def get_bench(self, case:BaseCase):
         bench = self.benchs.get(case.bench_name, None)
         if bench is None :
-            bench = HttpApiBench()
+            if isinstance(case, HttpApiCase):
+                bench = HttpApiBench()
+            elif isinstance(case, PyCase):
+                bench = PyBench()
+            elif isinstance(case, AppBench):
+                bench = AppBench()
+            elif isinstance(case, WebBench):
+                bench = WebBench()
         bench.add_case(case)
         self.benchs[case.bench_name] = bench
         return bench
@@ -67,7 +74,7 @@ class Runner(Process):
     # TODO: try new_locker here, still need some tests
     # @locker 
     def put_case_back(self, key:str, case):
-        logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name}", __name__)
+        logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name} for dependent : {case.dependent}", __name__)
         with new_locker(self.bus_client, key):
             self.case_handler_queue.put(case)
 
