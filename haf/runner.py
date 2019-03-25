@@ -331,6 +331,17 @@ class ApiRunner(BaseRunner):
         result.on_case_end()
         return result
 
+    def get_dependent_var(self, case):
+        if isinstance(case, (HttpApiCase)):
+            if case.dependent_var is None:
+                return
+            else:
+                for dv in case.dependent_var:
+                    if hasattr(case, dv):
+                        new_attr = getattr(case, dv)
+                        pass
+                        # TODO : add replace case's dv here
+
     def request(self, request:Request):
         return Utils.http_request(request, key=self.key)
 
