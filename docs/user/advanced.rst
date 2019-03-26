@@ -3,28 +3,55 @@
 Advanced Usage
 ==============
 
-.. image:: https://travis-ci.org/tsbxmw/haf.svg?branch=dev-2.1.0
-    :target: https://travis-ci.org/tsbxmw/haf
+.. image:: https://travis-ci.org/hautof/haf.svg?branch=master
+    :target: https://travis-ci.org/hautof/haf
 
-.. image:: https://raw.githubusercontent.com/tsbxmw/haf/dev-2.1.0/docs/show/all.gif
+.. image:: https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/all.gif
 
-.. image:: https://raw.githubusercontent.com/tsbxmw/haf/dev-2.1.0/docs/show/report.gif
 
 
 How to get it
 ==============
 
-- using pip to get it::
+- using pip to get it
 
-    $tsbxmw@ps# pip install haf --upgrade
+    - tsbxmw@ps# pip install haf --upgrade
 
-- using git tool to get it::
+- using git tool to get it
 
-    $tsbxmw@ps# git clone https://github.com/tsbxmw/haf
-    $tsbxmw@ps# cd haf
-    $tsbxmw@ps# python setup.py install
+    - tsbxmw@ps# git clone https://github.com/tsbxmw/haf
+    - tsbxmw@ps# cd haf
+    - tsbxmw@ps# python setup.py install
 
 How to run
+==============
+
+- 1 using init to init workspace
+
+    - python -m haf init
+
+    or 
+
+    - git clone https://github.com/tsbxmw/haf-sample
+
+
+- 2 run it in dir haf-sample
+
++ run api case
+
+    python -m haf run -c=config.json
+
+
++ run web ui case
+
+    python -m haf run -c=config-web.json
+
++ 3 find the report at the data dir
+
+    using chrome or other browsers to open the html file
+
+
+Others
 ==============
 
 - local bus mode, using local bus to run all cases
@@ -140,3 +167,4 @@ How to run
 
 
 
+.. image:: https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/report.gif
