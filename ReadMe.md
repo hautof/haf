@@ -1,45 +1,24 @@
-### haf    
-    
+# HAF    
+
     The high automation framework. 
 
 [![Build Status](https://travis-ci.org/hautof/haf.svg?branch=master)](https://travis-ci.org/hautof/haf)
 [![Documentation Status](https://readthedocs.org/projects/haf/badge/?version=latest)](https://haf.readthedocs.io/en/latest/?badge=latest)
-[![PyPI](https://img.shields.io/pypi/v/haf.svg)](https://img.shields.io/pypi/v/haf.svg)
+[![PyPI](https://img.shields.io/pypi/v/haf.svg)](https://img.shields.io/pypi/v/haf.svg) [![GitHub release](https://img.shields.io/github/release/hautof/haf.svg)](https://img.shields.io/github/release/hautof/haf.svg)
                 
 
 ![all](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/all.gif)
 
 
-### new features
+# How to get it
 
-- now support app-ui/web-ui cases and generate report
-
-- support mysql result publish
-
-- based on local test runners
-
-- support xlsx,json,yml,py cases
-
-- report generate with html-template
-
-- multi-processes on different machines
-
-- multi-runners
-
-- web-server support restful api based on flask
-
-- only mode : loader/runner/recorder/webserver/bus/logger support
-
-
-### How to get it
-
-> using pip to get it
+## using pip to get it
 
 ```shell
    tsbxmw@ps# pip install haf --upgrade
 ```
 
-> using git tool to get it
+## using git tool to get it
 
 ```bash
    tsbxmw@ps# git clone https://github.com/tsbxmw/haf
@@ -48,13 +27,9 @@
 ```
 
 
-### How to run
+# How to run
 
-#### local bus mode, using local bus to run all cases
-
-- local bus is without --bus-server(-bs) args, when running the program, the bus would be created
-
-#### using init to init workspace
+## 1 using init to init workspace
 
 ```bash
     python -m haf init
@@ -66,30 +41,48 @@ or
     git clone https://github.com/tsbxmw/haf-sample
 ```
 
+## 2 run it in dir haf-sample
 
-#### run it in dir haf-sample
-
-##### run api case
+### run api case
 
 ```bash
     python -m haf run -c=config.json
 ```
 
-##### run web ui case
+### run web ui case
 
 ```bash
     python -m haf run -c=config-web.json
 ```
 
-#### find the report at the data dir
+## 3 find the report at the data dir
 
     using chrome or other browsers to open the html file
 
-### How to run your define cases
+# Others
 
-#### other running locally
+| quick start | haf-sample | pypi | read the doc |
+|---|---|---|---|
+| [start](https://github.com/tsbxmw/haf/wiki/Quick-Start) | [haf-sample](https://github.com/hautof/haf-sample) | [pypi](https://pypi.org/project/haf/) | [doc](https://haf-doc.readthedocs.io/en/dev-2.1.0/) |
 
-##### modify the config.json in testcases
+
+# Plugins
+
+| id | plugin name | version | git hub repo|
+|---|---|---|---|
+| 1 | haf api server | [![PyPI](https://img.shields.io/pypi/v/hafapiserver.svg)](https://img.shields.io/pypi/v/hafapiserver.svg) | [haf webserver](https://github.com/hautof/haf-plugin-webserver) |
+| 2 | haf sql publish | [![PyPI](https://img.shields.io/pypi/v/hafsqlpublish.svg)](https://img.shields.io/pypi/v/hafsqlpublish.svg) | [haf sqlpublish](https://github.com/hautof/haf-plugin-sqlpublish) |
+
+
+# How to run your define cases
+
+## Other running locally
+
+### Local bus mode, using local bus to run all cases
+
+- local bus is without --bus-server(-bs) args, when running the program, the bus would be created
+
+### modify the config.json in testcases
 
 - change the `log_path` and `report_path` and `case_path` to your own path
 - delete `config->run->sql_publish` if you don't have an haf-publish
@@ -156,70 +149,76 @@ or
     }
 ```
 
-##### create testcase or using default cases
+### create testcase or using default cases
 
 - create xlsx/json/yml/py file with template in testcases/
 - using haf-sample case template
 
-##### run
+### run
 
-- run with config
+#### run with config
 
 ```shell
     python -m haf run -c=./testcases/config.json
 ```
 
-- run with args
+#### run with args
 
 ```shell
     python -m haf run -case=./testcases/test.xlsx,./testcases/test2.json -ld=./data -rh=true -rod=./data/report.html
 ```
 
-##### when running the api cases
+# when running the api cases
 
 
 ![report](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/report.gif)
 
 
 
-##### when running the app cases
+# when running the app cases
 
 - change the config.json's "report" to add report_template
 
 ```json
-    "report": 
-        {
-            "report_template": "base_app",
+    "run": {
+        "type": "app"  # change type to app
+
+        "report": {
+            "report_template": "base_app",  # change report_template to base_app
             "report_path": "./data/report.html"
         }
+    }
 ```
 
 ![report-app](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/report-app.gif)
 
 
-##### when runnng the web ui cases
+# when runnng the web ui cases
 
 - change the config.json's "report" to add report_template
 
 
 ```json
-    "report": 
-        {
-            "report_template": "base_web",
+    "run": {
+        "type": "web"  # change type to web
+
+        "report": {
+            "report_template": "base_web",  # change report_template to base_web
             "report_path": "./data/report.html"
         }
+    }
 ```
 
 ![report-app](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/webui.gif)
 
 
 
-#### haf samples
+# haf samples
 
 > https://github.com/hautof/haf-sample
 
 
-#### other run args
+# other run args
 
 - run with multi-runners (4 runners)
 
@@ -297,6 +296,7 @@ or
 
 ```bash
     http://localhost:8888/report
+    http://localhost:8888/report-app
 ```
 
 ### FrameWork 
@@ -318,3 +318,23 @@ or
 ### Release Note
 
 [release note](https://github.com/tsbxmw/haf/blob/master/docs/releasenote.md)
+
+### new features
+
+- now support app-ui/web-ui cases and generate report
+
+- support mysql result publish
+
+- based on local test runners
+
+- support xlsx,json,yml,py cases
+
+- report generate with html-template
+
+- multi-processes on different machines
+
+- multi-runners
+
+- web-server support restful api based on flask
+
+- only mode : loader/runner/recorder/webserver/bus/logger support

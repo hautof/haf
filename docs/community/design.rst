@@ -16,6 +16,11 @@ Runner
 WebServer
 =============
 
+SQL
+=============
+.. image:: https://raw.githubusercontent.com/tsbxmw/haf/master/docs/png/haf-publish.png
+
+
 Bus
 =============
 
