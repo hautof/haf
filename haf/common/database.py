@@ -89,6 +89,14 @@ class MysqlTool(object):
                         data.append(cursor_m.fetchall())
                         if not run_background:
                             logger.info(f"{key} result {str(data)}", __name__)
+                    if isinstance(ss, tuple):
+                        if not run_background:
+                            logger.info(f"{key} tuple start {sqlconfig.host} execute {ss}", __name__)
+                        cursor_m.execute(ss[0], ss[1])
+                        data.append(cursor_m.fetchall())
+                        if not run_background:
+                            logger.info(f"{key} result {str(data)}", __name__)
+
             elif isinstance(sqlscript, str):
                 if sqlscript != None and sqlscript != "None" and "None" not in sqlscript and len(sqlscript) > 5:
                     if not run_background:
@@ -97,6 +105,15 @@ class MysqlTool(object):
                     data.append(cursor_m.fetchall())
                     if not run_background:
                         logger.info(f"{key} result {str(data)}", __name__)
+                
+            elif isinstance(ss, tuple):
+                if not run_background:
+                    logger.info(f"{key} start {sqlconfig.host} execute {ss}", __name__)
+                cursor_m.execute(*ss)
+                data.append(cursor_m.fetchall())
+                if not run_background:
+                    logger.info(f"{key} result {str(data)}", __name__)
+
             if commit:
                 self.connect_msql.commit()
             return data
@@ -170,3 +187,52 @@ class SqlServerTool(object):
         if self.connect_msql is not None:
             self.connect_msql.close()
 
+
+class RedisTool(object):
+    '''
+    Redis  工具类
+    '''
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return "RedisTool"
+
+    def connect_execute(self, sqlconfig: SQLConfig, sqlscript: list, **kwargs):
+        '''
+        连接到数据库并执行脚本
+        :参数:
+        
+        * testcase ： testcase 实例
+        * caseparam : 执行的 case 中对应的 脚本名称
+        '''
+        
+        import redis
+        key = kwargs.get("key", "database$%common$%")
+        commit = kwargs.get("commit", False)
+        run_background = kwargs.get("run_background", False)
+
+        sqlconfig = sqlconfig
+        self.connect_redis = None
+
+        try:
+            self.connect_redis = redis.Redis(host=sqlconfig.host, port=sqlconfig.port, db=sqlconfig.database)
+            logger.info(f"{key} start {sqlconfig.host} : [{self.connect_redis.type(sqlscript)}] execute {sqlscript}", __name__)
+            if "zset" in str(self.connect_redis.type(sqlscript)):
+                start = kwargs["start"]
+                end = kwargs["end"]
+                if "rev" in kwargs:
+                    return self.connect_redis.zrevrange(sqlscript, start, end)
+                else:
+                    return self.connect_redis.zrange(sqlscript, start, end)
+            elif "hash" in str(self.connect_redis.type(sqlscript)):
+                return self.connect_redis.hget(sqlscript)
+            else:
+                return self.connect_redis.get(sqlscript)
+
+        except Exception as e:
+            logger.error(f"{key} {e}")
+
+    def close(self):
+        if self.connect_redis is not None:
+            self.connect_redis.close()

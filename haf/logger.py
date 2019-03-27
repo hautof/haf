@@ -33,7 +33,7 @@ class Logger(Process):
             log_queue = self.bus_client.get_log()
             while True:
                 if log_queue.empty():
-                    time.sleep(0.01)
+                    time.sleep(0.001)
                     continue
                 log = log_queue.get()
                 self.log_handler(log)
@@ -120,9 +120,14 @@ class Logger(Process):
         if not os.path.exists(dir):
             os.makedirs(dir)
         full_name = f"{dir}/{filename}.log"
-        with open(full_name, 'a+') as f:
-            f.write(f"{self.now}{msg}\n")
-            f.close()
+        try:
+            with open(full_name, 'a+') as f:
+                f.write(f"{self.now}{msg}\n")
+                f.close()
+        except Exception as e:
+            with open(full_name, 'a+', encoding='utf-8') as f:
+                f.write(f"{self.now}{msg}\n")
+                f.close()
 
     @property
     def now(self):

@@ -381,7 +381,7 @@ class ApiRunner(BaseRunner):
             logger.info(f"{self.key} : check func : {check_func}", __name__)
             logger.info(f"{self.key} : check list is {case.sqlinfo.check_list}", __name__)
             if case.sqlinfo.check_list is not None:
-                check_func(case.expect.sql_response_result, data, case.sqlinfo.check_list["sql_response"])
+                check_func(case.expect.sql_response_result, data, case.sqlinfo.check_list["sql_response"], testcase=case)
             else:
                 check_func(case.expect.sql_response_result, data)
         except Exception as e:
