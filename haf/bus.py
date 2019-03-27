@@ -38,6 +38,8 @@ class BusServer(Process):
         '''
         # case queue, keep the case
         case = Queue(maxsize=-1)
+        # case back queue, form runner to loader
+        case_back = Queue(maxsize=-1)
         # param queue, keep the queue
         param = Queue(maxsize=-1)
         # result queue, keep the result
@@ -54,15 +56,22 @@ class BusServer(Process):
         web_lock = Queue(maxsize=1)
         # case lock queue
         case_lock = Queue(maxsize=1)
+        # case back lock queue
+        case_back_lock = Queue(maxsize=1)
         # result queue to web server
         publish_result = Queue(maxsize=1)
         # loader queue to web server
         publish_loader = Queue(maxsize=1)
         # runner queue to web server
         publish_runner = Queue(maxsize=1)
+        # case count queue
+        case_count = Queue(maxsize=1)
+        # case count lock queue
+        case_count_lock = Queue(maxsize=1)
 
         # register the functions to InfoManager
         InfoManager.register("get_case", callable=lambda: case)
+        InfoManager.register("get_case_back", callable=lambda: case_back)
         InfoManager.register("get_param", callable=lambda: param)
         InfoManager.register("get_result", callable=lambda: result)
         InfoManager.register("get_bench", callable=lambda: bench)
@@ -71,9 +80,12 @@ class BusServer(Process):
         InfoManager.register("get_lock", callable=lambda: lock)
         InfoManager.register("get_web_lock", callable=lambda: web_lock)
         InfoManager.register("get_case_lock", callable=lambda: case_lock)
+        InfoManager.register("get_case_back_lock", callable=lambda: case_back_lock)
         InfoManager.register("get_publish_result", callable=lambda: publish_result)
         InfoManager.register("get_publish_runner", callable=lambda: publish_runner)
         InfoManager.register("get_publish_loader", callable=lambda: publish_loader)
+        InfoManager.register("get_case_count", callable=lambda: case_count)
+        InfoManager.register("get_case_count_lock", callable=lambda: case_count_lock)
         self.queue_manager = InfoManager(address=(self.domain, self.port), authkey=self.auth_key)
         self.server = self.queue_manager.get_server()
 

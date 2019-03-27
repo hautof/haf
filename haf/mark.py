@@ -65,6 +65,11 @@ class Locker:
             lock = self.bus_client.get_web_lock()
         elif self.key == "case":
             lock = self.bus_client.get_case_lock()
+        elif self.key == "case_back":
+            lock = self.bus_client.get_case_back_lock()
+        elif self.key == "case_count":
+            lock = self.bus_client.get_case_count_lock()
+        
         while True:
             if not lock.empty():
                 return lock.get()
@@ -77,6 +82,10 @@ class Locker:
             return self.bus_client.get_web_lock().put(Lock)
         elif self.key == "case":
             return self.bus_client.get_case_lock().put(Lock)
+        elif self.key == "case_back":
+            return self.bus_client.get_case_back_lock().put(Lock)
+        elif self.key == "case_count":
+            return self.bus_client.get_case_count_lock().put(Lock)
 
 
 def locker(func):

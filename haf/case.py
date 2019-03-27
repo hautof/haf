@@ -130,7 +130,6 @@ class HttpApiCase(BaseCase):
             args_init = args[0]
         else:
             args_init = kwargs
-        #logger.info(args_init)
         self.ids.constructor(args_init)
         self.run = CASE_RUN if args_init.get("run") is True else CASE_SKIP
         self.dependent = [x for x in str(args_init.get("dependent")).split(";") if args_init.get("dependent") is not None]
@@ -152,6 +151,7 @@ class HttpApiCase(BaseCase):
             "ids": self.ids.deserialize(),
             "run": self.run,
             "dependent": self.dependent,
+            "dependent_var" : self.dependent_var,
             "bench_name": self.bench_name,
             "request": self.request.deserialize(),
             "response": self.response.deserialize(),

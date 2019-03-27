@@ -9,7 +9,7 @@ from haf.common.exception import FailLoaderException
 from haf.common.log import Log
 from haf.config import *
 from haf.utils import Utils
-from haf.mark import locker
+from haf.mark import locker, new_locker
 
 logger = Log.getLogger(__name__)
 
@@ -20,6 +20,7 @@ class Loader(Process):
         self.bus_client = bus_client
         self.daemon = True
         self.key = ""
+        self.true_case_count = 0
         self.loader = {"all":0, "error":0, "error_info":{}}
 
     def run(self):
@@ -29,6 +30,8 @@ class Loader(Process):
             logger.bind_busclient(self.bus_client)
             logger.info(f"{self.key} start loader", __name__)
             self.case_queue = self.bus_client.get_case()
+            self.case_back_queue = self.bus_client.get_case_back()
+            self.case_count = self.bus_client.get_case_count()
             while True:
                 if self.get_parameter() == SIGNAL_START:
                     logger.info(f"{self.key} -- get start signal from main", __name__)
@@ -39,10 +42,23 @@ class Loader(Process):
                 temp = self.get_parameter()
                 if temp == SIGNAL_STOP :
                     while True:
-                        if self.case_queue.empty():
-                            self.end_handler()
-                            return
+                        with new_locker(self.bus_client, "case_back"):
+                            logger.debug("check case_back here", __name__)
+                            if self.case_back_queue.empty():
+                                pass
+                            else:
+                                logger.debug("put case here from back queue", __name__)
+                                self.put_case("case", self.case_back_queue.get())
 
+                        if self.case_queue.empty() and self.case_back_queue.empty():
+                            # here wait for the runner put case back, if not, may lost case
+                            if not self.case_count.empty():
+                                complete_case_count = self.case_count.get()
+                                logger.debug(f"complete case count check here {complete_case_count} == {self.true_case_count}", __name__)
+                                if complete_case_count==self.true_case_count:
+                                    self.end_handler()
+                                    return
+                    time.sleep(0.1)
                 if temp is None:
                     time.sleep(0.01)
                     continue
@@ -69,7 +85,7 @@ class Loader(Process):
                         continue
                     if input.get("host_port") is None:
                         input["host_port"] = inputs.get("config")[0].get("host_port")
-                    if "api_name" in input.keys():
+                    if "api_name" in input.keys() or input.get("type")=="api":
                         case = HttpApiCase()
                     elif input.get("type") == "app":
                         case = AppCase()
@@ -87,6 +103,8 @@ class Loader(Process):
                         case.run = CASE_SKIP
                         case.error = CASE_ERROR
                         case.error_msg = str(e)
+                        
+                    self.true_case_count += 1
                     self.add_case(case)
                     self.put_case("case", case)
                     self.put_web_message("web")
@@ -97,6 +115,14 @@ class Loader(Process):
             logger.error(f"{self.key} {e}", __name__)
             logger.error(f"{self.key} {FailLoaderException}", __name__)
             self.end_handler(e)
+
+    @locker
+    def check_case_complete(self, key: str):
+        if not self.case_count.empty():
+            complete_case_count = self.case_count.get()
+            if complete_case_count==self.true_case_count:
+                return True
+        return False
 
     def get_parameter(self, param_key=None):
         params_queue = self.bus_client.get_param()

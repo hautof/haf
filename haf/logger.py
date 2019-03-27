@@ -23,7 +23,10 @@ class Logger(Process):
 
     def run(self):
         self.reconnect_bus()
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+        if hasattr(self.args, "debug") and self.args.debug:
+            logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+        else:
+            logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
         log_home = f"{self.log_dir}/{self.case_name}"
         if not os.path.exists(log_home):
             os.makedirs(log_home)
