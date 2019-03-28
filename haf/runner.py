@@ -77,6 +77,7 @@ class Runner(Process):
         logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name} for dependent : {case.dependent}", __name__)
         with new_locker(self.bus_client, key):
             self.case_back_queue.put(case)
+        time.sleep(5)
 
     def result_handler(self, result):
         if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
@@ -99,7 +100,7 @@ class Runner(Process):
                     "bench_name":result.bench_name
                 }
             }
-        # logger.info(f"{self.key} : runner {self.pid} -- put web message {self.runner}")
+        logger.debug(f"{self.key} : runner {self.pid} -- put web message {self.runner}", __name__)
         self.put_web_message("web")
 
     def run(self):
