@@ -32,6 +32,10 @@ class BusClient(metaclass=SingletonType):
         InfoManager.register("get_publish_runner")
         InfoManager.register("get_publish_loader")
         InfoManager.register("get_case_lock")
+        InfoManager.register("get_case_back")
+        InfoManager.register("get_case_back_lock")
+        InfoManager.register("get_case_count")
+        InfoManager.register("get_case_count_lock")
         # connect to the bus
         self.info_manager = InfoManager(address=(self.domain, self.port), authkey=self.auth_key)
         self.info_manager.connect()
@@ -71,6 +75,18 @@ class BusClient(metaclass=SingletonType):
 
     def get_publish_runner(self):
         return self.info_manager.get_publish_runner()
+
+    def get_case_back(self):
+        return self.info_manager.get_case_back()
+
+    def get_case_back_lock(self):
+        return self.info_manager.get_case_back_lock()
+
+    def get_case_count(self):
+        return self.info_manager.get_case_count()
+
+    def get_case_count_lock(self):
+        return self.info_manager.get_case_count_lock()
 
     def __new__(cls, *args, **kwargs):
         return object.__new__(cls)

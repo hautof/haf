@@ -90,6 +90,9 @@ class Program(object):
         self.bus_client.get_lock().put(Lock)
         self.bus_client.get_web_lock().put(Lock)
         self.bus_client.get_case_lock().put(Lock)
+        self.bus_client.get_case_back_lock().put(Lock)
+        self.bus_client.get_case_count_lock().put(Lock)
+        self.bus_client.get_case_count().put(0)
 
     def _bus_client(self, args):
         if isinstance(args.bus_server, list):
