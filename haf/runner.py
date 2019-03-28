@@ -51,10 +51,11 @@ class Runner(Process):
                 bench = HttpApiBench()
             elif isinstance(case, PyCase):
                 bench = PyBench()
-            elif isinstance(case, AppBench):
+            elif isinstance(case, AppCase):
                 bench = AppBench()
-            elif isinstance(case, WebBench):
+            elif isinstance(case, WebCase):
                 bench = WebBench()
+        
         bench.add_case(case)
         self.benchs[case.bench_name] = bench
         return bench
@@ -79,7 +80,7 @@ class Runner(Process):
             self.case_back_queue.put(case)
 
     def result_handler(self, result):
-        if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
+        if isinstance(result, HttpApiResult) or isinstance(result, AppResult) or isinstance(result, WebResult):
             if result.case.run == CASE_SKIP:
                 self.runner["skip"] += 1
             self.runner["run"] = {}
@@ -92,7 +93,7 @@ class Runner(Process):
                     "result" : RESULT_GROUP.get(str(result.result))
                 }
             })
-        elif isinstance(result, HttpApiCase) or isinstance(result, AppCase):
+        elif isinstance(result, HttpApiCase) or isinstance(result, AppCase) or isinstance(result, WebCase):
             self.runner["run"] = {
                 f"{result.ids.id}.{result.ids.subid}-{result.ids.name}":
                 {
@@ -133,8 +134,10 @@ class Runner(Process):
                                     self.put_result("result", result)
                             cases = []
                     elif isinstance(case, (AppCase, PyCase, WebCase)):
+                        logger.debug(f"cases' length is {len(cases)}, and end is {case}", __name__)
                         cases.append(case)
                         if len(cases)>0 and (len(cases)>=1 or case_end):
+                            logger.debug(f"cases' length is {len(cases)}", __name__)
                             results = loop.run_until_complete(self.run_cases(cases))
                             for result in results:
                                 if isinstance(result, (HttpApiResult, AppResult, WebResult)):
@@ -168,7 +171,7 @@ class Runner(Process):
         try:
             try:
                 self.key = local_case.log_key
-                logger.info(f"{self.key} : runner {self.pid} -- get {local_case.ids.id}.{local_case.ids.subid}-{local_case.ids.name}", __name__)
+                logger.info(f"{self.key} : runner {self.pid} -- get case {type(local_case)} <{local_case.ids.id}.{local_case.ids.subid}-{local_case.ids.name}>", __name__)
                 self.result_handler(local_case)
                 self.init_runner(local_case)
                 if local_case.type == CASE_TYPE_HTTPAPI:
@@ -179,7 +182,7 @@ class Runner(Process):
                     runner = AppRunner(self.bench, self.log_dir)
                 elif local_case.type == CASE_TYPE_WEBUI:
                     runner = WebRunner(self.bench, self.log_dir)
-                
+                logger.debug(f"{self.key} : running now")
                 result = await runner.run(local_case)
 
                 if isinstance(result, list):
@@ -214,14 +217,15 @@ class BaseRunner(object):
         self.bench = bench
 
     def check_case_run_here(self, case):
+        logger.debug("Base Runner check case run here", __name__)
         if not case.dependent or len(case.dependent) == 0:
             return True
         try:
             for dependence in case.dependent:
                 if dependence not in self.bench.cases.keys():
                     return False
-
-            self.get_dependent_var(case)
+            if isinstance(case, HttpApiCase):
+                self.get_dependent_var(case)
             return True
         except Exception:
             return False
@@ -584,9 +588,11 @@ class WebRunner(BaseRunner):
         self.key = case.log_key
         result = WebResult()
         result.on_case_begin()
+
         if not self.check_case_run_here(case) :
             result.on_case_end()
             return [CASE_CAN_NOT_RUN_HERE, result]
+
         if not self.check_case_run(case): # not False is skip
             result.case = case
             result.on_case_end()
