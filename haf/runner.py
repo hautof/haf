@@ -77,7 +77,6 @@ class Runner(Process):
         logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name} for dependent : {case.dependent}", __name__)
         with new_locker(self.bus_client, key):
             self.case_back_queue.put(case)
-        time.sleep(5)
 
     def result_handler(self, result):
         if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
@@ -119,7 +118,8 @@ class Runner(Process):
             while True:
                 case_end = False
                 if not self.case_handler_queue.empty() :
-                    case = self.case_handler_queue.get()
+                    with new_locker(self.bus_client, "case_runner"):
+                        case = self.case_handler_queue.get()
                     if case == SIGNAL_CASE_END:
                         case_end = True
                     if isinstance(case, HttpApiCase):
@@ -232,8 +232,8 @@ class BaseRunner(object):
     def check_case_error(self, case):
         return case.error == CASE_ERROR
 
-    def get_dependence_case_from_bench(self, dependence):
-        return None
+    def get_dependence_case_from_bench(self, dependent):
+        return self.bench.cases.get(dependent)
 
     def reuse_with_dependent(self, new_attr):
         begin = "<@begin@>"
@@ -241,18 +241,25 @@ class BaseRunner(object):
         if isinstance(new_attr, str):
             f, temp = new_attr.split("<@begin@>")
             temp, l = temp.split("<@end@>")
-            logger.debug(temp, __name__)
+            logger.debug(f"reuse with dependent {temp}", __name__)
+            return temp
+        elif isinstance(new_attr, dict):
+            for key in new_attr.keys():
+                if begin in new_attr.get(key):
+                    new_attr[key] = self.reuse_with_dependent(new_attr.get(key))
+            return new_attr
 
     def get_dependent_var(self, case):
-        logger.debug("get_dependent_var", __name__)
+        logger.debug(f"get_dependent_var {case.dependent_var}", __name__)
         if isinstance(case, (HttpApiCase)):
             if case.dependent_var is None:
                 return
             else:
                 for dv in case.dependent_var:
+                    logger.debug(f"start get dependent {dv}", __name__)
                     if hasattr(case, dv):
                         new_attr = getattr(case, dv)
-                        self.reuse_with_dependent(new_attr)
+                        new_attr = self.reuse_with_dependent(new_attr)
                         # TODO : add replace case's dv here
 
 

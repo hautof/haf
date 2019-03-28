@@ -133,7 +133,7 @@ class HttpApiCase(BaseCase):
         self.ids.constructor(args_init)
         self.run = CASE_RUN if args_init.get("run") is True else CASE_SKIP
         self.dependent = [x for x in str(args_init.get("dependent")).split(";") if args_init.get("dependent") is not None]
-        self.dependent_var = [x for x in args_init.get("dependent_var")] if args_init.get("dependent_var") is not None else None
+        self.dependent_var = [x for x in str(args_init.get("dependent_var")).split(";") if args_init.get("dependent_var") is not None]
         self.request.constructor(args_init)
         self.response.constructor(args_init)
         self.expect.constructor(args_init)
