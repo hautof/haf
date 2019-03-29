@@ -3,8 +3,7 @@ pipeline {
   stages {
     stage('setup') {
       steps {
-        sh 'pip3 uninstall haf -y'
-        sh 'python3 setup.py install'
+        sh "ls"
       }
     }
 
@@ -19,7 +18,7 @@ pipeline {
 
     stage('teardown') {
       steps {
-        sh 'pip3 uninstall haf -y'
+        sh 'pip3 install haf -U'
       }
     }
 
