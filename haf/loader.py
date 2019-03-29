@@ -1,6 +1,6 @@
 # encoding='utf-8'
 import time
-from multiprocessing import Process
+from multiprocessing import Process, Lock as m_lock
 from haf.bench import HttpApiBench
 from haf.busclient import BusClient
 from haf.common.database import SQLConfig
@@ -15,13 +15,14 @@ logger = Log.getLogger(__name__)
 
 
 class Loader(Process):
-    def __init__(self, bus_client:BusClient=None, args:list=None):
+    def __init__(self, bus_client: BusClient=None, lock: m_lock=None, args: list=None):
         super().__init__()
         self.bus_client = bus_client
         self.daemon = True
         self.key = ""
         self.true_case_count = 0
         self.loader = {"all":0, "error":0, "error_info":{}}
+        self.lock = lock
 
     def run(self):
         try:
@@ -42,16 +43,14 @@ class Loader(Process):
                 temp = self.get_parameter()
                 if temp == SIGNAL_STOP :
                     while True:
-                        with new_locker(self.bus_client, "case_back"):
-                            logger.debug("check case_back here", __name__)
-                            if self.case_back_queue.empty():
-                                pass
-                            else:
-                                logger.debug("put case here from back queue", __name__)
-                                self.put_case("case", self.case_back_queue.get())
+                        logger.debug("check case_back here", __name__)
+                        if self.case_back_queue.empty():
+                            pass
+                        else:
+                            logger.debug("put case here from back queue", __name__)
+                            self.put_case("case", None, self.case_back_queue.get())
 
                         if self.case_queue.empty() and self.case_back_queue.empty():
-                            # here wait for the runner put case back, if not, may lost case
                             if not self.case_count.empty():
                                 complete_case_count = self.case_count.get()
                                 logger.debug(f"complete case count check here {complete_case_count} == {self.true_case_count}", __name__)
@@ -106,7 +105,7 @@ class Loader(Process):
                         
                     self.true_case_count += 1
                     self.add_case(case)
-                    self.put_case("case", case)
+                    self.put_case("case", None, case)
                     self.put_web_message("web")
 
                 self.put_web_message("web")
@@ -114,10 +113,12 @@ class Loader(Process):
         except Exception as e:
             logger.error(f"{self.key} {e}", __name__)
             logger.error(f"{self.key} {FailLoaderException}", __name__)
+            import traceback
+            traceback.print_exc()
+            logger.error(f"{self.key} {traceback.format_exc()}",__name__)
             self.end_handler(e)
 
-    @locker
-    def check_case_complete(self, key: str):
+    def check_case_complete(self, key: str, lock=None):
         if not self.case_count.empty():
             complete_case_count = self.case_count.get()
             if complete_case_count==self.true_case_count:
@@ -139,15 +140,13 @@ class Loader(Process):
             self.loader["error"] += 1
             self.loader["error_info"][f"{case.ids.id}.{case.ids.subid}.{case.ids.name}"] = case.error_msg
 
-    @locker
-    def put_web_message(self, key:str):
+    def put_web_message(self, key: str, lock=None):
         web_queue = self.bus_client.get_publish_loader()
         if web_queue.full():
             web_queue.get()
         web_queue.put(self.loader)
 
-    @locker
-    def put_case(self, key:str, case):
+    def put_case(self, key: str, lock, case):
         logger.info(f"{self.key} -- put case {case.bench_name} - {case.ids.id}.{case.ids.subid}.{case.ids.name}", __name__)
         self.case_queue.put(case)
 

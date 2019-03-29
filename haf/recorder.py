@@ -1,8 +1,7 @@
 # encoding='utf-8'
 
 import time
-from multiprocessing import Process
-
+from multiprocessing import Process, Lock as m_lock
 from haf.busclient import BusClient
 from haf.case import HttpApiCase, BaseCase, PyCase, WebCase, AppCase
 from haf.common.database import SQLConfig
@@ -18,7 +17,7 @@ logger = Log.getLogger(__name__)
 
 
 class Recorder(Process):
-    def __init__(self, bus_client: BusClient, sql_config: SQLConfig, sql_publish: bool=False, runner_count: int=1, report_path:str="", case_name:str="", log_dir="", report_template_path="base", args=None):
+    def __init__(self, bus_client: BusClient, sql_config: SQLConfig, sql_publish: bool=False, runner_count: int=1, report_path:str="", case_name:str="", log_dir="", report_template_path="base", lock: m_lock=None, args=None):
         super().__init__()
         self.bus_client = bus_client
         self.args = args
@@ -34,6 +33,7 @@ class Recorder(Process):
         self.sql_config = sql_config
         self.sql_publish =  sql_publish
         self.complete_case_count = 0
+        self.lock = lock
 
     def on_recorder_start(self):
         '''
@@ -171,15 +171,14 @@ class Recorder(Process):
         suite.cases.append(result)
         self.results.details[result.case.bench_name] = suite
 
-    @locker
-    def count_case(self, key: str):
+    def count_case(self, key: str, lock: m_lock=None):
         logger.debug(f"put case count {self.complete_case_count}", __name__)
         if not self.case_count.empty():
             self.case_count.get()
         self.case_count.put(self.complete_case_count)
 
     def result_handler(self, result):
-        self.count_case("case_count")
+        self.count_case("case_count", self.lock)
         self.add_result_to_suite(result)
         self.check_case_result(result)
         self.publish_results()

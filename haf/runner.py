@@ -2,7 +2,7 @@
 import importlib
 import sys
 import time
-from multiprocessing import Process
+from multiprocessing import Process, Lock as m_lock
 from haf.apihelper import Request, Response
 from haf.apphelper import Stage, BasePage, save_screen_shot
 from haf.asserthelper import AssertHelper
@@ -25,7 +25,7 @@ logger = Log.getLogger(__name__)
 
 
 class Runner(Process):
-    def __init__(self, log_dir: str, bus_client: BusClient, args):
+    def __init__(self, log_dir: str, bus_client: BusClient, m_lock: list, args):
         super().__init__()
         self.daemon = True
         self.bus_client = bus_client
@@ -37,14 +37,21 @@ class Runner(Process):
         self.runner = {"get": 0, "skip": 0, "run": {}, "done":[], "key": 0}
         self.log_dir = log_dir
         self.args = args
+        self.locks = m_lock
+        '''
+        locks [0] : get case lock
+        locks [1] : put case back lock
+        locks [2] : put result lock
+        locks [3] : put web message lock
+        '''
 
     def load(self):
         pass
 
-    def init_runner(self, case:BaseCase):
+    def init_runner(self, case: BaseCase):
         self.bench = self.get_bench(case)
 
-    def get_bench(self, case:BaseCase):
+    def get_bench(self, case: BaseCase):
         bench = self.benchs.get(case.bench_name, None)
         if bench is None :
             if isinstance(case, HttpApiCase):
@@ -61,22 +68,20 @@ class Runner(Process):
         return bench
 
     @locker
-    def put_result(self,  key:str, result:HttpApiResult):
+    def put_result(self,  key: str, lock: m_lock=None, result: HttpApiResult=HttpApiResult()):
         logger.info(f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}", __name__)
         self.result_handler_queue.put(result)
 
     @locker
-    def put_web_message(self, key:str):
+    def put_web_message(self, key: str, lock: m_lock=None):
         if self.args.web_server:
             if self.web_queue.full():
                 self.web_queue.get()
             self.web_queue.put(self.runner)
 
-    # TODO: try new_locker here, still need some tests
-    # @locker 
     def put_case_back(self, key:str, case):
         logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name} for dependent : {case.dependent}", __name__)
-        with new_locker(self.bus_client, key):
+        with new_locker(self.bus_client, key, self.locks[1]):
             self.case_back_queue.put(case)
 
     def result_handler(self, result):
@@ -101,7 +106,7 @@ class Runner(Process):
                 }
             }
         logger.debug(f"{self.key} : runner {self.pid} -- put web message {self.runner}", __name__)
-        self.put_web_message("web")
+        self.put_web_message("web", self.locks[3])
 
     def run(self):
         try:
@@ -119,7 +124,7 @@ class Runner(Process):
             while True:
                 case_end = False
                 if not self.case_handler_queue.empty() :
-                    with new_locker(self.bus_client, "case_runner"):
+                    with new_locker(self.bus_client, "case_runner", self.locks[0]):
                         case = self.case_handler_queue.get()
                     if case == SIGNAL_CASE_END:
                         case_end = True
@@ -131,7 +136,7 @@ class Runner(Process):
                             results = loop.run_until_complete(self.run_cases(cases))
                             for result in results:
                                 if isinstance(result, (HttpApiResult, AppResult, WebResult)):
-                                    self.put_result("result", result)
+                                    self.put_result("result", self.locks[2], result)
                             cases = []
                     elif isinstance(case, (AppCase, PyCase, WebCase)):
                         logger.debug(f"cases' length is {len(cases)}, and end is {case}", __name__)
@@ -141,7 +146,7 @@ class Runner(Process):
                             results = loop.run_until_complete(self.run_cases(cases))
                             for result in results:
                                 if isinstance(result, (HttpApiResult, AppResult, WebResult)):
-                                    self.put_result("result", result)
+                                    self.put_result("result", self.locks[2], result)
                             cases = []
                 if case_end:
                     break
