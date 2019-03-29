@@ -83,6 +83,7 @@ class Runner(Process):
         logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name} for dependent : {case.dependent}", __name__)
         with new_locker(self.bus_client, key, self.locks[1]):
             self.case_back_queue.put(case)
+        time.sleep(1)
 
     def result_handler(self, result):
         if isinstance(result, HttpApiResult) or isinstance(result, AppResult) or isinstance(result, WebResult):
