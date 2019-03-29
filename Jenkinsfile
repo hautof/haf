@@ -10,9 +10,9 @@ pipeline {
     stage('test') {
       steps {
         sh 'git clone https://github.com/hautof/haf-sample'
-        dir("haf-sample"){
-            sh 'python3 -m haf run -c=config.json'
-        }
+        sh 'cp -rf ./haf-sample/* ./'
+        sh 'python3 -m haf run -c=config.json'
+
       }
     }
 
