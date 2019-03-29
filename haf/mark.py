@@ -4,6 +4,7 @@ import inspect
 import contextlib
 import time
 from haf.common.lock import Lock
+from multiprocessing import Lock as m_lock
 
 
 class TestDecorator:
@@ -54,52 +55,36 @@ parameterize = ParameterizeDecorator
 
 
 class Locker:
-    def __init__(self, bus_client, key):
+    def __init__(self, bus_client, key, lock: m_lock=None):
         self.bus_client = bus_client
         self.key = key
+        self.local_lock = lock
 
     def get_lock(self):
-        if self.key == "result":
-            lock = self.bus_client.get_lock()
-        elif self.key == "web":
-            lock = self.bus_client.get_web_lock()
-        elif self.key == "case":
-            lock = self.bus_client.get_case_lock()
-        elif self.key == "case_back":
-            lock = self.bus_client.get_case_back_lock()
-        elif self.key == "case_count":
-            lock = self.bus_client.get_case_count_lock()
-        elif self.key == "case_runner":
-            lock = self.bus_client.get_case_runner_lock()
-        
-        while True:
-            if not lock.empty():
-                return lock.get()
-            time.sleep(0.1)
+        if self.local_lock:
+            self.local_lock.acquire()
+            return
 
     def release_lock(self):
-        if self.key == "result":
-            return self.bus_client.get_lock().put(Lock)
-        elif self.key == "web":
-            return self.bus_client.get_web_lock().put(Lock)
-        elif self.key == "case":
-            return self.bus_client.get_case_lock().put(Lock)
-        elif self.key == "case_back":
-            return self.bus_client.get_case_back_lock().put(Lock)
-        elif self.key == "case_count":
-            return self.bus_client.get_case_count_lock().put(Lock)
-        elif self.key == "case_runner":
-            return self.bus_client.get_case_runner_lock().put(Lock)
+        if self.local_lock:
+            self.local_lock.release()
+            return
 
 
 def locker(func):
     @functools.wraps(func)
     def lock(self, *args, **kwargs):
+        local_lock = None
         if len(args) > 0:
             key = args[0]
+            if len(args) > 1:
+                local_lock = args[1]
+            else:
+                local_lock = kwargs.get("lock", None)
         else:
             key = kwargs.get("key")
-        locker = Locker(self.bus_client, key)
+            local_lock = kwargs.get("lock", None)
+        locker = Locker(self.bus_client, key, local_lock)
         locker.get_lock()
         result = func(self, *args, **kwargs)
         locker.release_lock()
@@ -108,8 +93,8 @@ def locker(func):
 
 
 @contextlib.contextmanager
-def new_locker(bus_client, key):
-    locker = Locker(bus_client, key)
+def new_locker(bus_client, key, lock: m_lock=None):
+    locker = Locker(bus_client, key, lock)
     locker.get_lock()
     try:
         yield

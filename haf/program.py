@@ -8,7 +8,7 @@
 import logging
 import os
 import time
-from multiprocessing import Process
+from multiprocessing import Process, Lock as m_lock
 from haf.bus import BusServer
 from haf.busclient import BusClient
 from haf.common.database import SQLConfig
@@ -54,7 +54,7 @@ class Program(object):
         :return: None
         '''
         for x in range(count):
-            loader = Loader(bus_client, self.args)
+            loader = Loader(bus_client, self.loader_recorder_lock, self.args)
             loader.start()
             time.sleep(0.1)
 
@@ -66,12 +66,12 @@ class Program(object):
         :return:
         '''
         for x in range(count):
-            runner = Runner(log_dir, bus_client, self.args)
+            runner = Runner(log_dir, bus_client, self.multi_process_locks, self.args)
             runner.start()
         time.sleep(0.5)
 
     def _start_recorder(self, bus_client: BusClient, sql_config: SQLConfig=None, sql_publish: bool=False, count: int=1, report_path: str="", log_dir: str=""):
-        recorder = Recorder(bus_client, sql_config, sql_publish, count, report_path, self.case_name, log_dir, self.args.report_template, self.args)
+        recorder = Recorder(bus_client, sql_config, sql_publish, count, report_path, self.case_name, log_dir, self.args.report_template, self.loader_recorder_lock, self.args)
         recorder.start()
         time.sleep(0.1)
 
@@ -87,12 +87,9 @@ class Program(object):
     def _init_system_lock(self, args):
         if args.bus_server:
             return
-        self.bus_client.get_lock().put(Lock)
-        self.bus_client.get_web_lock().put(Lock)
-        self.bus_client.get_case_lock().put(Lock)
-        self.bus_client.get_case_back_lock().put(Lock)
-        self.bus_client.get_case_count_lock().put(Lock)
-        self.bus_client.get_case_runner_lock().put(Lock)
+
+        self.multi_process_locks = [m_lock() for x in range(4)]
+        self.loader_recorder_lock = m_lock()
         self.bus_client.get_case_count().put(0)
 
     def _bus_client(self, args):
