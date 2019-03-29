@@ -51,10 +51,11 @@ class Runner(Process):
                 bench = HttpApiBench()
             elif isinstance(case, PyCase):
                 bench = PyBench()
-            elif isinstance(case, AppBench):
+            elif isinstance(case, AppCase):
                 bench = AppBench()
-            elif isinstance(case, WebBench):
+            elif isinstance(case, WebCase):
                 bench = WebBench()
+        
         bench.add_case(case)
         self.benchs[case.bench_name] = bench
         return bench
@@ -77,10 +78,9 @@ class Runner(Process):
         logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name} for dependent : {case.dependent}", __name__)
         with new_locker(self.bus_client, key):
             self.case_back_queue.put(case)
-        time.sleep(5)
 
     def result_handler(self, result):
-        if isinstance(result, HttpApiResult) or isinstance(result, AppResult):
+        if isinstance(result, HttpApiResult) or isinstance(result, AppResult) or isinstance(result, WebResult):
             if result.case.run == CASE_SKIP:
                 self.runner["skip"] += 1
             self.runner["run"] = {}
@@ -93,7 +93,7 @@ class Runner(Process):
                     "result" : RESULT_GROUP.get(str(result.result))
                 }
             })
-        elif isinstance(result, HttpApiCase) or isinstance(result, AppCase):
+        elif isinstance(result, HttpApiCase) or isinstance(result, AppCase) or isinstance(result, WebCase):
             self.runner["run"] = {
                 f"{result.ids.id}.{result.ids.subid}-{result.ids.name}":
                 {
@@ -119,7 +119,8 @@ class Runner(Process):
             while True:
                 case_end = False
                 if not self.case_handler_queue.empty() :
-                    case = self.case_handler_queue.get()
+                    with new_locker(self.bus_client, "case_runner"):
+                        case = self.case_handler_queue.get()
                     if case == SIGNAL_CASE_END:
                         case_end = True
                     if isinstance(case, HttpApiCase):
@@ -133,8 +134,10 @@ class Runner(Process):
                                     self.put_result("result", result)
                             cases = []
                     elif isinstance(case, (AppCase, PyCase, WebCase)):
+                        logger.debug(f"cases' length is {len(cases)}, and end is {case}", __name__)
                         cases.append(case)
                         if len(cases)>0 and (len(cases)>=1 or case_end):
+                            logger.debug(f"cases' length is {len(cases)}", __name__)
                             results = loop.run_until_complete(self.run_cases(cases))
                             for result in results:
                                 if isinstance(result, (HttpApiResult, AppResult, WebResult)):
@@ -168,7 +171,7 @@ class Runner(Process):
         try:
             try:
                 self.key = local_case.log_key
-                logger.info(f"{self.key} : runner {self.pid} -- get {local_case.ids.id}.{local_case.ids.subid}-{local_case.ids.name}", __name__)
+                logger.info(f"{self.key} : runner {self.pid} -- get case {type(local_case)} <{local_case.ids.id}.{local_case.ids.subid}-{local_case.ids.name}>", __name__)
                 self.result_handler(local_case)
                 self.init_runner(local_case)
                 if local_case.type == CASE_TYPE_HTTPAPI:
@@ -179,7 +182,7 @@ class Runner(Process):
                     runner = AppRunner(self.bench, self.log_dir)
                 elif local_case.type == CASE_TYPE_WEBUI:
                     runner = WebRunner(self.bench, self.log_dir)
-                
+                logger.debug(f"{self.key} : running now")
                 result = await runner.run(local_case)
 
                 if isinstance(result, list):
@@ -214,14 +217,15 @@ class BaseRunner(object):
         self.bench = bench
 
     def check_case_run_here(self, case):
+        logger.debug("Base Runner check case run here", __name__)
         if not case.dependent or len(case.dependent) == 0:
             return True
         try:
             for dependence in case.dependent:
                 if dependence not in self.bench.cases.keys():
                     return False
-
-            self.get_dependent_var(case)
+            if isinstance(case, HttpApiCase):
+                self.get_dependent_var(case)
             return True
         except Exception:
             return False
@@ -232,8 +236,8 @@ class BaseRunner(object):
     def check_case_error(self, case):
         return case.error == CASE_ERROR
 
-    def get_dependence_case_from_bench(self, dependence):
-        return None
+    def get_dependence_case_from_bench(self, dependent):
+        return self.bench.cases.get(dependent)
 
     def reuse_with_dependent(self, new_attr):
         begin = "<@begin@>"
@@ -241,18 +245,25 @@ class BaseRunner(object):
         if isinstance(new_attr, str):
             f, temp = new_attr.split("<@begin@>")
             temp, l = temp.split("<@end@>")
-            logger.debug(temp, __name__)
+            logger.debug(f"reuse with dependent {temp}", __name__)
+            return temp
+        elif isinstance(new_attr, dict):
+            for key in new_attr.keys():
+                if begin in new_attr.get(key):
+                    new_attr[key] = self.reuse_with_dependent(new_attr.get(key))
+            return new_attr
 
     def get_dependent_var(self, case):
-        logger.debug("get_dependent_var", __name__)
+        logger.debug(f"get_dependent_var {case.dependent_var}", __name__)
         if isinstance(case, (HttpApiCase)):
             if case.dependent_var is None:
                 return
             else:
                 for dv in case.dependent_var:
+                    logger.debug(f"start get dependent {dv}", __name__)
                     if hasattr(case, dv):
                         new_attr = getattr(case, dv)
-                        self.reuse_with_dependent(new_attr)
+                        new_attr = self.reuse_with_dependent(new_attr)
                         # TODO : add replace case's dv here
 
 
@@ -577,9 +588,11 @@ class WebRunner(BaseRunner):
         self.key = case.log_key
         result = WebResult()
         result.on_case_begin()
+
         if not self.check_case_run_here(case) :
             result.on_case_end()
             return [CASE_CAN_NOT_RUN_HERE, result]
+
         if not self.check_case_run(case): # not False is skip
             result.case = case
             result.on_case_end()
