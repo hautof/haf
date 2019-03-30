@@ -58,6 +58,8 @@ class BusServer(Process):
         publish_runner = Queue(maxsize=1)
         # case count queue
         case_count = Queue(maxsize=1)
+        # case result summary main queue
+        case_result_main = Queue(maxsize=1)
 
         # register the functions to InfoManager
         InfoManager.register("get_case", callable=lambda: case)
@@ -71,6 +73,7 @@ class BusServer(Process):
         InfoManager.register("get_publish_runner", callable=lambda: publish_runner)
         InfoManager.register("get_publish_loader", callable=lambda: publish_loader)
         InfoManager.register("get_case_count", callable=lambda: case_count)
+        InfoManager.register("get_case_result_main", callable=lambda: case_result_main)
 
         self.queue_manager = InfoManager(address=(self.domain, self.port), authkey=self.auth_key)
         self.server = self.queue_manager.get_server()

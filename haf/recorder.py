@@ -62,6 +62,7 @@ class Recorder(Process):
             #self.bus_client = BusClient()
             self.results_handler = self.bus_client.get_result()
             self.publish_result = self.bus_client.get_publish_result()
+            self.publish_result_main = self.bus_client.get_case_result_main()
             self.case_count = self.bus_client.get_case_count()
             while True:
                 if not self.results_handler.empty() :
@@ -184,10 +185,13 @@ class Recorder(Process):
         self.publish_results()
 
     def publish_results(self):
-        # logger.info(f"publish results now...")
+        logger.debug(f"publish results now...", __name__)
         if self.publish_result.full():
             self.publish_result.get()
         self.publish_result.put(self.results)
+        if self.publish_result_main.full():
+            self.publish_result_main.get()
+        self.publish_result_main.put(self.results)
 
     # show end results here before publish to mysql
     def show_in_cs(self):

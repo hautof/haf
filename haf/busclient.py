@@ -30,6 +30,7 @@ class BusClient(metaclass=SingletonType):
         InfoManager.register("get_publish_loader")
         InfoManager.register("get_case_back")
         InfoManager.register("get_case_count")
+        InfoManager.register("get_case_result_main")
         # connect to the bus
         self.info_manager = InfoManager(address=(self.domain, self.port), authkey=self.auth_key)
         self.info_manager.connect()
@@ -66,6 +67,9 @@ class BusClient(metaclass=SingletonType):
 
     def get_case_count(self):
         return self.info_manager.get_case_count()
+
+    def get_case_result_main(self):
+        return self.info_manager.get_case_result_main()
 
     def __new__(cls, *args, **kwargs):
         return object.__new__(cls)
