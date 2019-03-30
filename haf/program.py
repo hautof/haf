@@ -9,6 +9,9 @@ import logging
 import os
 import time
 from multiprocessing import Process, Lock as m_lock
+
+from haf.result import HttpApiResult, AppResult, WebResult, EndResult
+
 from haf.bus import BusServer
 from haf.busclient import BusClient
 from haf.common.database import SQLConfig
@@ -212,6 +215,8 @@ class Program(object):
             result = self._case_name()
         elif cmd == "exit" or cmd == "e":
             result = self._exit()
+        elif cmd == "summary" or cmd == "s":
+            result = self._summary()
         else:
             print("unsupported command!")
             result = self._help()
@@ -246,8 +251,23 @@ haf-{PLATFORM_VERSION}#
         print(help)
         return False
 
-    def _summary(help):
-        pass
+    def _summary(self):
+        result_main = self.bus_client.get_case_result_main()
+        if not result_main.empty():
+            results = result_main.get()
+            if isinstance(results, EndResult):
+                self.results = results
+        if hasattr(self, "results") and isinstance(self.results, EndResult):
+            pass
+        else:
+            self.results = EndResult()
+        result_summary = "|{:^8}|{:^8}|{:^8}|{:^8}|{:^8}|{:^25}|{:^25}|".format(self.results.passed, self.results.failed, self.results.skip, \
+                        self.results.error, self.results.all, self.results.begin_time, self.results.end_time)
+        print("--------------------------------------------------------------------------------------------------")
+        print("|--\33[32mPASS\33[0m--|--\33[31mFAIL\33[0m--|--\33[37mSKIP\33[0m--|--\33[35mERROR\33[0m-|---\33[36mALL\33[0m--|----------\33[36mBegin\33[0m----------|-----------\33[36mEnd\33[0m-----------|")
+        print(result_summary)
+        print("--------------------------------------------------------------------------------------------------")
+
 
     def _case_name(self):
         print(self.case_name)
