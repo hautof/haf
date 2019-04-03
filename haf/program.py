@@ -88,12 +88,10 @@ class Program(object):
         time.sleep(0.1)
 
     def _init_system_lock(self, args):
-        if args.bus_server:
-            return
-
-        self.multi_process_locks = [m_lock() for x in range(4)]
         self.loader_recorder_lock = m_lock()
-        self.bus_client.get_case_count().put(0)
+        self.multi_process_locks = [m_lock() for x in range(4)]
+        if self.bus_client.get_case_count().empty():
+            self.bus_client.get_case_count().put(0)
 
     def _bus_client(self, args):
         if isinstance(args.bus_server, list):
@@ -129,27 +127,28 @@ class Program(object):
             self.args = args
             self._init_logging_module(args)
             self.case_name = Utils.get_case_name(self.args.name)
-            runner_count = args.runner_count if args.runner_count else 1
+            self.runner_count = args.runner_count if args.runner_count else 1
+            
             self.only_bus(args)
 
             self._start_bus(local=args.bus_server if args.bus_server else False)
-
             self._bus_client(args)
-
             self._init_system_lock(args)
-            self._init_system_logger(args.log_dir, self.bus_client)
+            # this only in server bus
+            if not args.bus_server:
+                self._init_system_logger(args.log_dir, self.bus_client)
 
             # only : module
             if args.only_loader:
                 self._start_loader(1, self.bus_client)
             elif args.only_runner:
-                self._start_runner(runner_count, f"{args.log_dir}/{self.case_name}", self.bus_client)
+                self._start_runner(self.runner_count, f"{args.log_dir}/{self.case_name}", self.bus_client)
             elif args.only_recorder:
-                self._start_recorder(self.bus_client, args.sql_publish_db, args.sql_publish, runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
+                self._start_recorder(self.bus_client, args.sql_publish_db, args.sql_publish, self.runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
             else:
                 self._start_loader(1, self.bus_client)
-                self._start_runner(runner_count, f"{args.log_dir}/{self.case_name}", self.bus_client)
-                self._start_recorder(self.bus_client, args.sql_publish_db, args.sql_publish, runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
+                self._start_runner(self.runner_count, f"{args.log_dir}/{self.case_name}", self.bus_client)
+                self._start_recorder(self.bus_client, args.sql_publish_db, args.sql_publish, self.runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
             
             self.start_main()
             self.put_loader_msg(args)
@@ -173,6 +172,8 @@ class Program(object):
             self._start_bus(local=args.bus_server if args.bus_server else False)
             self._bus_client(args)
             self._init_system_lock(args)
+            self._init_system_logger(args.log_dir, self.bus_client)
+            self._start_recorder(self.bus_client, self.args.sql_publish_db, self.args.sql_publish, self.runner_count, self.args.report_output_dir, f"{args.log_dir}/{self.case_name}")
             while True:
                 time.sleep(1)
         else:
