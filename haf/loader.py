@@ -46,14 +46,17 @@ class Loader(Process):
                 time.sleep(0.01)
             if self.args.nout:
                 cb = ChargingBar(max=100)
+            complete_case_count = 0
             while True:
                 temp = self.get_parameter()
                 if temp == SIGNAL_STOP :
                     while True:
 
-                        complete_case_count = self.case_count.get()
+                        if not self.case_count.empty():
+                            complete_case_count = self.case_count.get()
+                        else:
+                            pass
                         if self.args.nout:
-                            #print(f"Done/Cases : {complete_case_count}/{self.true_case_count}")
                             cb.goto(complete_case_count*100/self.true_case_count)
                         if self.case_back_queue.empty():
                             pass
@@ -62,21 +65,18 @@ class Loader(Process):
                             self.put_case("case", None, self.case_back_queue.get())
 
                         if self.case_queue.empty() and self.case_back_queue.empty():
-                            if not self.case_count.empty():
-                                logger.debug(f"complete case count check here {complete_case_count} == {self.true_case_count}", __name__)
-                                if complete_case_count==self.true_case_count:
-                                    if self.args.nout:
-                                        cb.finish()
-                                    self.end_handler()
-                                    return
+                            logger.debug(f"complete case count check here {complete_case_count} == {self.true_case_count}", __name__)
+                            if complete_case_count==self.true_case_count:
+                                if self.args.nout:
+                                    cb.finish()
+                                self.end_handler()
+                                return
                     time.sleep(0.01)
                 if temp is None:
                     time.sleep(0.01)
                     continue
 
                 file_name = temp.get("file_name")
-                # loader = LoadFromConfig()
-                # inputs = loader.load_from_file(file_name)
                 inputs = plugin_manager.load_from_file(file_name)
 
                 logger.debug(f"{self.key} -- {inputs}", __name__)
