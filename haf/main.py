@@ -151,8 +151,6 @@ def main_args():
                 password, temp = args.bus_server.split("@")
                 host, port = temp.split(":")
                 args.bus_server = [bytes(password, encoding='utf-8'), host, int(port)]
-        if args.web_server:
-            pass
 
         # here : case <- dir/file
         if args.case:
