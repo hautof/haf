@@ -150,19 +150,6 @@ def main_args():
         if args.runner_count:
             pass
 
-        if args.sql_publish:
-            if isinstance(args.sql_publish_db, str):
-                from haf.common.database import SQLConfig
-                sql_config = SQLConfig()
-                hp, up, db = args.sql_publish_db.split('@')
-                host, port = hp.split(':')
-                username, password = up.split(':')
-                sc_dict = {
-                    "host": host, "port": int(port), "username": username, "password": password, "id":0, "sql_name": "haf-publish", "protocol": "mysql", "database": db
-                }
-                sql_config.constructor(sc_dict)
-                args.sql_publish_db = sql_config
-
         # here : bus server <- password@host:port
         if args.bus_server:
             if "@" in args.bus_server and ":" in args.bus_server:

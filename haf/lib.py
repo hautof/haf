@@ -25,5 +25,5 @@ def load_from_file(file_name):
 
 
 @haf.hookimpl
-def publish_to_sql(publish, config, results):
+def publish_to_sql(args, results):
     pass

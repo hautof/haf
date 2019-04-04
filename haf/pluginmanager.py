@@ -25,11 +25,9 @@ class PluginManager(object):
         elif isinstance(inputs, dict):
             return inputs
 
-    def publish_to_sql(self, publish, config, results):
+    def publish_to_sql(self, args, results):
         pm = self.pm
-        publish_result = None
-        if publish:
-            publish_result = pm.hook.publish_to_sql(publish=publish, config=config, results=results)
+        publish_result = pm.hook.publish_to_sql(args=args, results=results)
         return publish_result
 
     def get_plugin_manager(self):
