@@ -33,12 +33,7 @@ class PluginManager(object):
     def start_web_server(self, args, bus_client):
         pm = self.pm
         result = pm.hook.start_web_server(args=args, bus_client=bus_client)
-        if isinstance(result, list):
-            return result[1]
-        elif isinstance(result, bool):
-            return result
-        else:
-            return True
+        return result
 
     def get_plugin_manager(self):
         self.pm = pluggy.PluginManager("haf")

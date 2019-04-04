@@ -114,7 +114,7 @@ class Program(object):
                 self.bus_client.get_param().put({"file_name": arg})
 
     def _start_web_server(self, args):
-        self._web_server_start_flag = plugin_manager.start_web_server(args, self.bus_client)
+        plugin_manager.start_web_server(args, self.bus_client)
 
     def run(self, args):
         try:
