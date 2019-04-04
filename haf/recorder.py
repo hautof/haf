@@ -10,6 +10,7 @@ from haf.common.log import Log
 from haf.result import HttpApiResult, EndResult, Detail, Summary, AppResult, WebResult
 from haf.config import *
 from haf.mark import locker
+from haf.pluginmanager import plugin_manager
 from haf.utils import Utils
 from haf.ext.jinjia2report.report import Jinja2Report
 
@@ -207,15 +208,5 @@ class Recorder(Process):
         '''
         publish results to mysql database
         '''
-        if self.sql_publish:
-            logger.info(f"publish results {self.results} to mysql!", __name__)
-            import_ok = False
-            try:
-                from hafsqlpublish.publish import Publish
-                import_ok = True
-            except Exception as e:
-                logger.error("Plugin hafsqlpublish is not installed, using 'pip install hafsqlpublish -U' to install", __name__)
-            if import_ok:
-                publish = Publish(self.sql_config)
-                publish.publish_result(self.results)
+        plugin_manager.publish_to_sql(self.sql_publish, self.sql_config, self.results)
 

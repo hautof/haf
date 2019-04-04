@@ -3,6 +3,7 @@ import json
 import os
 import sys
 
+from haf.pluginmanager import PluginManager, plugin_manager
 from haf.program import Program
 from haf.helper import Helper
 from haf.config import BANNER_STRS
@@ -77,10 +78,10 @@ def main_args():
     sub_run_arg_program.add_argument("--debug", "-debug", dest="debug", default=False, type=bool,
                                      help="open debug or not")
     # sql publish
-    sub_run_arg_program.add_argument("--sql-publish", "-sp", dest="sql_publish", default=False, type=bool,
-                                     help="sql publish or not")
-    sub_run_arg_program.add_argument("--sql-publish-db", "-sp_db", dest="sql_publish_db", type=str, default="",
-                                     help="sql publish db config, format like : host:port@username:password@database)")
+    # sub_run_arg_program.add_argument("--sql-publish", "-sp", dest="sql_publish", default=False, type=bool,
+    #                                 help="sql publish or not")
+    # sub_run_arg_program.add_argument("--sql-publish-db", "-sp_db", dest="sql_publish_db", type=str, default="",
+    #                                 help="sql publish db config, format like : host:port@username:password@database)")
     # init
     sub_init_arg_program = sub_all_arg_program.add_parser("init",
                                                          help="init workspace, using 'python -m haf init -t=all' to init workspace of haf")
@@ -92,6 +93,8 @@ def main_args():
                                                          help="help, using 'python -m haf help' to show this")
     sub_help_arg_program.add_argument("--all", dest="help-all", type=str, default=None,
                                      help="show all help informations")
+
+    plugin_manager.add_options(sub_run_arg_program)
 
     args = arg_program.parse_args()
 
@@ -155,7 +158,7 @@ def main_args():
                 host, port = hp.split(':')
                 username, password = up.split(':')
                 sc_dict = {
-                    "host": host, "port": port, "username": username, "password": password, "id":0, "sql_name": "haf-publish", "protocol": "mysql"
+                    "host": host, "port": int(port), "username": username, "password": password, "id":0, "sql_name": "haf-publish", "protocol": "mysql", "database": db
                 }
                 sql_config.constructor(sc_dict)
                 args.sql_publish_db = sql_config
@@ -188,6 +191,7 @@ def main_args():
                 else:
                     args.case.append(path)
         print(args)
+
         main_program = Program()
         main_program.run(args)
     elif args.all == "init":

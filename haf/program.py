@@ -24,6 +24,7 @@ from haf.logger import Logger
 from haf.recorder import Recorder
 from haf.runner import Runner
 from haf.utils import Utils
+from haf.pluginmanager import PluginManager
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
