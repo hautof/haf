@@ -1,7 +1,10 @@
 # encoding = 'utf-8'
 import importlib, inspect, json, os, sys, time, traceback, urllib, random, platform, yaml
 from http.client import HTTPResponse
+from threading import Thread
 from datetime import datetime
+
+from haf.common.sigleton import SingletonType
 from openpyxl import load_workbook
 from haf.apihelper import Request, Response
 from haf.case import BaseCase
@@ -428,3 +431,26 @@ class LoadFromConfig(object):
         if isinstance(file_name, str):
             inputs = Utils.load_from_py(file_name)
             return inputs
+
+
+class Signal(metaclass=SingletonType):
+    def __init__(self):
+        super().__init__()
+        self.signal = True
+
+    def change_status(self):
+        self.signal = not self.signal
+
+
+class SignalThread(Thread):
+    def __init__(self, signal, signal_change_time=1):
+        super().__init__()
+        self.signal = signal
+        self.time = signal_change_time
+
+    def run(self):
+        while True:
+            logger.debug(f"signal of {self.signal.signal}", __name__)
+            self.signal.change_status()
+            time.sleep(self.time)
+

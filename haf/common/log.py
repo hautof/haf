@@ -19,6 +19,9 @@ class BaseLogger(metaclass=SingletonType):
     def bind_process(self, process_id):
         self.process_id = process_id
 
+    def set_output(self, nout):
+        self.nout = nout
+
     def debug(self, msg, logger_name=None):
         msg = {"process": self.process_id, "logger_name":self.logger_name if not logger_name else logger_name, "level":"debug", "msg": msg}
         self.msg_write(msg)
@@ -45,6 +48,8 @@ class BaseLogger(metaclass=SingletonType):
     def msg_write(self, msg):
         if self.bus_client is None:
             self.bus_client = BusClient()
+        if self.nout:
+            return
         self.bus_client.get_log().put(msg)
 
 

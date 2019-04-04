@@ -76,6 +76,9 @@ def main_args():
     # console
     sub_run_arg_program.add_argument("--console", "-cmd", dest="console", default=False, type=bool,
                                      help="open console or not")
+    # no output
+    sub_run_arg_program.add_argument("--no-output", "-nout", dest="nout", default=False, type=bool,
+                                     help="do not show output")
     # init
     sub_init_arg_program = sub_all_arg_program.add_parser("init",
                                                          help="init workspace, using 'python -m haf init -t=all' to init workspace of haf")
@@ -114,6 +117,7 @@ def main_args():
                     
                     args.debug = True if args.debug else config_run.get("debug", False)
                     args.console = True if args.console else config_run.get("console", False)
+                    args.nout = True if args.nout else config_run.get("no_output", False)
 
                     config_run_report = config_run.get("report")
                     args.report_output_dir = config_run_report.get("report_path")

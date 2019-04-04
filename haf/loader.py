@@ -12,6 +12,7 @@ from haf.config import *
 from haf.utils import Utils
 from haf.mark import locker, new_locker
 from haf.pluginmanager import plugin_manager
+from progress.bar import ChargingBar
 
 logger = Log.getLogger(__name__)
 
@@ -25,27 +26,35 @@ class Loader(Process):
         self.true_case_count = 0
         self.loader = {"all":0, "error":0, "error_info":{}}
         self.lock = lock
+        self.args = args
 
     def run(self):
         try:
             logger.bind_process(self.pid)
             self.key = f"{self.pid}$%loader$%"
             logger.bind_busclient(self.bus_client)
+            logger.set_output(self.args.nout)
             logger.info(f"{self.key} start loader", __name__)
             self.case_queue = self.bus_client.get_case()
             self.case_back_queue = self.bus_client.get_case_back()
             self.case_count = self.bus_client.get_case_count()
+
             while True:
                 if self.get_parameter() == SIGNAL_START:
                     logger.info(f"{self.key} -- get start signal from main", __name__)
                     break
                 time.sleep(0.01)
-
+            if self.args.nout:
+                cb = ChargingBar(max=100)
             while True:
                 temp = self.get_parameter()
                 if temp == SIGNAL_STOP :
                     while True:
-                        logger.debug("check case_back here", __name__)
+
+                        complete_case_count = self.case_count.get()
+                        if self.args.nout:
+                            #print(f"Done/Cases : {complete_case_count}/{self.true_case_count}")
+                            cb.goto(complete_case_count*100/self.true_case_count)
                         if self.case_back_queue.empty():
                             pass
                         else:
@@ -54,12 +63,13 @@ class Loader(Process):
 
                         if self.case_queue.empty() and self.case_back_queue.empty():
                             if not self.case_count.empty():
-                                complete_case_count = self.case_count.get()
                                 logger.debug(f"complete case count check here {complete_case_count} == {self.true_case_count}", __name__)
                                 if complete_case_count==self.true_case_count:
+                                    if self.args.nout:
+                                        cb.finish()
                                     self.end_handler()
                                     return
-                    time.sleep(0.1)
+                    time.sleep(0.01)
                 if temp is None:
                     time.sleep(0.01)
                     continue
