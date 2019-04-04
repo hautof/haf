@@ -74,10 +74,9 @@ class Runner(Process):
 
     @locker
     def put_web_message(self, key: str, lock: m_lock=None):
-        if self.args.web_server:
-            if self.web_queue.full():
-                self.web_queue.get()
-            self.web_queue.put(self.runner)
+        if self.web_queue.full():
+            self.web_queue.get()
+        self.web_queue.put(self.runner)
 
     def put_case_back(self, key:str, case):
         logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name} for dependent : {case.dependent}", __name__)

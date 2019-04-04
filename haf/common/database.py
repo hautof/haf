@@ -66,7 +66,8 @@ class MysqlTool(object):
         key = kwargs.get("key", "database$%common$%")
         commit = kwargs.get("commit", False)
         run_background = kwargs.get("run_background", False)
-
+        logger.debug(sqlconfig)
+        logger.debug(sqlconfig.deserialize() if sqlconfig else None)
         sqlconfig = sqlconfig
         self.connect_msql = None
 
@@ -106,10 +107,10 @@ class MysqlTool(object):
                     if not run_background:
                         logger.info(f"{key} result {str(data)}", __name__)
                 
-            elif isinstance(ss, tuple):
+            elif isinstance(sqlscript, tuple):
                 if not run_background:
-                    logger.info(f"{key} start {sqlconfig.host} execute {ss}", __name__)
-                cursor_m.execute(*ss)
+                    logger.info(f"{key} start {sqlconfig.host} execute {sqlscript}", __name__)
+                cursor_m.execute(*sqlscript)
                 data.append(cursor_m.fetchall())
                 if not run_background:
                     logger.info(f"{key} result {str(data)}", __name__)

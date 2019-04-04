@@ -1,5 +1,6 @@
 # encoding='utf-8'
 import time
+import haf
 from multiprocessing import Process, Lock as m_lock
 from haf.bench import HttpApiBench
 from haf.busclient import BusClient
@@ -10,6 +11,7 @@ from haf.common.log import Log
 from haf.config import *
 from haf.utils import Utils
 from haf.mark import locker, new_locker
+from haf.pluginmanager import plugin_manager
 
 logger = Log.getLogger(__name__)
 
@@ -63,7 +65,9 @@ class Loader(Process):
                     continue
 
                 file_name = temp.get("file_name")
-                inputs = LoadFromConfig.load_from_file(file_name)
+                # loader = LoadFromConfig()
+                # inputs = loader.load_from_file(file_name)
+                inputs = plugin_manager.load_from_file(file_name)
 
                 logger.debug(f"{self.key} -- {inputs}", __name__)
                 input = inputs.get("config")[0]
@@ -79,7 +83,6 @@ class Loader(Process):
                         bench.add_db(db)
 
                 for input in inputs.get("testcases"):
-
                     if input.get("id") is None or input.get("subid") is None:
                         continue
                     if input.get("host_port") is None:
@@ -159,42 +162,3 @@ class Loader(Process):
             self.case_queue.put(SIGNAL_CASE_END)
         except Exception as e:
             logger.error(f"{self.key} {e}", __name__)
-
-
-class LoadFromConfig(object):
-
-    @staticmethod
-    def load_from_file(file_name):
-        if file_name.endswith(".xlsx"):
-            output = LoadFromConfig.load_from_xlsx(file_name)
-        elif file_name.endswith(".json"):
-            output = LoadFromConfig.load_from_json(file_name)
-        elif file_name.endswith(".yml"):
-            output = LoadFromConfig.load_from_yml(file_name)
-        elif file_name.endswith(".py"):
-            output = LoadFromConfig.load_from_py(file_name)
-        return output
-
-    @staticmethod
-    def load_from_xlsx(file_name):
-        if isinstance(file_name, str):
-            inputs = Utils.get_rows_from_xlsx(file_name)
-            return inputs
-
-    @staticmethod
-    def load_from_json(file_name):
-        if isinstance(file_name, str):
-            inputs = Utils.load_from_json(file_name)
-            return inputs
-
-    @staticmethod
-    def load_from_yml(file_name):
-        if isinstance(file_name, str):
-            inputs = Utils.load_from_yml(file_name)
-            return inputs
-
-    @staticmethod
-    def load_from_py(file_name):
-        if isinstance(file_name, str):
-            inputs = Utils.load_from_py(file_name)
-            return inputs

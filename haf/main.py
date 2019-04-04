@@ -3,6 +3,7 @@ import json
 import os
 import sys
 
+from haf.pluginmanager import PluginManager, plugin_manager
 from haf.program import Program
 from haf.helper import Helper
 from haf.config import BANNER_STRS
@@ -45,10 +46,6 @@ def main_args():
                                      help="""default is 9000, using another port to start bus server""")
     sub_run_arg_program.add_argument("--only-bus", "-ob", type=bool, default=False, dest="only_bus",
                                      help="""if true, only start bus""")
-    # web server
-    sub_run_arg_program.add_argument("--web-server", "-ws", type=bool,
-                                     help="""default is not run;
-                                             if is True, would create web server to offer the api and html service;""")
     # report
     sub_run_arg_program.add_argument("--report-html", "-rh", type=bool, default=True,
                                      help="""default is True,to generate html report""")
@@ -76,11 +73,9 @@ def main_args():
     # debug
     sub_run_arg_program.add_argument("--debug", "-debug", dest="debug", default=False, type=bool,
                                      help="open debug or not")
-    # sql publish
-    sub_run_arg_program.add_argument("--sql-publish", "-sp", dest="sql_publish", default=False, type=bool,
-                                     help="sql publish or not")
-    sub_run_arg_program.add_argument("--sql-publish-db", "-sp_db", dest="sql_publish_db", type=str, default="",
-                                     help="sql publish db config, format like : host:port@username:password@database)")
+    # console
+    sub_run_arg_program.add_argument("--console", "-cmd", dest="console", default=False, type=bool,
+                                     help="open console or not")
     # init
     sub_init_arg_program = sub_all_arg_program.add_parser("init",
                                                          help="init workspace, using 'python -m haf init -t=all' to init workspace of haf")
@@ -92,6 +87,8 @@ def main_args():
                                                          help="help, using 'python -m haf help' to show this")
     sub_help_arg_program.add_argument("--all", dest="help-all", type=str, default=None,
                                      help="show all help informations")
+
+    plugin_manager.add_options(sub_run_arg_program)
 
     args = arg_program.parse_args()
 
@@ -115,7 +112,8 @@ def main_args():
                     args.only_bus = bus_config.get("only")
                     args.bus_server = None if bus_config.get("host") is None or bus_config.get("host")=="" else f"{bus_config.get('auth_key')}@{bus_config.get('host')}:{bus_config.get('host')}"
                     
-                    args.debug = config_run.get("debug", False)
+                    args.debug = True if args.debug else config_run.get("debug", False)
+                    args.console = True if args.console else config_run.get("console", False)
 
                     config_run_report = config_run.get("report")
                     args.report_output_dir = config_run_report.get("report_path")
@@ -147,27 +145,12 @@ def main_args():
         if args.runner_count:
             pass
 
-        if args.sql_publish:
-            if isinstance(args.sql_publish_db, str):
-                from haf.common.database import SQLConfig
-                sql_config = SQLConfig()
-                hp, up, db = args.sql_publish_db.split('@')
-                host, port = hp.split(':')
-                username, password = up.split(':')
-                sc_dict = {
-                    "host": host, "port": port, "username": username, "password": password, "id":0, "sql_name": "haf-publish", "protocol": "mysql"
-                }
-                sql_config.constructor(sc_dict)
-                args.sql_publish_db = sql_config
-
         # here : bus server <- password@host:port
         if args.bus_server:
             if "@" in args.bus_server and ":" in args.bus_server:
                 password, temp = args.bus_server.split("@")
                 host, port = temp.split(":")
                 args.bus_server = [bytes(password, encoding='utf-8'), host, int(port)]
-        if args.web_server:
-            pass
 
         # here : case <- dir/file
         if args.case:
@@ -188,6 +171,7 @@ def main_args():
                 else:
                     args.case.append(path)
         print(args)
+
         main_program = Program()
         main_program.run(args)
     elif args.all == "init":

@@ -24,6 +24,7 @@ from haf.logger import Logger
 from haf.recorder import Recorder
 from haf.runner import Runner
 from haf.utils import Utils
+from haf.pluginmanager import PluginManager, plugin_manager
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
@@ -73,8 +74,8 @@ class Program(object):
             runner.start()
         time.sleep(0.5)
 
-    def _start_recorder(self, bus_client: BusClient, sql_config: SQLConfig=None, sql_publish: bool=False, count: int=1, report_path: str="", log_dir: str=""):
-        recorder = Recorder(bus_client, sql_config, sql_publish, count, report_path, self.case_name, log_dir, self.args.report_template, self.loader_recorder_lock, self.args)
+    def _start_recorder(self, bus_client: BusClient, count: int=1, log_dir: str=""):
+        recorder = Recorder(bus_client, count, self.case_name, log_dir, self.args.report_template, self.loader_recorder_lock, self.args)
         recorder.start()
         time.sleep(0.1)
 
@@ -113,14 +114,7 @@ class Program(object):
                 self.bus_client.get_param().put({"file_name": arg})
 
     def _start_web_server(self, args):
-        if args.web_server:
-            try:
-                from hafapiserver.app import web_server
-                ws = Process(target=web_server, args=(self.bus_client,), daemon=True)
-                ws.start()
-            except Exception as e:
-                logger.error("Plugin hafapiserver is not installed, using 'pip install hafapiserver -U' to install")
-                logger.error(e)
+        plugin_manager.start_web_server(args, self.bus_client)
 
     def run(self, args):
         try:
@@ -144,11 +138,11 @@ class Program(object):
             elif args.only_runner:
                 self._start_runner(self.runner_count, f"{args.log_dir}/{self.case_name}", self.bus_client)
             elif args.only_recorder:
-                self._start_recorder(self.bus_client, args.sql_publish_db, args.sql_publish, self.runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
+                self._start_recorder(self.bus_client, self.runner_count, f"{args.log_dir}/{self.case_name}")
             else:
                 self._start_loader(1, self.bus_client)
                 self._start_runner(self.runner_count, f"{args.log_dir}/{self.case_name}", self.bus_client)
-                self._start_recorder(self.bus_client, args.sql_publish_db, args.sql_publish, self.runner_count, args.report_output_dir, f"{args.log_dir}/{self.case_name}")
+                self._start_recorder(self.bus_client, self.runner_count, f"{args.log_dir}/{self.case_name}")
             
             self.start_main()
             self.put_loader_msg(args)
@@ -173,7 +167,7 @@ class Program(object):
             self._bus_client(args)
             self._init_system_lock(args)
             self._init_system_logger(args.log_dir, self.bus_client)
-            self._start_recorder(self.bus_client, self.args.sql_publish_db, self.args.sql_publish, self.runner_count, self.args.report_output_dir, f"{args.log_dir}/{self.case_name}")
+            self._start_recorder(self.bus_client, self.runner_count, f"{args.log_dir}/{self.case_name}")
             while True:
                 time.sleep(1)
         else:
@@ -187,12 +181,11 @@ class Program(object):
         try:
             system_signal = self.bus_client.get_system()
             while True:
-                if not args.web_server:
+                if not args.console:
                     if not system_signal.empty():
                         self.signal = system_signal.get()
                         if self.signal == SIGNAL_RECORD_END or self.signal == SIGNAL_STOP:
                             logger.info("main -- stop")
-                            
                             system_signal.put(SIGNAL_BUS_END)
                             break
                     time.sleep(0.1)
@@ -229,7 +222,7 @@ class Program(object):
             case_handler.get()
         self._start_runner(self.args.runner_count if self.args.runner_count else 1, f"{self.args.log_dir}/{self.case_name}", self.bus_client)
         self._start_loader(1, self.bus_client)
-        self._start_recorder(self.bus_client, self.args.sql_publish_db, self.args.sql_publish,self.args.runner_count, self.args.report_output_dir, f"{self.args.log_dir}/{self.case_name}")
+        self._start_recorder(self.bus_client, self.args.runner_count, f"{self.args.log_dir}/{self.case_name}")
         self.start_main()
         self.put_loader_msg(self.args)
         self.stop_main()
@@ -268,7 +261,6 @@ haf-{PLATFORM_VERSION}#
         print("|--\33[32mPASS\33[0m--|--\33[31mFAIL\33[0m--|--\33[37mSKIP\33[0m--|--\33[35mERROR\33[0m-|---\33[36mALL\33[0m--|----------\33[36mBegin\33[0m----------|-----------\33[36mEnd\33[0m-----------|")
         print(result_summary)
         print("--------------------------------------------------------------------------------------------------")
-
 
     def _case_name(self):
         print(self.case_name)

@@ -10,6 +10,7 @@ from haf.common.log import Log
 from haf.result import HttpApiResult, EndResult, Detail, Summary, AppResult, WebResult
 from haf.config import *
 from haf.mark import locker
+from haf.pluginmanager import plugin_manager
 from haf.utils import Utils
 from haf.ext.jinjia2report.report import Jinja2Report
 
@@ -17,7 +18,7 @@ logger = Log.getLogger(__name__)
 
 
 class Recorder(Process):
-    def __init__(self, bus_client: BusClient, sql_config: SQLConfig, sql_publish: bool=False, runner_count: int=1, report_path:str="", case_name:str="", log_dir="", report_template_path="base", lock: m_lock=None, args=None):
+    def __init__(self, bus_client: BusClient, runner_count: int=1, case_name:str="", log_dir="", report_template_path="base", lock: m_lock=None, args=None):
         super().__init__()
         self.bus_client = bus_client
         self.args = args
@@ -25,13 +26,11 @@ class Recorder(Process):
         self.results = EndResult(f"haf-{case_name}")
         self.runner_count = runner_count
         self.signal_end_count = 0
-        self.report_path = report_path
+        self.report_path = self.args.report_output_dir
         self.case_name = case_name
         self.recorder_key = ""
         self.log_dir = log_dir
         self.report_template_path = report_template_path
-        self.sql_config = sql_config
-        self.sql_publish =  sql_publish
         self.complete_case_count = 0
         self.lock = lock
 
@@ -67,6 +66,7 @@ class Recorder(Process):
             while True:
                 if not self.results_handler.empty() :
                     result = self.results_handler.get()
+                    logger.debug(f"receive message -- {result}", __name__)
                     if isinstance(result, (HttpApiResult, AppResult, WebResult)):
                         if isinstance(result.case, (HttpApiCase, BaseCase, PyCase, WebCase, AppCase)):
                             logger.info(f"{self.recorder_key} {result.case.bench_name}.{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {RESULT_GROUP.get(str(result.result), None)}", __name__)
@@ -77,6 +77,7 @@ class Recorder(Process):
                         self.result_handler(result)
                     elif result == SIGNAL_RESULT_END:
                         self.signal_end_count += 1
+                        logger.debug(f"receive message -- {self.signal_end_count}", __name__)
                         if self.runner_count == self.signal_end_count:
                             self.end_handler()
                             break
@@ -103,6 +104,7 @@ class Recorder(Process):
                 Jinja2Report.write_report_to_file(report, f"{self.log_dir}/report-export.html")
 
     def end_handler(self):
+        logger.debug("on record handle end", __name__)
         self.on_recorder_stop()
         self.publish_results()
         self.generate_report()
@@ -207,15 +209,6 @@ class Recorder(Process):
         '''
         publish results to mysql database
         '''
-        if self.sql_publish:
-            logger.info(f"publish results {self.results} to mysql!", __name__)
-            import_ok = False
-            try:
-                from hafsqlpublish.publish import Publish
-                import_ok = True
-            except Exception as e:
-                logger.error("Plugin hafsqlpublish is not installed, using 'pip install hafsqlpublish -U' to install", __name__)
-            if import_ok:
-                publish = Publish(self.sql_config)
-                publish.publish_result(self.results)
+        logger.info("publish result to sql", __name__)
+        plugin_manager.publish_to_sql(self.args, self.results)
 
