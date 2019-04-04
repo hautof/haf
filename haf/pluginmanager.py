@@ -30,6 +30,16 @@ class PluginManager(object):
         publish_result = pm.hook.publish_to_sql(args=args, results=results)
         return publish_result
 
+    def start_web_server(self, args, bus_client):
+        pm = self.pm
+        result = pm.hook.start_web_server(args=args, bus_client=bus_client)
+        if isinstance(result, list):
+            return result[1]
+        elif isinstance(result, bool):
+            return result
+        else:
+            return True
+
     def get_plugin_manager(self):
         self.pm = pluggy.PluginManager("haf")
         self.pm.add_hookspecs(hookspecs)

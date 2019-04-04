@@ -27,3 +27,8 @@ def load_from_file(file_name):
 @haf.hookimpl
 def publish_to_sql(args, results):
     pass
+
+
+@haf.hookimpl
+def start_web_server(args, bus_client):
+    return False

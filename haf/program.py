@@ -24,7 +24,7 @@ from haf.logger import Logger
 from haf.recorder import Recorder
 from haf.runner import Runner
 from haf.utils import Utils
-from haf.pluginmanager import PluginManager
+from haf.pluginmanager import PluginManager, plugin_manager
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
@@ -114,14 +114,7 @@ class Program(object):
                 self.bus_client.get_param().put({"file_name": arg})
 
     def _start_web_server(self, args):
-        if args.web_server:
-            try:
-                from hafapiserver.app import web_server
-                ws = Process(target=web_server, args=(self.bus_client,), daemon=True)
-                ws.start()
-            except Exception as e:
-                logger.error("Plugin hafapiserver is not installed, using 'pip install hafapiserver -U' to install")
-                logger.error(e)
+        self._web_server_start_flag = plugin_manager.start_web_server(args, self.bus_client)
 
     def run(self, args):
         try:
@@ -188,12 +181,11 @@ class Program(object):
         try:
             system_signal = self.bus_client.get_system()
             while True:
-                if not args.web_server:
+                if not args.console:
                     if not system_signal.empty():
                         self.signal = system_signal.get()
                         if self.signal == SIGNAL_RECORD_END or self.signal == SIGNAL_STOP:
                             logger.info("main -- stop")
-                            
                             system_signal.put(SIGNAL_BUS_END)
                             break
                     time.sleep(0.1)
