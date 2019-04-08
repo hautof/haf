@@ -3,6 +3,7 @@ import importlib
 import sys
 import time
 from multiprocessing import Process, Lock as m_lock
+from threading import Thread, Lock as t_lock
 from haf.apihelper import Request, Response
 from haf.apphelper import Stage, BasePage, save_screen_shot
 from haf.asserthelper import AssertHelper
@@ -16,7 +17,7 @@ from haf.config import *
 from haf.mark import locker, new_locker
 from haf.result import HttpApiResult, AppResult, WebResult
 from haf.suite import HttpApiSuite, AppSuite
-from haf.utils import Utils
+from haf.utils import Utils, Signal, SignalThread
 from haf.webhelper import *
 import traceback
 import asyncio
@@ -109,50 +110,61 @@ class Runner(Process):
         logger.debug(f"{self.key} : runner {self.pid} -- put web message {self.runner}", __name__)
         self.put_web_message("web", self.locks[3])
 
+    def signal_service(self):
+        self.signal = Signal()
+        st = SignalThread(self.signal, 1)
+        st.start()
+
+    def run_loop(self, cases):
+        self.loop = asyncio.get_event_loop()
+        results = self.loop.run_until_complete(self.run_cases(cases))
+        for result in results:
+            if isinstance(result, (HttpApiResult, AppResult, WebResult)):
+                self.put_result("result", self.locks[2], result)
+
     def run(self):
         try:
             self.runner_key = f"{self.pid}$%runner$%"
             self.runner["key"] = f"{self.pid}"
             logger.bind_busclient(self.bus_client)
             logger.bind_process(self.pid)
+            logger.set_output(self.args.nout)
             logger.info(f"{self.runner_key} start runner", __name__)
+
             self.web_queue = self.bus_client.get_publish_runner()
             self.case_handler_queue = self.bus_client.get_case()
             self.case_back_queue = self.bus_client.get_case_back()
             self.result_handler_queue = self.bus_client.get_result()
-            loop = asyncio.get_event_loop()
+
+            self.signal_service()
+
             cases = []
             while True:
                 case_end = False
+                case = None
                 if not self.case_handler_queue.empty() :
                     with new_locker(self.bus_client, "case_runner", self.locks[0]):
                         case = self.case_handler_queue.get()
                     if case == SIGNAL_CASE_END:
                         case_end = True
                     if isinstance(case, HttpApiCase):
-                        logger.debug(f"cases' length is {len(cases)}, and end is {case}", __name__)
                         cases.append(case)
-                        if len(cases)>0 and (len(cases)>=1 or case_end):
-                            logger.debug(f"cases' length is {len(cases)}", __name__)
-                            results = loop.run_until_complete(self.run_cases(cases))
-                            for result in results:
-                                if isinstance(result, (HttpApiResult, AppResult, WebResult)):
-                                    self.put_result("result", self.locks[2], result)
-                            cases = []
+
                     elif isinstance(case, (AppCase, PyCase, WebCase)):
-                        logger.debug(f"cases' length is {len(cases)}, and end is {case}", __name__)
                         cases.append(case)
-                        if len(cases)>0 and (len(cases)>=1 or case_end):
-                            logger.debug(f"cases' length is {len(cases)}", __name__)
-                            results = loop.run_until_complete(self.run_cases(cases))
-                            for result in results:
-                                if isinstance(result, (HttpApiResult, AppResult, WebResult)):
-                                    self.put_result("result", self.locks[2], result)
-                            cases = []
+
+                    logger.debug(f"cases' length is {len(cases)}, and end is {case}", __name__)
+
+                if len(cases) > 0 and (len(cases) >= 10 or case_end or self.signal.signal):
+                    logger.debug(f"cases' length is {len(cases)}", __name__)
+                    self.run_loop(cases)
+                    cases = []
+
                 if case_end:
                     break
                 time.sleep(0.01)
-            loop.close()
+
+            self.loop.close()
             self.end_handler()
         except Exception as e:
             logger.error(f"{self.key} : {e}", __name__)
@@ -608,25 +620,25 @@ class WebRunner(BaseRunner):
         logger.info(f"{self.key} : WebRunner run - {case.ids.id}.{case.ids.subid}-{case.ids.name}", __name__)
         try:
             result.case = case
-            driver = self.create_web_driver(case.desired_caps)
+            self.driver = self.create_web_driver(case.desired_caps)
             logger.info(f"{self.key} : wait web {case.desired_caps.platformName} start ... [{case.time_sleep}s]", __name__)
-            driver.get(case.desired_caps.start_url)
-            driver.maximize_window()
+            self.driver.get(case.desired_caps.start_url)
+            self.driver.maximize_window()
             if case.wait_activity:
                 time.sleep(5)
-                self.wait_activity(case.wait_activity, case.time_sleep, driver)
+                self.wait_activity(case.wait_activity, case.time_sleep, self.driver)
             else:
                 time.sleep(case.time_sleep)
-            logger.info(f"{self.key} : driver is {driver}", __name__)
-            page = BasePage(driver)
+            logger.info(f"{self.key} : driver is {self.driver}", __name__)
+            page = BasePage(self.driver)
             for key in range(1, len(case.stages.keys())+1):
                 logger.info(f"{self.key} : {key} == {case.stages.get(key).deserialize()}", __name__)
                 png_dir = f"{self.log_dir}"
                 png_name = f"{case.bench_name}.{case.ids.id}.{case.ids.subid}.{case.ids.name}.{key}"
                 case.pngs[key] = {"before": f"./png/{png_name}-before.png", "after": f"./png/{png_name}-after.png"}
-                png_before = web_save_screen_shot(driver, png_dir, f"{png_name}-before")
+                png_before = web_save_screen_shot(self.driver, png_dir, f"{png_name}-before")
                 self.run_stage(case, page, case.stages.get(key, WebStage()), result)
-                png_after = web_save_screen_shot(driver, png_dir, f"{png_name}-after")
+                png_after = web_save_screen_shot(self.driver, png_dir, f"{png_name}-after")
             result.case = case
             result.result = RESULT_PASS
             result.run_error = None
@@ -635,8 +647,14 @@ class WebRunner(BaseRunner):
             result.run_error = e
             # TODO : make the result to error and fail
             result.result = RESULT_FAIL # RESULT_ERROR, fix #134
-        result.on_case_end()
-        return result
+        finally:
+            result.on_case_end()
+            if self.driver:
+                try:
+                    self.driver.close()
+                except Exception as e:
+                    pass
+            return result
 
     def run_operation(self, page, operation, paths, info):
         if  operation== OPERATION_WEB_CLICK:

@@ -70,10 +70,8 @@ class HttpController(object):
         except ur.URLError as e:
             logger.info(f"{key}{str(e)}", __name__)
             logger.info(f"{key}{traceback.format_exc()}", __name__)
-            traceback.print_exc()
             return e
         except Exception as ee:
-            traceback.print_exc()
             logger.info(f"{key}{str(ee)}")
             logger.info(f"{key}{traceback.format_exc()}", __name__)
             return ee
@@ -98,15 +96,12 @@ class HttpController(object):
             return response
         except ur.URLError as e:
             logger.error(f"{key} {str(e)}", __name__)
-            traceback.print_exc()
             return e
         except urlerror.HTTPError as httpe:
             logger.error(f"{key} { str(httpe)}", __name__)
-            traceback.print_exc()
             return httpe
         except Exception as ee:
             logger.error(f"{key} {str(ee)}", __name__)
-            traceback.print_exc()
             return ee
 
     def put(self, url, data=None, **kwargs):
@@ -119,10 +114,8 @@ class HttpController(object):
             result = response.read()
             return result
         except ur.URLError as e:
-            traceback.print_exc()
             logger.error(f"{key} {str(e)}", __name__)
         except Exception as ee:
-            traceback.print_exc()
             logger.error(f"{key} {str(ee)}", __name__)
 
     def delete(self, url, data=None):

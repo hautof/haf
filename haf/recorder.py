@@ -57,6 +57,7 @@ class Recorder(Process):
             self.recorder_key = f"{self.pid}$%recorder$%"
             logger.bind_busclient(self.bus_client)
             logger.bind_process(self.pid)
+            logger.set_output(self.args.nout)
             logger.info(f"{self.recorder_key} start recorder ", __name__)
             #self.bus_client = BusClient()
             self.results_handler = self.bus_client.get_result()
@@ -81,7 +82,7 @@ class Recorder(Process):
                         if self.runner_count == self.signal_end_count:
                             self.end_handler()
                             break
-                time.sleep(0.1)
+                time.sleep(0.01)
         except Exception:
             raise FailRecorderException
 

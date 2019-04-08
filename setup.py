@@ -21,7 +21,8 @@ requires = [
     'hafapiserver',
     'hafsqlpublish',
     'jsonschema',
-    'pluggy'
+    'pluggy',
+    'progress'
         ]
 
 with open('ReadMe.md', encoding='utf8') as f:
