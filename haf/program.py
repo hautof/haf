@@ -74,8 +74,8 @@ class Program(object):
             runner.start()
         time.sleep(0.5)
 
-    def _start_recorder(self, bus_client: BusClient, count: int=1, log_dir: str=""):
-        recorder = Recorder(bus_client, count, self.case_name, log_dir, self.args.report_template, self.loader_recorder_lock, self.args)
+    def _start_recorder(self, bus_client: BusClient, count: int=1, log_dir: str="", time_str: str=""):
+        recorder = Recorder(bus_client, count, self.case_name, time_str, log_dir, self.args.report_template, self.loader_recorder_lock, self.args)
         recorder.start()
         time.sleep(0.1)
 
@@ -84,7 +84,7 @@ class Program(object):
         pass
 
     def _init_system_logger(self, log_dir: str, bus_client: BusClient):
-        log = Logger(self.case_name, log_dir, bus_client, self.args)
+        log = Logger(self.case_name, self.time_str, log_dir, bus_client, self.args)
         log.start()
         time.sleep(0.1)
 
@@ -120,7 +120,9 @@ class Program(object):
         try:
             self.args = args
             self._init_logging_module(args)
-            self.case_name = Utils.get_case_name(self.args.name)
+            self.case_name = self.args.name
+            self.time_str = Utils.get_time_str()
+            self.case_log_dir = f"{args.log_dir}/{self.case_name}/{self.time_str}"
             self.runner_count = args.runner_count if args.runner_count else 1
             
             self.only_bus(args)
@@ -136,14 +138,13 @@ class Program(object):
             if args.only_loader:
                 self._start_loader(1, self.bus_client)
             elif args.only_runner:
-                self._start_runner(self.runner_count, f"{args.log_dir}/{self.case_name}", self.bus_client)
+                self._start_runner(self.runner_count, self.case_log_dir, self.bus_client)
             elif args.only_recorder:
-                self._start_recorder(self.bus_client, self.runner_count, f"{args.log_dir}/{self.case_name}")
+                self._start_recorder(self.bus_client, self.runner_count, self.case_log_dir, self.time_str)
             else:
                 self._start_loader(1, self.bus_client)
-                self._start_runner(self.runner_count, f"{args.log_dir}/{self.case_name}", self.bus_client)
-                self._start_recorder(self.bus_client, self.runner_count, f"{args.log_dir}/{self.case_name}")
-            
+                self._start_runner(self.runner_count, self.case_log_dir, self.bus_client)
+                self._start_recorder(self.bus_client, self.runner_count, self.case_log_dir, self.time_str)
             self.start_main()
             self.put_loader_msg(args)
             self.stop_main()
@@ -167,7 +168,7 @@ class Program(object):
             self._bus_client(args)
             self._init_system_lock(args)
             self._init_system_logger(args.log_dir, self.bus_client)
-            self._start_recorder(self.bus_client, self.runner_count, f"{args.log_dir}/{self.case_name}")
+            self._start_recorder(self.bus_client, self.runner_count, self.case_log_dir, self.time_str)
             while True:
                 time.sleep(1)
         else:
@@ -220,9 +221,9 @@ class Program(object):
         case_handler = self.bus_client.get_case()
         while not case_handler.empty():
             case_handler.get()
-        self._start_runner(self.args.runner_count if self.args.runner_count else 1, f"{self.args.log_dir}/{self.case_name}", self.bus_client)
+        self._start_runner(self.args.runner_count if self.args.runner_count else 1, self.case_log_dir, self.bus_client)
         self._start_loader(1, self.bus_client)
-        self._start_recorder(self.bus_client, self.args.runner_count, f"{self.args.log_dir}/{self.case_name}")
+        self._start_recorder(self.bus_client, self.runner_count, self.case_log_dir, self.time_str)
         self.start_main()
         self.put_loader_msg(self.args)
         self.stop_main()
