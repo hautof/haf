@@ -18,12 +18,12 @@ logger = Log.getLogger(__name__)
 
 
 class Recorder(Process):
-    def __init__(self, bus_client: BusClient, runner_count: int=1, case_name:str="", log_dir="", report_template_path="base", lock: m_lock=None, args=None):
+    def __init__(self, bus_client: BusClient, runner_count: int=1, case_name:str="", time_str: str="", log_dir="", report_template_path="base", lock: m_lock=None, args=None):
         super().__init__()
         self.bus_client = bus_client
         self.args = args
         self.daemon = True
-        self.results = EndResult(f"haf-{case_name}")
+        self.results = EndResult(f"{case_name}-{time_str}")
         self.runner_count = runner_count
         self.signal_end_count = 0
         self.report_path = self.args.report_output_dir

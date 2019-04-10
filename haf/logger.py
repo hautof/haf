@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class Logger(Process):
-    def __init__(self, case_name, log_dir, bus_client: BusClient, args: tuple):
+    def __init__(self, case_name: str, time_str: str, log_dir: str, bus_client: BusClient, args: tuple):
         super().__init__()
         self.daemon = True
         self.bus_client = bus_client
@@ -17,6 +17,7 @@ class Logger(Process):
         self.log_dir = log_dir
         self.loggers = {}
         self.args = args
+        self.time_str = time_str
 
     def reconnect_bus(self):
         self.bus_client = BusClient(self.bus_client.domain, self.bus_client.port, self.bus_client.auth_key)
@@ -27,7 +28,7 @@ class Logger(Process):
             logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
         else:
             logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
-        log_home = f"{self.log_dir}/{self.case_name}"
+        log_home = f"{self.log_dir}/{self.case_name}/{self.time_str}"
         if not os.path.exists(log_home):
             os.makedirs(log_home)
         # here delete BusClient(), using input bus_clients
@@ -119,7 +120,7 @@ class Logger(Process):
         self.write("error", temp1, msg)
 
     def write(self, dir, filename, msg):
-        dir = f"{self.log_dir}/{self.case_name}/{dir}"
+        dir = f"{self.log_dir}/{self.case_name}/{self.time_str}/{dir}"
         if not os.path.exists(dir):
             os.makedirs(dir)
         full_name = f"{dir}/{filename}.log"

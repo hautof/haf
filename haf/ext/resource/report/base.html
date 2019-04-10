@@ -120,7 +120,6 @@
                                 <th>Suites</th>
                                 <th>Begin Time</th>
                                 <th>End Time</th>
-                                <th>Duration Time</th>
                                 <th>Pass</th>
                                 <th>Fail</th>
                                 <th>Error</th>
@@ -155,7 +154,6 @@
                                 {% else %}
                                 <td>running...</td>
                                 {% endif %}
-                                <td>{{results.duration}}</td>
                                 <td><a onclick="showElement('all_pass')">{{results.passed}}</a></td>
                                 <td><a onclick="showElement('all_fail')">{{results.failed}}</a></td>
                                 <td><a onclick="showElement('all_error')">{{results.error}}</a></td>
