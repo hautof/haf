@@ -85,7 +85,7 @@ class Loader(Process):
                 module_name = input.get("module_name")
                 module_path = input.get("module_path")
 
-                bench = HttpApiBench()
+                bench = HttpApiBench(self.args)
                 if "dbconfig" in inputs.keys():
                     for input in inputs.get("dbconfig"):
                         db = SQLConfig()

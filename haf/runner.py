@@ -56,13 +56,13 @@ class Runner(Process):
         bench = self.benchs.get(case.bench_name, None)
         if bench is None :
             if isinstance(case, HttpApiCase):
-                bench = HttpApiBench()
+                bench = HttpApiBench(self.args)
             elif isinstance(case, PyCase):
-                bench = PyBench()
+                bench = PyBench(self.args)
             elif isinstance(case, AppCase):
-                bench = AppBench()
+                bench = AppBench(self.args)
             elif isinstance(case, WebCase):
-                bench = WebBench()
+                bench = WebBench(self.args)
         
         bench.add_case(case)
         self.benchs[case.bench_name] = bench
@@ -248,8 +248,15 @@ class BaseRunner(object):
         except Exception:
             return False
 
+    def check_case_filter(self, case):
+        logger.debug(f"case <{case.ids.name}> check in [{self.bench.args.filter_case}]", __name__)
+        return case.name in self.bench.args.filter_case
+
     def check_case_run(self, case): # if skip, return False
-        return case.run == CASE_RUN
+        if self.check_case_filter(case):
+            return case.run == CASE_RUN
+        else:
+            return False
 
     def check_case_error(self, case):
         return case.error == CASE_ERROR

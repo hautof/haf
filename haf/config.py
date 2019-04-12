@@ -115,7 +115,7 @@ LOG_PATH_DEFAULT = "./data"
 
 MAIN_VERSION = 2
 SUB_VERSION = 8
-FIX_VERSION = 0
+FIX_VERSION = 1
 VERSION_TYPE = "haf"
 PLATFORM_VERSION = f"{VERSION_TYPE}-{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}"
 
@@ -147,6 +147,8 @@ config_schema = {
                 "run": {
                     "type": "object",
                     "properties": {
+                        "no_output": {"type": "boolean"},
+                        "console": {"type": "boolean"},
                         "bus_server_port": {"type": "number"},
                         "sql_publish": {
                             "type": "object",
@@ -240,6 +242,12 @@ config_schema = {
                                 "run": {"type": "boolean"}
                             },
                             "required": ["run"]
+                        },
+                        "case_filter": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         }
                     },
                     "required": ["log", "bus", "report", "case", "runner", "recorder", "loader", "web_server"]
