@@ -84,7 +84,7 @@ class Runner(Process):
         with new_locker(self.bus_client, key, self.locks[1]):
             self.case_back_queue.put(case)
         import random
-        time.sleep(random.randint(1,5))
+        time.sleep(random.randint(1,2))
 
     def result_handler(self, result):
         if isinstance(result, HttpApiResult) or isinstance(result, AppResult) or isinstance(result, WebResult):
@@ -112,7 +112,7 @@ class Runner(Process):
 
     def signal_service(self):
         self.signal = Signal()
-        st = SignalThread(self.signal, 1)
+        st = SignalThread(self.signal, 0.1)
         st.start()
 
     def run_loop(self, cases):
@@ -235,8 +235,10 @@ class BaseRunner(object):
         self.bench = bench
 
     def check_case_run_here(self, case):
-        logger.debug("Base Runner check case run here", __name__)
+        logger.debug(f"Base Runner check case run here {case.dependent}", __name__)
         if not case.dependent or len(case.dependent) == 0:
+            return True
+        elif isinstance(case.dependent, list) and case.dependent==['None']:
             return True
         try:
             for dependence in case.dependent:
@@ -250,7 +252,13 @@ class BaseRunner(object):
 
     def check_case_filter(self, case):
         logger.debug(f"case <{case.ids.name}> check in [{self.bench.args.filter_case}]", __name__)
-        return case.name in self.bench.args.filter_case
+        filter_cases = self.bench.args.filter_case
+        if filter_cases is None or filter_cases=='None':
+            return True
+        elif isinstance(filter_cases, list):
+            return case.name in filter_cases
+        else:
+            return True
 
     def check_case_run(self, case): # if skip, return False
         if self.check_case_filter(case):

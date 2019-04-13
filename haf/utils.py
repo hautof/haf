@@ -443,7 +443,7 @@ class Signal(metaclass=SingletonType):
 
 
 class SignalThread(Thread):
-    def __init__(self, signal, signal_change_time=1):
+    def __init__(self, signal, signal_change_time=0.1):
         super().__init__()
         self.signal = signal
         self.time = signal_change_time

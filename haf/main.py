@@ -121,7 +121,7 @@ def main_args():
                     args.debug = True if args.debug else config_run.get("debug", False)
                     args.console = True if args.console else config_run.get("console", False)
                     args.nout = True if args.nout else config_run.get("no_output", False)
-                    args.filter_case = args.filter_case.split(",") if config_run.get("filter_case") is None else config_run.get("filter_case")
+                    args.filter_case = args.filter_case.split(",") if config_run.get("filter_case") is None and isinstance(args.filter_case, str) else config_run.get("filter_case")
 
                     config_run_report = config_run.get("report")
                     args.report_output_dir = config_run_report.get("report_path")
