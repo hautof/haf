@@ -112,8 +112,12 @@ class Runner(Process):
 
     def signal_service(self):
         self.signal = Signal()
-        st = SignalThread(self.signal, 0.1)
-        st.start()
+        self.st = SignalThread(self.signal, 0.1)
+        self.st.start()
+    
+    def stop_signal(self):
+        if self.st:
+            self.st._stop()
 
     def run_loop(self, cases):
         self.loop = asyncio.get_event_loop()

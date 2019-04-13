@@ -447,6 +447,7 @@ class SignalThread(Thread):
         super().__init__()
         self.signal = signal
         self.time = signal_change_time
+        self.daemon = True
 
     def run(self):
         while True:
