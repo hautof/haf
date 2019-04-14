@@ -79,12 +79,15 @@ def main_args():
     # no output
     sub_run_arg_program.add_argument("--no-output", "-nout", dest="nout", default=False, type=bool,
                                      help="do not show output")
+    # case filter
+    sub_run_arg_program.add_argument("--filter-case", "-fc", dest="filter_case", default=None, type=str,
+                                     help="only run filter cases's include cases, filter by name")
+
     # init
     sub_init_arg_program = sub_all_arg_program.add_parser("init",
                                                          help="init workspace, using 'python -m haf init -t=all' to init workspace of haf")
     sub_init_arg_program.add_argument("--type", "-t", dest="init_type", type=str, default=None,
                                      help="init workspace with type")
-
     # help
     sub_help_arg_program = sub_all_arg_program.add_parser("help",
                                                          help="help, using 'python -m haf help' to show this")
@@ -118,6 +121,7 @@ def main_args():
                     args.debug = True if args.debug else config_run.get("debug", False)
                     args.console = True if args.console else config_run.get("console", False)
                     args.nout = True if args.nout else config_run.get("no_output", False)
+                    args.filter_case = args.filter_case.split(",") if config_run.get("filter_case") is None and isinstance(args.filter_case, str) else config_run.get("filter_case")
 
                     config_run_report = config_run.get("report")
                     args.report_output_dir = config_run_report.get("report_path")

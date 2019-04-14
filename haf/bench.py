@@ -7,15 +7,17 @@ class BaseBench(object):
     '''
     BaseCase the base of cases
     '''
-    def __init__(self):
+    def __init__(self, args):
         self.name = None
+        self.args = args
         pass
 
 
 class PyBench(BaseBench):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, args):
         self.name = None
+        self.args = args
+        super().__init__(args)
         self._init_all()
 
     def _init_all(self):
@@ -43,9 +45,10 @@ class PyBench(BaseBench):
 
 
 class HttpApiBench(BaseBench):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, args):
         self.name = None
+        self.args = args
+        super().__init__(args)
         self._init_all()
 
     def _init_all(self):
@@ -72,9 +75,10 @@ class HttpApiBench(BaseBench):
 
 
 class AppBench(BaseBench):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, args):
         self.name = None
+        self.args = args
+        super().__init__(args)
         self._init_all()
 
     def _init_all(self):
@@ -101,9 +105,10 @@ class AppBench(BaseBench):
 
 
 class WebBench(BaseBench):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, args):
         self.name = None
+        self.args = args
+        super().__init__(args)
         self._init_all()
 
     def _init_all(self):
