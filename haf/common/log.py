@@ -1,6 +1,6 @@
 # -*- encoding:utf-8 -*-
 
-import logging
+import logging, os, time
 from haf.busclient import BusClient
 from haf.common.sigleton import SingletonType
 
@@ -19,8 +19,8 @@ class BaseLogger(metaclass=SingletonType):
     def bind_process(self, process_id):
         self.process_id = process_id
 
-    def set_output(self, nout):
-        self.nout = nout
+    def set_output(self, local_logger):
+        self.local_logger = local_logger
 
     def debug(self, msg, logger_name=None):
         msg = {"process": self.process_id, "logger_name":self.logger_name if not logger_name else logger_name, "level":"debug", "msg": msg}
@@ -45,12 +45,40 @@ class BaseLogger(metaclass=SingletonType):
     def __new__(cls, *args, **kwargs):
         return object.__new__(cls)
 
+    def write_local_logger(self, msg):        
+        dir = f"./data/log/"
+        if not os.path.exists(dir):
+            os.makedirs(dir)
+        full_name = f"{dir}/log.log"
+        try:
+            with open(full_name, 'a+') as f:
+                f.write(f"{self.now}{msg}\n")
+                f.close()
+        except Exception as e:
+            with open(full_name, 'a+', encoding='utf-8') as f:
+                f.write(f"{self.now}{msg}\n")
+                f.close()
+    
+    @property
+    def now(self):
+        '''
+        get datetime now to str
+        :return: time now str
+        '''
+        current_time = time.time()
+        local_time = time.localtime(current_time)
+        time_temp = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
+        secs = (current_time - int(current_time)) * 1000
+        timenow = "%s %03d" % (time_temp, secs)
+        return timenow
+
     def msg_write(self, msg):
         if self.bus_client is None:
             self.bus_client = BusClient()
-        if self.nout:
-            return
-        self.bus_client.get_log().put(msg)
+        if self.local_logger:
+            self.write_local_logger(msg)
+        else:
+            self.bus_client.get_log().put(msg)
 
 
 class Log:

@@ -130,9 +130,10 @@ class Runner(Process):
         try:
             self.runner_key = f"{self.pid}$%runner$%"
             self.runner["key"] = f"{self.pid}"
+            self.loop = None
             logger.bind_busclient(self.bus_client)
             logger.bind_process(self.pid)
-            logger.set_output(self.args.nout)
+            logger.set_output(self.args.local_logger)
             logger.info(f"{self.runner_key} start runner", __name__)
 
             self.web_queue = self.bus_client.get_publish_runner()
@@ -167,8 +168,8 @@ class Runner(Process):
                 if case_end:
                     break
                 time.sleep(0.01)
-
-            self.loop.close()
+            if self.loop: # here fix when cases is None, loop is None
+                self.loop.close()
             self.end_handler()
         except Exception as e:
             logger.error(f"{self.key} : {e}", __name__)

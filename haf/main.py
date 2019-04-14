@@ -82,6 +82,9 @@ def main_args():
     # case filter
     sub_run_arg_program.add_argument("--filter-case", "-fc", dest="filter_case", default=None, type=str,
                                      help="only run filter cases's include cases, filter by name")
+    # local logger
+    sub_run_arg_program.add_argument("--local-logger", "-llog", dest="local_logger", default=None, type=str,
+                                     help="local logger to make runner faster than now!")
 
     # init
     sub_init_arg_program = sub_all_arg_program.add_parser("init",

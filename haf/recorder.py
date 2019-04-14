@@ -26,7 +26,7 @@ class Recorder(Process):
         self.results = EndResult(f"{case_name}-{time_str}")
         self.runner_count = runner_count
         self.signal_end_count = 0
-        self.report_path = self.args.report_output_dir
+        self.report_path = self.args.report_output_dir if self.args.report_output_dir else "./data/report.html"
         self.case_name = case_name
         self.recorder_key = ""
         self.log_dir = log_dir
@@ -57,7 +57,7 @@ class Recorder(Process):
             self.recorder_key = f"{self.pid}$%recorder$%"
             logger.bind_busclient(self.bus_client)
             logger.bind_process(self.pid)
-            logger.set_output(self.args.nout)
+            logger.set_output(self.args.local_logger)
             logger.info(f"{self.recorder_key} start recorder ", __name__)
             #self.bus_client = BusClient()
             self.results_handler = self.bus_client.get_result()
@@ -200,12 +200,17 @@ class Recorder(Process):
     def show_in_cs(self):
         result_summary = "|{:^8}|{:^8}|{:^8}|{:^8}|{:^8}|".format(self.results.passed, self.results.failed, self.results.skip, self.results.error, \
             self.results.all)
+        if not self.args.nout:
+            logger.info("----------------------------------------------", __name__)
+            logger.info("|--\33[32mPASS\33[0m--|--\33[31mFAIL\33[0m--|--\33[37mSKIP\33[0m--|--\33[35mERROR\33[0m-|---\33[36mALL\33[0m--|", __name__)
+            logger.info(result_summary, __name__)
+            logger.info("----------------------------------------------", __name__)
+        else:
+            print("----------------------------------------------")
+            print("|--\33[32mPASS\33[0m--|--\33[31mFAIL\33[0m--|--\33[37mSKIP\33[0m--|--\33[35mERROR\33[0m-|---\33[36mALL\33[0m--|")
+            print(result_summary)
+            print("----------------------------------------------")
 
-        logger.info("----------------------------------------------", __name__)
-        logger.info("|--\33[32mPASS\33[0m--|--\33[31mFAIL\33[0m--|--\33[37mSKIP\33[0m--|--\33[35mERROR\33[0m-|---\33[36mALL\33[0m--|", __name__)
-        logger.info(result_summary, __name__)
-        logger.info("----------------------------------------------", __name__)
-        
     def publish_to_mysql(self):
         '''
         publish results to mysql database
