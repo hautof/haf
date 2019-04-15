@@ -29,6 +29,5 @@ script:
   - python -m haf run -rc=1 -case=./testcases/test.xlsx,./testcases/test2.json,./testcases/test3.yml -rh=True -rod=./testcases/report.html -ld=./testcases -debug=true
   - python -m haf run -rc=3 -case=./testcases/test.xlsx,./testcases/test2.json,./testcases/test3.yml -rh=True -rod=./testcases/report1.html -ld=./testcases -debug=true
   - python -m haf run -rc=3 -case=./testcases/test.xlsx,./testcases/test2.json,./testcases/test3.yml -rh=True -rod=./testcases/report1.html -ld=./testcases -llog=true
-  - python -m haf run -rc=3 -case=./testcases/test.xlsx,./testcases/test2.json,./testcases/test3.yml -rh=True -rod=./testcases/report1.html -ld=./testcases -llog=true -debug=true
   - python -m haf run -rc=3 -case=./testcases/test.xlsx,./testcases/test2.json,./testcases/test3.yml -rh=True -rod=./testcases/report1.html -ld=./testcases -nout=true -llog=true
   
