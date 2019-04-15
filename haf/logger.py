@@ -51,6 +51,8 @@ class Logger(Process):
             return f"log$%error$%{log}"
 
     def log_print(self, log):
+        if self.args.nout:
+            return
         logger_name = log.get("logger_name")
         level = log.get("level")
         msg_origin = log.get("msg")
