@@ -122,17 +122,18 @@ class Logger(Process):
         self.write("error", temp1, msg)
 
     def write(self, dir, filename, msg):
+        msg = f"{self.now}{msg}\n"
         dir = f"{self.log_dir}/{self.case_name}/{self.time_str}/{dir}"
         if not os.path.exists(dir):
             os.makedirs(dir)
         full_name = f"{dir}/{filename}.log"
         try:
             with open(full_name, 'a+') as f:
-                f.write(f"{self.now}{msg}\n")
+                f.write(msg)
                 f.close()
         except Exception as e:
             with open(full_name, 'a+', encoding='utf-8') as f:
-                f.write(f"{self.now}{msg}\n")
+                f.write(msg)
                 f.close()
 
     @property

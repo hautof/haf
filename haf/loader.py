@@ -33,7 +33,7 @@ class Loader(Process):
             logger.bind_process(self.pid)
             self.key = f"{self.pid}$%loader$%"
             logger.bind_busclient(self.bus_client)
-            logger.set_output(self.args.local_logger)
+            logger.set_output(self.args.local_logger, self.args.nout)
             logger.info(f"{self.key} start loader", __name__)
             self.case_queue = self.bus_client.get_case()
             self.case_back_queue = self.bus_client.get_case_back()
