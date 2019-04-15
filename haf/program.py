@@ -169,8 +169,8 @@ class Program(object):
             self._init_system_lock(args)
             self._init_system_logger(args.log_dir, self.bus_client)
             self._start_recorder(self.bus_client, self.runner_count, self.case_log_dir, self.time_str)
-            while True:
-                time.sleep(1)
+            self.wait_end_signal(args)
+            sys.exit(0)
         else:
             logger.info("not only bus mode")
 
@@ -187,6 +187,7 @@ class Program(object):
                         self.signal = system_signal.get()
                         if self.signal == SIGNAL_RECORD_END or self.signal == SIGNAL_STOP:
                             logger.info("main -- stop")
+                            system_signal.put(SIGNAL_RECORD_END)
                             system_signal.put(SIGNAL_BUS_END)
                             break
                     time.sleep(0.1)

@@ -133,7 +133,7 @@ class Runner(Process):
             self.loop = None
             logger.bind_busclient(self.bus_client)
             logger.bind_process(self.pid)
-            logger.set_output(self.args.local_logger)
+            logger.set_output(self.args.local_logger, self.args.nout)
             logger.info(f"{self.runner_key} start runner", __name__)
 
             self.web_queue = self.bus_client.get_publish_runner()

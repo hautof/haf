@@ -19,8 +19,9 @@ class BaseLogger(metaclass=SingletonType):
     def bind_process(self, process_id):
         self.process_id = process_id
 
-    def set_output(self, local_logger):
+    def set_output(self, local_logger, nout=True):
         self.local_logger = local_logger
+        self.nout = nout
 
     def debug(self, msg, logger_name=None):
         msg = {"process": self.process_id, "logger_name":self.logger_name if not logger_name else logger_name, "level":"debug", "msg": msg}
@@ -45,18 +46,24 @@ class BaseLogger(metaclass=SingletonType):
     def __new__(cls, *args, **kwargs):
         return object.__new__(cls)
 
-    def write_local_logger(self, msg):        
+    def log_output(self, msg):
+        if not self.nout:
+            print(msg)
+
+    def write_local_logger(self, msg):
+        msg = f"{self.now} {msg.get('level')} <{msg.get('process')}> [{msg.get('logger_name')}] {msg.get('msg')}"
+        self.log_output(msg)
         dir = f"./data/log/"
         if not os.path.exists(dir):
             os.makedirs(dir)
         full_name = f"{dir}/log.log"
         try:
             with open(full_name, 'a+') as f:
-                f.write(f"{self.now}{msg}\n")
+                f.write(f"{msg}\n")
                 f.close()
         except Exception as e:
             with open(full_name, 'a+', encoding='utf-8') as f:
-                f.write(f"{self.now}{msg}\n")
+                f.write(f"{msg}\n")
                 f.close()
     
     @property
