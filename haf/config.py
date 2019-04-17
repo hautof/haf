@@ -1,37 +1,48 @@
 # encoding='utf-8'
 
-GITHUB_URL_BASE = 'https://github.com/tsbxmw/haf'
 
+# git hub main page of haf
+GITHUB_URL_BASE = 'https://github.com/hautof/haf'
+
+# bus server default port,domain, client, authkey
 BUS_PORT = 9000
 BUS_DOMAIN = u"0.0.0.0"
 BUS_CLIENT_DOMAIN = u"127.0.0.1"
 BUS_AUTH_KEY = bytes("hafbus", encoding='utf-8')
 
+# web server default port
 WEB_SERVER = False
 WEB_SERVER_PORT = 8888
 
+# app driver path
 APP_DRIVER_PATH = 'http://localhost:4723/wd/hub'
 
+# runner count default = 1
 COUNT_RUNNER = 1
 
+# case types [base, webui, httpapi, py, app]
 CASE_TYPE_BASE = 0
 CASE_TYPE_WEBUI = 1
 CASE_TYPE_HTTPAPI = 2
 CASE_TYPE_PY = 3
 CASE_TYPE_APP = 4
 
+# message type [case, result, api, other]
 MESSAGE_TYPE_CASE = 10
 MESSAGE_TYPE_RESULT = 11
 MESSAGE_TYPE_API_RESULT = 12
 MESSAGE_TYPE_OTHER = 13
 
+# signal [start, stop, case-end, result-end, record-end, bus-end]
 SIGNAL_START = 20
 SIGNAL_STOP = 21
 SIGNAL_CASE_END = 22
 SIGNAL_RESULT_END = 23
 SIGNAL_RECORD_END = 24
 SIGNAL_BUS_END = 25
+SIGNAL_LOGGER_END = 26
 
+# api method [get, post, put, delete]
 CASE_HTTP_API_METHOD_GET = 30
 CASE_HTTP_API_METHOD_POST = 31
 CASE_HTTP_API_METHOD_PUT= 32
@@ -44,12 +55,14 @@ METHOD_GROUP = {
     "33": "DELETE"
 }
 
+# case run type [run, not run, skip, run, error]
 CASE_CAN_RUN_HERE = 40
 CASE_CAN_NOT_RUN_HERE = 41
 CASE_SKIP = 42
 CASE_RUN = 43
 CASE_ERROR = 44
 
+# result [pass, fail, skip, error]
 RESULT_PASS = 50
 RESULT_FAIL = 51
 RESULT_SKIP = 52
@@ -62,11 +75,13 @@ RESULT_GROUP = {
     "53": "ERROR"
 }
 
+# case mark, [base, api, app, web]
 CASE_MARK_BASE = 60
 CASE_MARK_API = 61
 CASE_MARK_APP = 62
 CASE_MARK_WEB = 63
 
+# operation of app [click, sendkeys, swipe, other, exists]
 OPERATION_APP_CLICK = 70
 OPERATION_APP_SENDKEYS = 71
 OPERATION_APP_SWIPE = 72
@@ -89,6 +104,7 @@ OPERATION_APP_ANTI_GROUP = {
   OPERATION_APP_EXISTS: "exists"
 }
 
+# operation of web [click, sendkeys, swipe, other, exists]
 OPERATION_WEB_CLICK = 80
 OPERATION_WEB_SENDKEYS = 81
 OPERATION_WEB_SWIPE = 82
@@ -111,14 +127,17 @@ OPERATION_WEB_ANTI_GROUP = {
   OPERATION_WEB_EXISTS: "exists"
 }
 
+# log path
 LOG_PATH_DEFAULT = "./data"
 
+# version define
 MAIN_VERSION = 2
 SUB_VERSION = 8
-FIX_VERSION = 3
+FIX_VERSION = 4
 VERSION_TYPE = "haf"
 PLATFORM_VERSION = f"{VERSION_TYPE}-{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}"
 
+# banner string
 BANNER_STRS = f"""
   .                     ____
  /\\\\  | |  | | ____    /. _/
@@ -137,6 +156,7 @@ BANNER_STRS_EXIT = f"""
       |_|  |_| v{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}  |_|   EXIT
 """
 
+# run config schema
 config_schema = {
     "type": "object",
     "properties": {

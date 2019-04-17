@@ -1,9 +1,18 @@
 # -*- coding: utf-8 -*-
+'''
+file name : apphelper
+description : the app case helper
+others:
+    include BasePage
+'''
 import time, os
 from haf.config import *
 
 
 class BasePage:
+    '''
+    the base page of app pages, can be implement by cases
+    '''
     DEFAULT_TIMEOUT = 3
 
     def __init__(self, driver):
@@ -73,6 +82,9 @@ class By(object):
 
 
 class Stage(object):
+    '''
+    stage of app test
+    '''
     def __init__(self):
         self.id = 0
         self.name = ""
@@ -85,6 +97,11 @@ class Stage(object):
         self.run_count = 0
     
     def constructor(self, input: dict={}):
+        '''
+
+        :param input:
+        :return:
+        '''
         self.id = input.get("id")
         self.name = input.get("name")
         self.operation = OPERATION_APP_GROUP[input.get("operation")]
@@ -95,6 +112,10 @@ class Stage(object):
         self.run_count = input.get("run_count")
 
     def deserialize(self):
+        '''
+
+        :return:
+        '''
         return {
             "id": self.id,
             "name": self.name,
@@ -109,6 +130,9 @@ class Stage(object):
 
 
 class AppIds(object):
+    '''
+    ids of app
+    '''
     def __init__(self):
         self.id = ""
         self.subid = ""
@@ -116,12 +140,21 @@ class AppIds(object):
         self.app_name = ""
 
     def constructor(self, inputs:dict={}):
+        '''
+
+        :param inputs:
+        :return:
+        '''
         self.id = inputs.get("id")
         self.subid = inputs.get("subid")
         self.name = inputs.get("name")
         self.app_name = inputs.get("app_name")
 
     def deserialize(self):
+        '''
+
+        :return:
+        '''
         return {
             "id": self.id,
             "subid": self.subid,
@@ -131,6 +164,9 @@ class AppIds(object):
 
 
 class DesiredCaps(object):
+    '''
+    desired caps needed by appium
+    '''
     def __init__(self):
         self.automationName = ""
         self.platformName = ""
@@ -141,6 +177,11 @@ class DesiredCaps(object):
         self.noReset = True
 
     def constructor(self, inputs: dict={}):
+        '''
+
+        :param inputs:
+        :return:
+        '''
         self.automationName = inputs.get("automationName")
         self.platformName = inputs.get("platformName")
         self.platformVersion = inputs.get("platformVersion")
@@ -150,6 +191,10 @@ class DesiredCaps(object):
         self.noReset = inputs.get("noReset", True)
 
     def deserialize(self):
+        '''
+
+        :return:
+        '''
         return {
             "automationName": self.automationName,
             "platformName": self.platformName,
@@ -162,6 +207,13 @@ class DesiredCaps(object):
 
 
 def save_screen_shot(driver, path, name):
+    '''
+    save the screen shot to the path of the name
+    :param driver:
+    :param path:
+    :param name:
+    :return:
+    '''
     try:
         path = f"{path}/png"
         if not os.path.exists(path):

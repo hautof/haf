@@ -1,4 +1,11 @@
 # encoding='utf-8'
+'''
+file name : asserthelper
+description : rewrite assert
+others:
+    include AssertHelper
+    now not use this
+'''
 from datetime import datetime
 
 from assertpy import assert_that
@@ -6,6 +13,9 @@ from haf.common.log import Log
 from deepdiff import DeepDiff
 
 logger = Log.getLogger(__name__)
+
+
+#TODO: here need extend
 
 
 class AssertHelper(object):

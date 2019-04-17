@@ -1,5 +1,14 @@
 # encoding='utf-8'
 
+'''
+file name : httpreqeust
+description : http request all need this
+others :
+    support GET POST PUT DELETE method
+    support with headers, data
+'''
+
+
 import json
 import urllib.request as ur
 import urllib.parse
@@ -12,7 +21,8 @@ logger = Log.getLogger(__name__)
 
 class HttpController(object):
     '''
-    Http 请求 管理类
+    HttpController
+    using to the get/post/others
     '''
 
     def __init__(self):
@@ -21,11 +31,10 @@ class HttpController(object):
     @staticmethod
     def getdata(data):
         '''
-        将 get 的 data 格式化为 url 参数 形式
+        getdata: using to make data to the url type
 
-        :参数:
-        * data : str/bytes/dict get 请求的参数
-        :return: data
+        :param data: the origin data
+        :return the url type data
         '''
         datastr = "?"
         if isinstance(data, bytes):
@@ -46,15 +55,19 @@ class HttpController(object):
     @staticmethod
     def get(url, data=None, headers=None, **kwargs):
         '''
-        http get 请求方法
-        :参数:
-        * url : 请求的 url
-        :return: response.read() 返回的 请求内容
+        get of http
+
+        :param url the request url
+        :param data the origin data
+        :param headers the get headers
+
+        :return the response of get
         '''
         key = kwargs.get("key")
         try:
             url = url + HttpController.getdata(data)
             logger.info(f'{key} [url] {url}', __name__)
+            # using requests to Request the url with headers and method get
             request = ur.Request(url=url, headers=headers, method="GET")
             if headers is not None:
                 for key in headers.keys():
@@ -78,6 +91,15 @@ class HttpController(object):
 
     @staticmethod
     def post(url, data=None, headers=None, **kwargs):
+        '''
+        post of http
+
+        :param url the request url
+        :param data the origin data
+        :param headers the post headers
+
+        :return the response of post
+        '''
         key = kwargs.get("key")
         try:
             if "application/json" in headers.values():
@@ -105,6 +127,15 @@ class HttpController(object):
             return ee
 
     def put(self, url, data=None, **kwargs):
+        '''
+        put of http
+
+        :param url the request url
+        :param data the origin data
+        :param headers the put headers
+
+        :return the response of put
+        '''
         key = kwargs.get("key")
         try:
             data = bytes(data, encoding='utf8') if data is not None else None
@@ -119,6 +150,15 @@ class HttpController(object):
             logger.error(f"{key} {str(ee)}", __name__)
 
     def delete(self, url, data=None):
+        '''
+        delete of http
+
+        :param url the request url
+        :param data the origin data
+        :param headers the delete headers
+
+        :return the response of delete
+        '''
         data = bytes(data, encoding='utf8') if data is not None else None
         try:
             request = ur.Request(url, headers=self.headers, data=data)

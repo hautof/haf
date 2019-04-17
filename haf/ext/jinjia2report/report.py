@@ -13,6 +13,9 @@ logger = Log.getLogger(__name__)
 
 
 class Jinja2Report(object):
+    '''
+    generate report by jinja2
+    '''
     def __init__(self):
         pass
 
@@ -26,6 +29,18 @@ class Jinja2Report(object):
 
     @staticmethod
     def get_template(key: str) -> None:
+        '''
+        get template by the key
+        key :                 template:
+        None/base/online      base.html
+        online-app, base_app  base_app.html
+        online-web, base_web  base_app.html
+        base_email            base_eamil.html
+        third-pary            find the template in the path
+
+        :param key:
+        :return:
+        '''
         if key == "base" or key == "online":
             template = "base.html"
         elif key in ["online-app", "base_app", "online-web", "base_web"]:
@@ -51,6 +66,13 @@ class Jinja2Report(object):
 
     @staticmethod
     def report(results: EndResult, name="base"):
+        '''
+        generate report
+
+        :param results:
+        :param name:
+        :return: generate report by template and results
+        '''
         if results is None:
             return {"status": "error", "msg": "results is None"}
         if not name:
@@ -61,6 +83,12 @@ class Jinja2Report(object):
 
     @staticmethod
     def write_report_to_file(info, report_path: str):
+        '''
+        write stream to file
+        :param info:
+        :param report_path:
+        :return: None
+        '''
         try:
             logger.info(f"generate report to {report_path}", __name__)
             stream = TemplateStream(info)
@@ -71,6 +99,11 @@ class Jinja2Report(object):
 
     @staticmethod
     def report_online(results: EndResult):
+        '''
+        generate online report stream
+        :param results:
+        :return:
+        '''
         if results is None:
             return {"status": "error", "msg": "results is None"}
         template = Jinja2Report.get_template("online")
@@ -78,6 +111,11 @@ class Jinja2Report(object):
     
     @staticmethod
     def report_online_app(results: EndResult):
+        '''
+        generate online app report stream
+        :param results:
+        :return:
+        '''
         if results is None:
             return {"status": "error", "msg": "results is None"}
         template = Jinja2Report.get_template("online-app")

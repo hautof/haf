@@ -1,4 +1,13 @@
 # encoding='utf-8'
+'''
+file name : case.py
+desc : the cases
+others :
+    usage :
+        py case must implement BaseCase
+        class TestApi(BaseCase):
+
+'''
 import json
 
 from haf.apihelper import Request, Response, Ids, Expect, SqlInfo
@@ -29,6 +38,9 @@ class BaseCase(object):
 
 
 class PyCase(BaseCase):
+    '''
+    py cases
+    '''
     def __init__(self, module_name, module_path):
         super().__init__()
         self.mark = CASE_MARK_API
@@ -44,6 +56,10 @@ class PyCase(BaseCase):
         self.param = None
 
     def _init_all(self):
+        '''
+        init all py case's needed
+        :return:
+        '''
         self.ids = Ids()
         self.run = CASE_RUN
         self.dependent = []
@@ -76,13 +92,26 @@ class PyCase(BaseCase):
         self.request = temp if temp else Request()
 
     def bind_bench(self, bench_name):
+        '''
+        bind bench with bench name
+        :param bench_name:
+        :return:
+        '''
         self.bench_name = bench_name
         self.generate_log_key()
 
     def generate_log_key(self):
+        '''
+        generate log key to self
+        :return:
+        '''
         self.log_key = self.key = f"{self.bench_name}$%{self.ids.id}.{self.ids.subid}.{self.ids.name}$%"
 
     def deserialize(self):
+        '''
+        return the dict type of pycase
+        :return:
+        '''
         return {
             "ids": self.ids.deserialize(),
             "run": self.run,
@@ -98,6 +127,9 @@ class PyCase(BaseCase):
 
 
 class HttpApiCase(BaseCase):
+    '''
+    http api case
+    '''
     def __init__(self):
         super().__init__()
         self.mark = CASE_MARK_API
@@ -107,6 +139,10 @@ class HttpApiCase(BaseCase):
         self._init_all()
 
     def _init_all(self):
+        '''
+        init all api case needed
+        :return:
+        '''
         self.ids = Ids()
         self.run = CASE_RUN
         self.dependent = []
@@ -140,13 +176,26 @@ class HttpApiCase(BaseCase):
         self.sqlinfo.constructor(args_init)
 
     def bind_bench(self, bench_name):
+        '''
+        bind bench with bench_name
+        :param bench_name:
+        :return:
+        '''
         self.bench_name = bench_name
         self.generate_log_key()
 
     def generate_log_key(self):
+        '''
+        generate log key to self
+        :return:
+        '''
         self.log_key = self.key = f"{self.bench_name}$%{self.ids.id}.{self.ids.subid}.{self.ids.name}$%"
 
     def deserialize(self):
+        '''
+        return dict type of api case
+        :return:
+        '''
         return {
             "ids": self.ids.deserialize(),
             "run": self.run,
@@ -162,6 +211,9 @@ class HttpApiCase(BaseCase):
 
 
 class AppCase(BaseCase):
+    '''
+    app case
+    '''
     def __init__(self):
         super().__init__()
         self.mark = CASE_MARK_APP
@@ -171,6 +223,10 @@ class AppCase(BaseCase):
         self._init_all()
 
     def _init_all(self):
+        '''
+        init all app case's needed
+        :return:
+        '''
         self.ids = AppIds()
         self.run = CASE_RUN
         self.dependent = []
@@ -208,13 +264,26 @@ class AppCase(BaseCase):
             self.stages[stage.id] = stage
 
     def bind_bench(self, bench_name):
+        '''
+        bind bench with bench name
+        :param bench_name:
+        :return:
+        '''
         self.bench_name = bench_name
         self.generate_log_key()
 
     def generate_log_key(self):
+        '''
+        generate log key to self
+        :return:
+        '''
         self.log_key = self.key = f"{self.bench_name}$%{self.ids.id}.{self.ids.subid}.{self.ids.name}$%"
 
     def deserialize(self):
+        '''
+        return dict type of self
+        :return:
+        '''
         return {
             "ids": self.ids.deserialize(),
             "run": self.run,
@@ -230,6 +299,9 @@ class AppCase(BaseCase):
 
 
 class WebCase(BaseCase):
+    '''
+    web case
+    '''
     def __init__(self):
         super().__init__()
         self.mark = CASE_MARK_WEB
@@ -239,6 +311,10 @@ class WebCase(BaseCase):
         self._init_all()
 
     def _init_all(self):
+        '''
+        init all web case's needed
+        :return:
+        '''
         self.ids = WebIds()
         self.run = CASE_RUN
         self.dependent = []
@@ -276,13 +352,26 @@ class WebCase(BaseCase):
             self.stages[stage.id] = stage
 
     def bind_bench(self, bench_name):
+        '''
+        bind bench with bench name
+        :param bench_name:
+        :return:
+        '''
         self.bench_name = bench_name
         self.generate_log_key()
 
     def generate_log_key(self):
+        '''
+        generate log key to self
+        :return:
+        '''
         self.log_key = self.key = f"{self.bench_name}$%{self.ids.id}.{self.ids.subid}.{self.ids.name}$%"
 
     def deserialize(self):
+        '''
+        return dict type of self
+        :return:
+        '''
         return {
             "ids": self.ids.deserialize(),
             "run": self.run,

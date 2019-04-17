@@ -8,6 +8,9 @@ from multiprocessing import Lock as m_lock
 
 
 class TestDecorator:
+    '''
+    test decorate
+    '''
     def __init__(self, name):
         self.name = name
         self.mark = "test"
@@ -25,6 +28,9 @@ test = TestDecorator
 
 
 class SkipDecorator:
+    '''
+    test's skip
+    '''
     def __init__(self, test_item: test=None):
         self.test_item = test_item
         self.test_item.run = False
@@ -39,6 +45,9 @@ skip = SkipDecorator
 
 
 class ParameterizeDecorator:
+    '''
+    parameter decorate
+    '''
     def __init__(self,  params: list=[]):
         self.params = params
         self.mark = "test"
@@ -55,22 +64,33 @@ parameterize = ParameterizeDecorator
 
 
 class Locker:
+    '''
+    locker
+    '''
     def __init__(self, bus_client, key, lock: m_lock=None):
         self.bus_client = bus_client
         self.key = key
         self.local_lock = lock
 
     def get_lock(self):
+        '''
+        get lock from local_lock
+        :return:
+        '''
         if self.local_lock:
             self.local_lock.acquire()
             return
 
     def release_lock(self):
+        '''
+        release lock from local_lock
+        :return:
+        '''
         if self.local_lock:
             self.local_lock.release()
             return
 
-
+# the lock decorator
 def locker(func):
     @functools.wraps(func)
     def lock(self, *args, **kwargs):
@@ -92,6 +112,7 @@ def locker(func):
     return lock
 
 
+# the newlocker: can use with 'with'
 @contextlib.contextmanager
 def new_locker(bus_client, key, lock: m_lock=None):
     locker = Locker(bus_client, key, lock)
