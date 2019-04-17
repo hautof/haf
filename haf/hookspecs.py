@@ -1,5 +1,7 @@
 import pluggy
-
+'''
+hookspecs
+'''
 
 hookspec = pluggy.HookspecMarker("haf")
 

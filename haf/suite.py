@@ -10,6 +10,9 @@ class BaseSuite(object):
 
 
 class HttpApiSuite(BaseSuite):
+    '''
+    http api suite
+    '''
     def __init__(self):
         super().__init__()
         self.name = ""
@@ -23,6 +26,9 @@ class HttpApiSuite(BaseSuite):
 
 
 class AppSuite(BaseSuite):
+    '''
+    app suite
+    '''
     def __init__(self):
         super().__init__()
         self.name = ""

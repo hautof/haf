@@ -4,6 +4,9 @@ from haf.config import *
 
 
 class WebBasePage:
+    '''
+    web base page
+    '''
     DEFAULT_TIMEOUT = 3
 
     def __init__(self, driver):

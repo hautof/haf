@@ -1,5 +1,15 @@
 # encoding='utf-8'
-import functools
+'''
+file name : sigleton
+description : the sigleton defined
+others:
+    usage:
+    1, class A(metaclass=SingletonType):
+    2, class B(Singleton)
+    3, @sigleton
+       class C(object):
+
+'''
 
 
 # this is metaclass

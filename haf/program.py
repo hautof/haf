@@ -23,6 +23,7 @@ from haf.loader import Loader
 from haf.logger import Logger
 from haf.recorder import Recorder
 from haf.runner import Runner
+from haf.signal import Signal
 from haf.utils import Utils
 from haf.pluginmanager import PluginManager, plugin_manager
 
@@ -60,7 +61,6 @@ class Program(object):
         for x in range(count):
             loader = Loader(bus_client, self.loader_recorder_lock, self.args)
             loader.start()
-            time.sleep(0.1)
 
     def _start_runner(self, count: int, log_dir: str, bus_client: BusClient):
         '''
@@ -72,46 +72,73 @@ class Program(object):
         for x in range(count):
             runner = Runner(log_dir, bus_client, self.multi_process_locks, self.args)
             runner.start()
-        time.sleep(0.5)
 
     def _start_recorder(self, bus_client: BusClient, count: int=1, log_dir: str="", time_str: str=""):
+        '''
+        start recorder
+        :param bus_client:
+        :param count:
+        :param log_dir:
+        :param time_str:
+        :return:
+        '''
         recorder = Recorder(bus_client, count, self.case_name, time_str, log_dir, self.args.report_template, self.loader_recorder_lock, self.args)
         recorder.start()
-        time.sleep(0.1)
 
     def _init_logging_module(self, args):
+        '''
+        init logging module
+        :param args:
+        :return:
+        '''
         logging.basicConfig(level=logging.INFO if not args.debug else logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
         pass
 
     def _init_system_logger(self, log_dir: str, bus_client: BusClient):
+        '''
+        init system logger
+        :param log_dir:
+        :param bus_client:
+        :return:
+        '''
         log = Logger(self.case_name, self.time_str, log_dir, bus_client, self.args)
         log.start()
-        time.sleep(0.1)
 
     def _init_system_lock(self, args):
+        '''
+        generate some locker
+        :param args:
+        :return:
+        '''
         self.loader_recorder_lock = m_lock()
         self.multi_process_locks = [m_lock() for x in range(4)]
         if self.bus_client.get_case_count().empty():
             self.bus_client.get_case_count().put(0)
 
     def _bus_client(self, args):
+        '''
+        init bus client
+        :param args:
+        :return:
+        '''
         if isinstance(args.bus_server, list):
             self.bus_client = BusClient(args.bus_server[1], args.bus_server[2], args.bus_server[0])
         elif args.bus_server_port:
             self.bus_client = BusClient(None, args.bus_server_port, None)
         else:
             self.bus_client = BusClient()
+        self.params_loader = self.bus_client.get_param()
 
     def start_main(self):
-        self.bus_client.get_param().put(SIGNAL_START)
+        self.params_loader.put(Signal("main", SIGNAL_START))
 
     def stop_main(self):
-        self.bus_client.get_param().put(SIGNAL_STOP)
+        self.params_loader.put(Signal("main", SIGNAL_STOP))
 
     def put_loader_msg(self, args):
         if args.case:
             for arg in args.case:
-                self.bus_client.get_param().put({"file_name": arg})
+                self.params_loader.put({"file_name": arg})
 
     def _start_web_server(self, args):
         plugin_manager.start_web_server(args, self.bus_client)
@@ -180,24 +207,42 @@ class Program(object):
 
     def wait_end_signal(self, args):
         try:
+            time.sleep(2)
             system_signal = self.bus_client.get_system()
             while True:
                 if not args.console:
                     if not system_signal.empty():
                         self.signal = system_signal.get()
-                        if self.signal == SIGNAL_RECORD_END or self.signal == SIGNAL_STOP:
-                            logger.info("main -- stop")
-                            system_signal.put(SIGNAL_RECORD_END)
-                            system_signal.put(SIGNAL_BUS_END)
+                        logger.info(f"program signal {self.signal}")
+                        signal = self.signal.signal if isinstance(self.signal, Signal) else None
+                        # check the end signal from recorder to main
+                        if signal == SIGNAL_RECORD_END or signal == SIGNAL_STOP:
+                            if not args.local_logger:
+                                while True:
+                                  if not system_signal.empty():
+                                      signal_logger = system_signal.get()
+                                      logger.info(f"program signal {signal_logger}")
+                                      signal_logger = signal_logger.signal if isinstance(signal_logger, Signal) else None
+                                      # check the logger signal from logger to main
+                                      if signal_logger == SIGNAL_LOGGER_END:
+                                          logger.info("main -- stop")
+                                          system_signal.put(Signal("main", SIGNAL_RECORD_END))
+                                          system_signal.put(Signal("main", SIGNAL_BUS_END))
+                                          break
+                            # if use local logger, just end the main program
+                            else:
+                                logger.info("main -- stop")
+                                system_signal.put(Signal("main", SIGNAL_RECORD_END))
+                                system_signal.put(Signal("main", SIGNAL_BUS_END))
                             break
                     time.sleep(0.1)
                 else:
                     cmd = input(f"haf-{PLATFORM_VERSION}# ")
                     if self._run_cmd(cmd):
                         break
-            time.sleep(1)
+            time.sleep(0.1)
         except KeyboardInterrupt as key_inter:
-            self.bus_client.get_param().put(SIGNAL_STOP)
+            self.params_loader.put(Signal("main", SIGNAL_STOP))
 
     # TODO: Here need CMDER to support cmd command ...
     def _run_cmd(self, cmd):

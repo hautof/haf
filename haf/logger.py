@@ -4,11 +4,15 @@ import time, logging
 from multiprocessing import Process
 from haf.busclient import BusClient
 from haf.config import *
+from haf.signal import Signal
 
 logger = logging.getLogger(__name__)
 
 
 class Logger(Process):
+    '''
+    Logger
+    '''
     def __init__(self, case_name: str, time_str: str, log_dir: str, bus_client: BusClient, args: tuple):
         super().__init__()
         self.daemon = True
@@ -20,6 +24,10 @@ class Logger(Process):
         self.time_str = time_str
 
     def reconnect_bus(self):
+        '''
+        need reconnect bus by self.bus's infos
+        :return:
+        '''
         self.bus_client = BusClient(self.bus_client.domain, self.bus_client.port, self.bus_client.auth_key)
 
     def run(self):
@@ -35,22 +43,45 @@ class Logger(Process):
         # self.bus_client = BusClient()
         try:
             log_queue = self.bus_client.get_log()
+            logger_end = self.bus_client.get_logger_end()
             while True:
-                if log_queue.empty():
+                if not logger_end.empty():
+                    logger_signal = logger_end.get()
+                    # check logger end singal to stop logger, from recorder to logger
+                    if isinstance(logger_signal, Signal) and logger_signal.signal == SIGNAL_LOGGER_END:
+                        while True:
+                            if log_queue.empty():
+                                break
+                            log = log_queue.get()
+                            self.log_handler(log)
+                        self.end_handler()
+                        break
+                elif log_queue.empty():
                     time.sleep(0.001)
                     continue
-                log = log_queue.get()
-                self.log_handler(log)
+                else:
+                    log = log_queue.get()
+                    self.log_handler(log)
         except KeyboardInterrupt as key_e:
             print(BANNER_STRS_EXIT)
 
     def split_log(self, log):
+        '''
+        split origin log msg
+        :param log:
+        :return:
+        '''
         try:
             return log.rsplit("$%", 2)
         except Exception as ee:
             return f"log$%error$%{log}"
 
     def log_print(self, log):
+        '''
+        to print the log with format
+        :param log:
+        :return:
+        '''
         if self.args.nout:
             return
         logger_name = log.get("logger_name")
@@ -78,9 +109,14 @@ class Logger(Process):
             logger.error(f"<{process}> [{logger_name}]\33[31m | {msg}\33[0m")
             logger.error(f"<{process}> [{logger_name}]\33[31m <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \33[0m")
         elif level=="critical":
-            logger.critical(f"\33[5m{msg}\33[0m")
+            logger.critical(f"\33[5m{log}\33[0m")
 
     def log_handler(self, log):
+        '''
+        handler log here
+        :param log:
+        :return:
+        '''
         self.log_print(log)
         log = log.get("msg")
         try:
@@ -122,6 +158,13 @@ class Logger(Process):
         self.write("error", temp1, msg)
 
     def write(self, dir, filename, msg):
+        '''
+        write log to filename's file
+        :param dir:
+        :param filename:
+        :param msg:
+        :return:
+        '''
         msg = f"{self.now}{msg}\n"
         dir = f"{self.log_dir}/{self.case_name}/{self.time_str}/{dir}"
         if not os.path.exists(dir):
@@ -150,8 +193,10 @@ class Logger(Process):
         return timenow
 
     def end_handler(self):
-        result_handler = self.bus_client.get_result()
-        result_handler.put(SIGNAL_RESULT_END)
-        case_handler = self.bus_client.get_case()
-        case_handler.put(SIGNAL_CASE_END)
+        '''
+        when logger end, send signal logger end to main
+        :return:
+        '''
+        logger_handler = self.bus_client.get_system()
+        logger_handler.put(Signal(self.pid, SIGNAL_LOGGER_END))
 

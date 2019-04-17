@@ -10,6 +10,13 @@ from haf import hookspecs, lib
 
 
 class PluginManager(object):
+    '''
+    plugin manager
+    now have : add_option before main()
+            : load_from_file at loader
+            : publish_to_sql after test
+            : start_web_server at program begining
+    '''
     def __init__(self):
         self.get_plugin_manager()
 

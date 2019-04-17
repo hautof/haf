@@ -18,6 +18,7 @@ from haf.mark import locker, new_locker
 from haf.result import HttpApiResult, AppResult, WebResult
 from haf.suite import HttpApiSuite, AppSuite
 from haf.utils import Utils, Signal, SignalThread
+from haf.signal import Signal as SignalTemp
 from haf.webhelper import *
 import traceback
 import asyncio
@@ -53,6 +54,11 @@ class Runner(Process):
         self.bench = self.get_bench(case)
 
     def get_bench(self, case: BaseCase):
+        '''
+        init bench, if exist, get bench
+        :param case:
+        :return:
+        '''
         bench = self.benchs.get(case.bench_name, None)
         if bench is None :
             if isinstance(case, HttpApiCase):
@@ -70,23 +76,47 @@ class Runner(Process):
 
     @locker
     def put_result(self,  key: str, lock: m_lock=None, result: HttpApiResult=HttpApiResult()):
+        '''
+        put result to recorder, from runner to recorder, need lock
+        :param key:
+        :param lock:
+        :param result:
+        :return:
+        '''
         logger.info(f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}", __name__)
         self.result_handler_queue.put(result)
 
     @locker
     def put_web_message(self, key: str, lock: m_lock=None):
+        '''
+        put web message to web server
+        :param key:
+        :param lock:
+        :return:
+        '''
         if self.web_queue.full():
             self.web_queue.get()
         self.web_queue.put(self.runner)
 
     def put_case_back(self, key:str, case):
+        '''
+        put can not run case to loader to republish, from runner to loader, need lock
+        :param key:
+        :param case:
+        :return:
+        '''
         logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name} for dependent : {case.dependent}", __name__)
         with new_locker(self.bus_client, key, self.locks[1]):
             self.case_back_queue.put(case)
         import random
-        time.sleep(random.randint(1,2))
+        time.sleep(random.randint(0,1))
 
     def result_handler(self, result):
+        '''
+        result handler
+        :param result:
+        :return:
+        '''
         if isinstance(result, HttpApiResult) or isinstance(result, AppResult) or isinstance(result, WebResult):
             if result.case.run == CASE_SKIP:
                 self.runner["skip"] += 1
@@ -111,6 +141,10 @@ class Runner(Process):
         self.put_web_message("web", self.locks[3])
 
     def signal_service(self):
+        '''
+        signal service to make runner run without enough cases
+        :return:
+        '''
         self.signal = Signal()
         self.st = SignalThread(self.signal, 0.1)
         self.st.start()
@@ -120,6 +154,12 @@ class Runner(Process):
             self.st._stop()
 
     def run_loop(self, cases):
+        '''
+        TODO: need use aiohttp to make it work
+        run loop, sync
+        :param cases:
+        :return:
+        '''
         self.loop = asyncio.get_event_loop()
         results = self.loop.run_until_complete(self.run_cases(cases))
         for result in results:
@@ -133,7 +173,7 @@ class Runner(Process):
             self.loop = None
             logger.bind_busclient(self.bus_client)
             logger.bind_process(self.pid)
-            logger.set_output(self.args.local_logger, self.args.nout)
+            logger.set_output(self.args.local_logger, self.args.nout, self.args.debug)
             logger.info(f"{self.runner_key} start runner", __name__)
 
             self.web_queue = self.bus_client.get_publish_runner()
@@ -150,7 +190,7 @@ class Runner(Process):
                 if not self.case_handler_queue.empty() :
                     with new_locker(self.bus_client, "case_runner", self.locks[0]):
                         case = self.case_handler_queue.get()
-                    if case == SIGNAL_CASE_END:
+                    if isinstance(case, SignalTemp) and case.signal == SIGNAL_CASE_END:
                         case_end = True
                     if isinstance(case, HttpApiCase):
                         cases.append(case)
@@ -176,6 +216,11 @@ class Runner(Process):
             raise FailRunnerException
 
     async def run_cases(self, local_cases):
+        '''
+        run cases
+        :param local_cases:
+        :return:
+        '''
         done, pending = await asyncio.wait([self.run_case(local_case) for local_case in local_cases])
         results = []
         for r in done:
@@ -183,6 +228,11 @@ class Runner(Process):
         return results
 
     async def run_case(self, local_case):
+        '''
+        run case
+        :param local_case:
+        :return:
+        '''
         if isinstance(local_case, HttpApiCase):
             result = HttpApiResult()
         elif isinstance(local_case, AppCase):
@@ -230,9 +280,13 @@ class Runner(Process):
             return result
 
     def end_handler(self):
+        '''
+        send result end and case end signal to main/loader, from runner to main
+        :return:
+        '''
         logger.info(f"{self.runner_key} : end runner", __name__)
-        self.result_handler_queue.put(SIGNAL_RESULT_END)
-        self.case_handler_queue.put(SIGNAL_CASE_END)
+        self.result_handler_queue.put(SignalTemp(self.pid, SIGNAL_RESULT_END))
+        self.case_handler_queue.put(SignalTemp(self.pid, SIGNAL_CASE_END))
 
 
 class BaseRunner(object):
@@ -240,6 +294,11 @@ class BaseRunner(object):
         self.bench = bench
 
     def check_case_run_here(self, case):
+        '''
+        check case can run here or not
+        :param case:
+        :return:
+        '''
         logger.debug(f"Base Runner check case run here {case.dependent}", __name__)
         if not case.dependent or len(case.dependent) == 0:
             return True
@@ -256,6 +315,11 @@ class BaseRunner(object):
             return False
 
     def check_case_filter(self, case):
+        '''
+        check case is in the filter
+        :param case:
+        :return:
+        '''
         logger.debug(f"case <{case.ids.name}> check in [{self.bench.args.filter_case}]", __name__)
         filter_cases = self.bench.args.filter_case
         if filter_cases is None or filter_cases=='None':
@@ -275,9 +339,19 @@ class BaseRunner(object):
         return case.error == CASE_ERROR
 
     def get_dependence_case_from_bench(self, dependent):
+        '''
+        get dependency
+        :param dependent:
+        :return:
+        '''
         return self.bench.cases.get(dependent)
 
     def reuse_with_dependent(self, new_attr):
+        '''
+        TODO: not complete
+        :param new_attr:
+        :return:
+        '''
         begin = "<@begin@>"
         end = "<@end@>"
         if isinstance(new_attr, str):
@@ -534,6 +608,14 @@ class AppRunner(BaseRunner):
         return result
 
     def run_operation(self, page, operation, paths, info):
+        '''
+        run the appium stages
+        :param page:
+        :param operation:
+        :param paths:
+        :param info:
+        :return:
+        '''
         if  operation== OPERATION_APP_CLICK:
             page.click(paths)
         elif operation == OPERATION_APP_SENDKEYS:
@@ -677,6 +759,14 @@ class WebRunner(BaseRunner):
             return result
 
     def run_operation(self, page, operation, paths, info):
+        '''
+        run the appium stages
+        :param page:
+        :param operation:
+        :param paths:
+        :param info:
+        :return:
+        '''
         if  operation== OPERATION_WEB_CLICK:
             page.click(paths)
         elif operation == OPERATION_WEB_SENDKEYS:

@@ -1,4 +1,9 @@
 # encoding='utf-8'
+'''
+file name : helper
+desc : show help informations
+'''
+
 import os, sys
 from haf.config import *
 
@@ -95,6 +100,11 @@ class Helper(object):
         --sql-publish-db SQL_PUBLISH_DB, -sp_db SQL_PUBLISH_DB
                                 sql publish db config, format like :
                                 host:port@username:password@database)
+        --no-output NO_OUTPUT, -nout NOUT
+                                no output
+        --local-logger LOCAL_LOGGER, -llog LLOG
+                                local logger writer
+        ---filter TEST_FILTER, -t
         """
 
         print(run_help)

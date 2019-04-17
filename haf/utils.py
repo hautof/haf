@@ -451,7 +451,7 @@ class SignalThread(Thread):
 
     def run(self):
         while True:
-            logger.debug(f"signal of {self.signal.signal}", __name__)
+            # logger.debug(f"signal of {self.signal.signal}", __name__)
             self.signal.change_status()
             time.sleep(self.time)
 
