@@ -234,7 +234,7 @@ class Recorder(Process):
         :return:
         '''
         logger.debug(f"publish results now...", __name__)
-        if self.args.web_server:
+        if hasattr(self.args, "web_server") and self.args.web_server:
             if self.publish_result.full():
                 self.publish_result.get()
             self.publish_result.put(self.results)

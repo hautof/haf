@@ -192,7 +192,7 @@ class Loader(Process):
         :param lock:
         :return:
         '''
-        if self.args.web_server:
+        if hasattr(self.args, "web_server") and self.args.web_server:
             if self.web_queue.full():
                 self.web_queue.get()
             self.web_queue.put(self.loader)
