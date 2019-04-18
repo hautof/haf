@@ -86,8 +86,8 @@ class MysqlTool(object):
         key = kwargs.get("key", "database$%common$%")
         commit = kwargs.get("commit", False)
         run_background = kwargs.get("run_background", False)
-        logger.debug(sqlconfig)
-        logger.debug(sqlconfig.deserialize() if sqlconfig else None)
+        logger.debug(sqlconfig.deserialize() if sqlconfig else None, __name__)
+        logger.debug(sqlscript, __name__)
         sqlconfig = sqlconfig
         self.connect_msql = None
 
@@ -142,6 +142,7 @@ class MysqlTool(object):
             # some sqlscript need commit to make it work, like update, delete, insert
             if commit:
                 self.connect_msql.commit()
+            logger.debug(data, __name__)
             return data
         except Exception as e:
             logger.error(str(e), __name__)

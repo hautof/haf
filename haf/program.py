@@ -227,19 +227,22 @@ class Program(object):
                                       if signal_logger == SIGNAL_LOGGER_END:
                                           logger.info("main -- stop")
                                           system_signal.put(Signal("main", SIGNAL_RECORD_END))
-                                          system_signal.put(Signal("main", SIGNAL_BUS_END))
+                                          system_signal.put(Signal("main", SIGNAL_LOGGER_END))
                                           break
                             # if use local logger, just end the main program
                             else:
                                 logger.info("main -- stop")
                                 system_signal.put(Signal("main", SIGNAL_RECORD_END))
-                                system_signal.put(Signal("main", SIGNAL_BUS_END))
+                                system_signal.put(Signal("main", SIGNAL_LOGGER_END))
                             break
                     time.sleep(0.1)
                 else:
                     cmd = input(f"haf-{PLATFORM_VERSION}# ")
                     if self._run_cmd(cmd):
                         break
+            if args.only_bus:
+                logger.info("main - wait for other process end !")
+                time.sleep(3)
             time.sleep(0.1)
         except KeyboardInterrupt as key_inter:
             self.params_loader.put(Signal("main", SIGNAL_STOP))
