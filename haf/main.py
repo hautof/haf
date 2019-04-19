@@ -127,6 +127,7 @@ def main_args():
                     args.filter_case = args.filter_case.split(",") if config_run.get("filter_case") is None and isinstance(args.filter_case, str) else config_run.get("filter_case")
 
                     config_run_report = config_run.get("report")
+                    args.report_html = config_run_report.get("report_html", True)
                     args.report_output_dir = config_run_report.get("report_path")
                     args.report_template = config_run_report.get("report_template", None)
                     args.report_export_template = config_run_report.get("report_export_template", None)
