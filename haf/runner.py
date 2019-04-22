@@ -109,7 +109,7 @@ class Runner(Process):
         with new_locker(self.bus_client, key, self.locks[1]):
             self.case_back_queue.put(case)
         import random
-        time.sleep(random.randint(0,1))
+        time.sleep(random.random())
 
     def result_handler(self, result):
         '''
@@ -146,7 +146,7 @@ class Runner(Process):
         :return:
         '''
         self.signal = Signal()
-        self.st = SignalThread(self.signal, 0.1)
+        self.st = SignalThread(self.signal, 0.2)
         self.st.start()
     
     def stop_signal(self):
@@ -389,6 +389,10 @@ class PyRunner(BaseRunner):
         result = HttpApiResult()
         self.key = case.log_key
         result.on_case_begin()
+
+        if not self.check_case_run_here(case) :
+            result.on_case_end()
+            return [CASE_CAN_NOT_RUN_HERE, result]
         if not self.check_case_run(case): # not False is skip
             result.case = case
             result.on_case_end()

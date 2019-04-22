@@ -91,6 +91,8 @@ or
     {
       "config":{
         "name": "test",
+        "debug" : false,
+        "bus_server_port": 8801,
         "run": {
           "sql_publish": {
             "id": 1,
@@ -113,7 +115,9 @@ or
             "auth_key": ""
           },
           "report": {
-            "report_path": "./data/report.html"
+            "report_path": "./data/report.html",
+            "report_template": "base",
+            "report_export_path": "email"
           },
           "case": [
             {
@@ -270,6 +274,32 @@ or
 ```
 
 ![sql](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/png/haf-publish.png)
+
+
+### now hafweb support 
+
+```bash
+    tsbx# pip install hafweb -U
+```
+
+
+```python
+    python -m hafweb -ss=root:root@localhost:3306@haf_publish -p=8081
+```
+
+- default page
+
+   http://localhost:8081/
+
+- index page
+   
+   http://localhost:8081/index
+   
+- today page
+
+   http://localhost:8081/today
+   
+- others support looking at hafweb project
 
 
 ### web api server suport
