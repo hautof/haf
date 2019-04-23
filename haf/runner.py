@@ -86,7 +86,6 @@ class Runner(Process):
         logger.info(f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}", __name__)
         self.result_handler_queue.put(result)
 
-    @locker
     def put_web_message(self, key: str, lock: m_lock=None):
         '''
         put web message to web server
@@ -94,9 +93,11 @@ class Runner(Process):
         :param lock:
         :return:
         '''
-        if self.web_queue.full():
-            self.web_queue.get()
-        self.web_queue.put(self.runner)
+
+        with new_locker(self.bus_client, key, lock):
+            if self.web_queue.full():
+                self.web_queue.get()
+            self.web_queue.put(self.runner)
 
     def put_case_back(self, key:str, case):
         '''
@@ -190,21 +191,17 @@ class Runner(Process):
                 if not self.case_handler_queue.empty() :
                     with new_locker(self.bus_client, "case_runner", self.locks[0]):
                         case = self.case_handler_queue.get()
+                        logger.debug(f"get case from loader {case}", __name__)
                     if isinstance(case, SignalTemp) and case.signal == SIGNAL_CASE_END:
                         case_end = True
-                    if isinstance(case, HttpApiCase):
+                    elif isinstance(case, (HttpApiCase, AppCase, PyCase, WebCase)):
                         cases.append(case)
-
-                    elif isinstance(case, (AppCase, PyCase, WebCase)):
-                        cases.append(case)
-
                     logger.debug(f"cases' length is {len(cases)}, and end is {case}", __name__)
 
-                if len(cases) > 0 and (len(cases) >= 10 or case_end or self.signal.signal):
-                    logger.debug(f"cases' length is {len(cases)}", __name__)
+                if len(cases) > 0 and (len(cases) >= 1 or case_end or self.signal.signal):
+                    logger.debug(f"cases' length is {len(cases)}, case_end is {case_end}, signal is {self.signal.signal}", __name__)
                     self.run_loop(cases)
                     cases = []
-
                 if case_end:
                     break
                 time.sleep(0.01)
