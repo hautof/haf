@@ -95,7 +95,10 @@ class BaseLogger(metaclass=SingletonType):
         self.log_output(msg_now, msg)
         dir = f"./data/log/"
         if not os.path.exists(dir):
-            os.makedirs(dir)
+            try:
+                os.makedirs(dir)
+            except Exception as error:
+                pass
         full_name = f"{dir}/log.log"
         try:
             with open(full_name, 'a+') as f:

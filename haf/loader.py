@@ -59,7 +59,8 @@ class Loader(Process):
             if self.args.nout:
                 cb = ChargingBar(max=100)
             complete_case_count = 0
-
+            show_count = []
+            all_count = []
             # check the params
             while True:
                 temp = self.get_parameter()
@@ -68,6 +69,8 @@ class Loader(Process):
                     while True:
                         if not self.case_count.empty():
                             complete_case_count = self.case_count.get()
+                            if complete_case_count not in all_count:
+                                all_count.append(complete_case_count)
                         else:
                             pass
                         if self.args.nout:
@@ -79,7 +82,9 @@ class Loader(Process):
                             self.put_case("case", None, self.case_back_queue.get())
 
                         if self.case_queue.empty() and self.case_back_queue.empty():
-                            logger.debug(f"complete case count check here {complete_case_count} == {self.true_case_count}", __name__)
+                            if complete_case_count not in show_count:
+                                logger.debug(f"complete case count check here {complete_case_count} == {self.true_case_count}", __name__)
+                                show_count.append(complete_case_count)
                             if complete_case_count==self.true_case_count:
                                 if self.args.nout:
                                     cb.finish()
@@ -199,7 +204,7 @@ class Loader(Process):
 
     def put_case(self, key: str, lock, case):
         '''
-        put case to case queue, from loadert to runners
+        put case to case queue, from loader to runners
         :param key:
         :param lock:
         :param case:
