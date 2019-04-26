@@ -32,7 +32,10 @@ class Request(object):
         header = inputs.get("request_header")
         self.header = json.loads(header) if isinstance(header, str) else header
         data = inputs.get("request_data")
-        self.data = json.loads(data) if isinstance(data, str) else data
+        try:
+            self.data = json.loads(data) if isinstance(data, str) else data
+        except Exception:
+            self.data = data
         method = inputs.get("method", CASE_HTTP_API_METHOD_GET)
         if str(method) == "get":
             self.method = CASE_HTTP_API_METHOD_GET

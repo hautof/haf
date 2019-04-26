@@ -175,36 +175,69 @@ class SqlServerTool(object):
         :param kwargs, include key of testcase, commit of sqlscript, run_background
         :return return the result of sql execute
         '''
-        # TODO:
-        # need extend like MysqlTool
         import pymssql
         key = kwargs.get("key", "database$%common$%")
-
+        commit = kwargs.get("commit", False)
+        run_background = kwargs.get("run_background", False)
+        logger.debug(sqlconfig.deserialize() if sqlconfig else None, __name__)
+        logger.debug(sqlscript, __name__)
         sqlconfig = sqlconfig
         self.connect_msql = None
+
         try:
+
             if "dictcursor" in kwargs.keys() and kwargs.get("dictcursor") is True:
-                self.connect_msql = pymssql.connect(sqlconfig.host, sqlconfig.username, sqlconfig.password,
-                                                sqlconfig.database)
+                self.connect_msql = pymssql.connect(host=sqlconfig.host, port=sqlconfig.port, user=sqlconfig.username,
+                                                    password=sqlconfig.password, database=sqlconfig.database)
+                cursor_m = self.connect_msql.cursor(as_dict=True)
             else:
-                self.connect_msql = pymssql.connect(sqlconfig.host, sqlconfig.username, sqlconfig.password,
-                                                sqlconfig.database)
-            cursor_m = self.connect_msql.cursor()
+                self.connect_msql = pymssql.connect(host=sqlconfig.host, port=sqlconfig.port, user=sqlconfig.username,
+                                                    password=sqlconfig.password, database=sqlconfig.database)
+                cursor_m = self.connect_msql.cursor()
+
             data = []
+            # here if sqlscript is list type, must execute every
+            # script and append the result to the end_result
             if isinstance(sqlscript, list):
                 for ss in sqlscript:
-                    if ss != None and ss != "None" and "None" not in ss and len(ss) > 5:
-                        logger.info(f"{key} [{sqlconfig.host}] start execute {ss}", __name__)
+                    # valued sql script must not be None and length > 5
+                    if ss != None and ss != "None" and len(ss) > 5:
+                        if not run_background:
+                            logger.info(f"{key} start {sqlconfig.host} execute {ss}", __name__)
                         cursor_m.execute(ss)
                         data.append(cursor_m.fetchall())
-                        logger.info(f"{key} result {str(data)}", __name__)
+                        if not run_background:
+                            logger.info(f"{key} result {str(data)}", __name__)
+                    # if sql script is tuple type, means to be 2 parts: 1 is the script, 2 is the parameter
+                    if isinstance(ss, tuple) and len(ss) > 2:
+                        if not run_background:
+                            logger.info(f"{key} tuple start {sqlconfig.host} execute {ss}", __name__)
+                        cursor_m.execute(ss[0], ss[1])
+                        data.append(cursor_m.fetchall())
+                        if not run_background:
+                            logger.info(f"{key} result {str(data)}", __name__)
+            # if the sqlscript is the string type, can just run it
             elif isinstance(sqlscript, str):
                 if sqlscript != None and sqlscript != "None" and "None" not in sqlscript and len(sqlscript) > 5:
-                    logger.info(f"{key} start [{sqlconfig.host}] execute {sqlscript}", __name__)
+                    if not run_background:
+                        logger.info(f"{key} start {sqlconfig.host} execute {sqlscript}", __name__)
                     cursor_m.execute(sqlscript)
                     data.append(cursor_m.fetchall())
+                    if not run_background:
+                        logger.info(f"{key} result {str(data)}", __name__)
+            # if the sqlscript is the tuple type and we do not know the length,
+            # just execute the *sqlscript by cursor.execute()
+            elif isinstance(sqlscript, tuple):
+                if not run_background:
+                    logger.info(f"{key} start {sqlconfig.host} execute {sqlscript}", __name__)
+                cursor_m.execute(*sqlscript)
+                data.append(cursor_m.fetchall())
+                if not run_background:
                     logger.info(f"{key} result {str(data)}", __name__)
-
+            # some sqlscript need commit to make it work, like update, delete, insert
+            if commit:
+                self.connect_msql.commit()
+            logger.debug(data, __name__)
             return data
         except Exception as e:
             logger.error(str(e), __name__)

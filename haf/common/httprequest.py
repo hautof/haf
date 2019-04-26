@@ -66,15 +66,26 @@ class HttpController(object):
         key = kwargs.get("key")
         try:
             url = url + HttpController.getdata(data)
+
             if "application/json" in headers.values():
-                data = bytes(json.dumps(data), encoding='utf-8')
+                if "using_data" in kwargs:
+                    data = bytes(json.dumps(data if data is not None else {}), encoding='utf-8')
+                elif "using_origin_data" in kwargs:
+                    pass
+                else:
+                    data = None
             else:
-                data = bytes(urllib.parse.urlencode(data), encoding='utf-8')
+                if "using_data" in kwargs:
+                    data = bytes(urllib.parse.urlencode(data), encoding='utf-8')
+                elif "using_origin_data" in kwargs:
+                    pass
+                else:
+                    data = None
 
             logger.info(f'{key} [url] {url}', __name__)
 
             # using requests to Request the url with headers and method get
-            request = ur.Request(url=url, data=data if "using_data" in kwargs else None, headers=headers)
+            request = ur.Request(url=url, data=data, headers=headers)
             if headers is not None:
                 for key in headers.keys():
                     request.add_header(key, headers[key])
