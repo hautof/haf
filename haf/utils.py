@@ -304,35 +304,69 @@ class Utils(object):
         '''
         key = kwargs.get("key")
 
-        header = request.header
-        data = request.data
-        method = request.method
-        url = request.url
+        session = kwargs.get("session")
 
-        response = Response()
-        result = None
-        if method == CASE_HTTP_API_METHOD_GET:
-            result = HttpController.get(url, data, header, **kwargs)
-        elif method == CASE_HTTP_API_METHOD_POST:
-            result = HttpController.post(url, data, header)
-        if method == CASE_HTTP_API_METHOD_PUT:
-            result = HttpController.put(url, data, header)
+        if session :
+            import requests
+            from requests import Response as rResponse
+            if isinstance(session, requests.Session):
+                header = request.header
+                data = request.data
+                method = request.method
+                url = request.url
 
-        logger.info("{} {}".format(key, result), __name__)
-        if isinstance(result, HTTPResponse):
-            response.header = result.headers
-            try:
-                response.body = json.loads(result.read())
-            except :
-                response.body = result.read()
-            response.code = result.code
-        elif isinstance(result,urllib.request.URLError) or isinstance(result, urllib.request.HTTPError) or isinstance(result, urllib.request.HTTPHandler):
-            response.body =  {}
-            response.code = result.code if hasattr(result, "code") else None
-            response.header = result.info() if hasattr(result, "info") else None
+                response = Response()
+                result = None
+                if method == CASE_HTTP_API_METHOD_GET:
+                    result = session.get(url, data=data, headers=header)
+                elif method == CASE_HTTP_API_METHOD_POST:
+                    result = session.post(url, data=data, headers=header)
 
-        logger.info(f"{key} {result}", __name__)
-        return response
+                logger.info("{} {}".format(key, result), __name__)
+                if isinstance(result, rResponse):
+                    response.header = result.headers
+                    try:
+                        response.body = json.loads(result.text)
+                    except:
+                        response.body = result.text
+                    response.code = result.status_code
+                elif isinstance(result, (requests.HTTPError, requests.RequestException, requests.ConnectionError)):
+                    response.body = {}
+                    response.code = result.code if hasattr(result, "code") else None
+                    response.header = result.info() if hasattr(result, "info") else None
+
+                logger.info(f"{key} {result}", __name__)
+                return response
+        else:
+            header = request.header
+            data = request.data
+            method = request.method
+            url = request.url
+
+            response = Response()
+            result = None
+            if method == CASE_HTTP_API_METHOD_GET:
+                result = HttpController.get(url, data, header, **kwargs)
+            elif method == CASE_HTTP_API_METHOD_POST:
+                result = HttpController.post(url, data, header)
+            if method == CASE_HTTP_API_METHOD_PUT:
+                result = HttpController.put(url, data, header)
+
+            logger.info("{} {}".format(key, result), __name__)
+            if isinstance(result, HTTPResponse):
+                response.header = result.headers
+                try:
+                    response.body = json.loads(result.read())
+                except :
+                    response.body = result.read()
+                response.code = result.code
+            elif isinstance(result,urllib.request.URLError) or isinstance(result, urllib.request.HTTPError) or isinstance(result, urllib.request.HTTPHandler):
+                response.body =  {}
+                response.code = result.code if hasattr(result, "code") else None
+                response.header = result.info() if hasattr(result, "info") else None
+
+            logger.info(f"{key} {result}", __name__)
+            return response
 
     @staticmethod
     def get_datetime_now():
