@@ -182,6 +182,11 @@ def main_args():
                         sys.exit(-2)
                 else:
                     args.case.append(path)
+
+        # here filter not in config
+        if isinstance(args.filter_case, str):
+            args.filter_case = args.filter_case.split(',')
+
         print(args)
 
         main_program = Program()
