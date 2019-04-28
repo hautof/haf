@@ -46,9 +46,9 @@ class Utils(object):
             data = func_obj.connect_execute(sqlconfig, sqlscript, **kwargs)
             return data
         except Exception as e:
-            logger.info(f"{key} {e}", __name__)
+            logger.error(f"{key} {e}", __name__)
         finally:
-            logger.info(f"{key} {func_obj}", __name__)
+            logger.info(f"{key} sql result : {data}", __name__)
             if func_obj is not None:
                 func_obj.close()
 
@@ -335,7 +335,7 @@ class Utils(object):
                     response.code = result.code if hasattr(result, "code") else None
                     response.header = result.info() if hasattr(result, "info") else None
 
-                logger.info(f"{key} {result}", __name__)
+                logger.info(f"{key} response is {response.deserialize()}", __name__)
                 return response
         else:
             header = request.header
@@ -365,7 +365,7 @@ class Utils(object):
                 response.code = result.code if hasattr(result, "code") else None
                 response.header = result.info() if hasattr(result, "info") else None
 
-            logger.info(f"{key} {result}", __name__)
+            logger.info(f"{key} response is {response.deserialize()}", __name__)
             return response
 
     @staticmethod
