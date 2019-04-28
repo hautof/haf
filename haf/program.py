@@ -27,7 +27,7 @@ from haf.signal import Signal
 from haf.utils import Utils
 from haf.pluginmanager import PluginManager, plugin_manager
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -91,7 +91,7 @@ class Program(object):
         :param args:
         :return:
         '''
-        logging.basicConfig(level=logging.INFO if not args.debug else logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+        logging.basicConfig(level=logging.DEBUG if not args.debug else logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
         pass
 
     def _init_system_logger(self, log_dir: str, bus_client: BusClient):

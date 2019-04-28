@@ -322,7 +322,7 @@ class BaseRunner(object):
         if filter_cases is None or filter_cases=='None':
             return True
         elif isinstance(filter_cases, list):
-            return case.name in filter_cases
+            return case.ids.name in filter_cases
         else:
             return True
 
