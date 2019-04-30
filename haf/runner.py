@@ -261,7 +261,8 @@ class Runner(Process):
                         return
                     if result[0] == CASE_SKIP:
                         result = result[1]
-                result.log_dir = f"{self.log_dir}/{local_case.bench_name}/{local_case.ids.id}.{local_case.ids.subid}.{local_case.ids.name}.log"
+
+                result.log_dir = f"{self.get_log_path(self.log_dir)}/{local_case.bench_name}/{local_case.ids.id}.{local_case.ids.subid}.{local_case.ids.name}.log"
                 result.bind_runner(self.pid)
                 self.result_handler(result)
                 return result
@@ -275,6 +276,13 @@ class Runner(Process):
             result.run_error = traceback.format_exc()
             result.result = RESULT_ERROR
             return result
+
+    def get_log_path(self, log_path):
+        if isinstance(log_path, str):
+            if log_path.startswith("."):
+                return f"{os.path.abspath(log_path)}"
+            else:
+                return log_path
 
     def end_handler(self):
         '''
