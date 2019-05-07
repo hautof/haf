@@ -1,5 +1,6 @@
 # encoding='utf-8'
 import importlib
+import json
 import sys
 import time
 from multiprocessing import Process, Lock as m_lock
@@ -156,7 +157,7 @@ class Runner(Process):
 
     def run_loop(self, cases):
         '''
-        TODO: need use aiohttp to make it work
+        TODO: need use aiohttp to make it work as async mode
         run loop, sync
         :param cases:
         :return:
@@ -349,6 +350,7 @@ class BaseRunner(object):
         :param dependent:
         :return:
         '''
+        logger.debug(f"get_dependence_case_from_bench : {dependent}", __name__)
         return self.bench.cases.get(dependent)
 
     def reuse_with_dependent(self, new_attr):
@@ -357,31 +359,106 @@ class BaseRunner(object):
         :param new_attr:
         :return:
         '''
+        logger.debug(f"reuse_with_dependent type is {type(new_attr)}", __name__)
+        if isinstance(new_attr, dict):
+            return self.replace_dict(new_attr)
+        elif isinstance(new_attr, list):
+            return self.replace_list(new_attr)
+
+    def replace_str(self, data):
+        logger.debug(f"replace str here {type(data)} : {data}", __name__)
         begin = "<@begin@>"
         end = "<@end@>"
-        if isinstance(new_attr, str):
-            f, temp = new_attr.split("<@begin@>")
+        if isinstance(data, str):
+            f, temp = data.split("<@begin@>")
             temp, l = temp.split("<@end@>")
-            logger.debug(f"reuse with dependent {temp}", __name__)
-            return temp
-        elif isinstance(new_attr, dict):
-            for key in new_attr.keys():
-                if begin in new_attr.get(key):
-                    new_attr[key] = self.reuse_with_dependent(new_attr.get(key))
-            return new_attr
+            temp = json.loads(temp.replace("'", '"'))
+            logger.debug(f"replace_str {temp}", __name__)
+            dependent_case = self.get_dependence_case_from_bench(f"{temp.get('case')}")
+            replace_target = ""
+            if isinstance(dependent_case, (HttpApiCase, PyCase, AppCase, WebCase)):
+                if temp.get("type") in ["int", "str", "list", "dict"]:
+                    logger.debug(f"case is {dependent_case}", __name__)
+                    temp_property = temp.get("property")
+                    for i in range(1, len(temp_property)+1):
+                        if i==1:
+                            current_pp = temp_property.get(str(i))
+                            if current_pp == "api_response":
+                                replace_target = dependent_case.response
+                        else:
+                            current_pp = temp_property.get(str(i))
+                            if isinstance(replace_target, Response):
+                                replace_target = getattr(replace_target, current_pp)
+                            elif isinstance(replace_target, dict):
+                                replace_target = replace_target.get(current_pp)
+                        logger.debug(f"replace_str {i} : {replace_target}")
+                    logger.debug(f"replace_str target found is {replace_target}", __name__)
+
+            elif temp.get("type") in ["find_table_index"]:
+                logger.debug(f"case is {dependent_case}", __name__)
+                replace_target = Utils.find_table_index(temp.get("table_name"),
+                                                        (int(temp.get("range").get("start")), int(temp.get("range").get("end"))),
+                                                        temp.get("data"))
+                logger.debug(f"replace_str target found is {replace_target}", __name__)
+
+
+            return f"{f}{replace_target}{l}"
+
+    def replace_dict(self, data):
+        for key in data.keys():
+            logger.debug(f"replace_dict check key {key} here: {data.get(key)}", __name__)
+            current_data = data.get(key)
+            if current_data is None:
+                return data
+            if "<@begin@>" in str(current_data):
+                if isinstance(current_data, str):
+                    data[key] = self.replace_str(current_data)
+                elif isinstance(current_data, list):
+                    data[key] = self.replace_list(current_data)
+        return data
+
+    def replace_list(self, data):
+        for i, data_i in enumerate(data):
+            logger.debug(f"replace_list check data {i} here: {data_i}", __name__)
+            current_data = data_i
+            if current_data is None:
+                return data
+            if "<@begin@>" in str(current_data):
+                if isinstance(current_data, str):
+                    data[i] = self.replace_str(current_data)
+                elif isinstance(current_data, list):
+                    data[i] = self.replace_list(current_data)
+        logger.debug(f"replace_list : {data}", __name__)
+        return data
 
     def get_dependent_var(self, case):
-        logger.debug(f"get_dependent_var {case.dependent_var}", __name__)
-        if isinstance(case, (HttpApiCase)):
-            if case.dependent_var is None:
-                return
-            else:
-                for dv in case.dependent_var:
-                    logger.debug(f"start get dependent {dv}", __name__)
-                    if hasattr(case, dv):
-                        new_attr = getattr(case, dv)
-                        new_attr = self.reuse_with_dependent(new_attr)
-                        # TODO : add replace case's dv here
+        try:
+            logger.debug(f"dependent var is {case.dependent_var}", __name__)
+            if isinstance(case, (HttpApiCase)):
+                if case.dependent_var is None:
+                    return
+                else:
+                    for dv in case.dependent_var:
+                        if dv in ["request_data", "request_header"]:
+                            logger.debug(f"start get dependent {dv}", __name__)
+                            request = case.request
+                            if dv == "request_header":
+                                header = request.header
+                                request.header = self.reuse_with_dependent(header)
+                            elif dv == "request_data":
+                                data = request.data
+                                request.data = self.reuse_with_dependent(data)
+
+                        if dv in ["sql_response"]:
+                            logger.debug(f"start get dependent {dv}", __name__)
+                            sql_info = case.sqlinfo
+                            if dv == "sql_response":
+                                sql_response = sql_info.scripts.get("sql_response")
+                                sql_info.scripts["sql_response"] = self.reuse_with_dependent(sql_response)
+        except Exception as e:
+            logger.error(e, __name__)
+            traceback.print_exc()
+            raise e
 
 
 class PyRunner(BaseRunner):
