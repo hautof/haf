@@ -161,6 +161,46 @@ class Utils(object):
         return path, file
 
     @staticmethod
+    def crc32(data):
+        import binascii
+        return  (binascii.crc32(bytes(str(data), encoding='utf-8')))
+
+    @staticmethod
+    def find_hash_in_range(hashrange, data, id):
+        find = None
+        if len(hashrange) <= id:
+            find = hashrange[0]
+        else:
+            logger.debug(str(id) + "---" + str(data) + " ?? " + str(hashrange[id]), __name__)
+            if hashrange[id] < data:
+                find = Utils.find_hash_in_range(hashrange, data, id + 1)
+            else:
+                find = hashrange[id]
+        return find
+
+    @staticmethod
+    def find_table_index(tablename, rangeidx, data):
+
+        tablename = str(tablename)
+        tablehashmap = {}
+        tablehashmange = []
+
+        for id in rangeidx:
+            logger.debug(tablename + "_" + str(id), __name__)
+            tablehash = Utils.crc32(tablename + "_" + str(id))
+            tablehashmange.append(tablehash)
+            tablehashmap[str(tablehash)] = id
+
+        data = Utils.crc32(data)
+        tablehashRange = sorted(tablehashmange)
+        findhash = Utils.find_hash_in_range(tablehashRange, data, 0)
+
+        logger.debug(f"table hash range is {tablehashmange}", __name__)
+        logger.debug(f"table hash range is {tablehashmap}", __name__)
+        logger.debug(f"table hash range is {findhash}", __name__)
+        return tablehashmap.get(str(findhash))
+
+    @staticmethod
     def get_class_from_py(module: str)->list:
         '''
         get_class_from_py : get classes from py file (module)
