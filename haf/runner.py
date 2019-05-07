@@ -156,7 +156,7 @@ class Runner(Process):
 
     def run_loop(self, cases):
         '''
-        TODO: need use aiohttp to make it work
+        TODO: need use aiohttp to make it work as async mode
         run loop, sync
         :param cases:
         :return:
