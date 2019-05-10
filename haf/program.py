@@ -213,16 +213,16 @@ class Program(object):
                 if not args.console:
                     if not system_signal.empty():
                         self.signal = system_signal.get()
-                        logger.info(f"program signal {self.signal}")
                         signal = self.signal.signal if isinstance(self.signal, Signal) else None
+                        logger.info(f"program signal {SIGNAL_GROUP.get(signal) if signal in [x for x in range(20, 30)] else None}")
                         # check the end signal from recorder to main
                         if signal == SIGNAL_RECORD_END or signal == SIGNAL_STOP:
                             if not args.local_logger:
                                 while True:
                                   if not system_signal.empty():
                                       signal_logger = system_signal.get()
-                                      logger.info(f"program signal {signal_logger}")
                                       signal_logger = signal_logger.signal if isinstance(signal_logger, Signal) else None
+                                      logger.info(f"program signal {SIGNAL_GROUP.get(signal_logger) if signal_logger in [x for x in range(20, 30)] else None}")
                                       # check the logger signal from logger to main
                                       if signal_logger == SIGNAL_LOGGER_END:
                                           logger.info("main -- stop")

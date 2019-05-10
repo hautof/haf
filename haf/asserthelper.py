@@ -34,6 +34,8 @@ class AssertHelper(object):
                 result = True
                 for temp in real.keys():
                     result = result and AssertHelper.assert_that(real.get(temp), expect.get(temp))
+                for temp in expect.keys():
+                    result = result and AssertHelper.assert_that(real.get(temp), expect.get(temp))
                 return result
             elif isinstance(real, list) and isinstance(expect, list):
                 result = True
