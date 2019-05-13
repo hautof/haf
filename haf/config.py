@@ -42,6 +42,17 @@ SIGNAL_RECORD_END = 24
 SIGNAL_BUS_END = 25
 SIGNAL_LOGGER_END = 26
 
+# SIGNAL GROUP
+SIGNAL_GROUP = {
+    SIGNAL_START: "signal start",
+    SIGNAL_STOP: "signal stop",
+    SIGNAL_CASE_END: "signal case end",
+    SIGNAL_RESULT_END: "signal result end",
+    SIGNAL_RECORD_END: "signal record end",
+    SIGNAL_BUS_END: "signal bus end",
+    SIGNAL_LOGGER_END: "signal logger end"
+}
+
 # api method [get, post, put, delete]
 CASE_HTTP_API_METHOD_GET = 30
 CASE_HTTP_API_METHOD_POST = 31
@@ -133,7 +144,7 @@ LOG_PATH_DEFAULT = "./data"
 # version define
 MAIN_VERSION = 2
 SUB_VERSION = 9
-FIX_VERSION = 2
+FIX_VERSION = 3
 VERSION_TYPE = "haf"
 PLATFORM_VERSION = f"{VERSION_TYPE}-{MAIN_VERSION}.{SUB_VERSION}.{FIX_VERSION}"
 

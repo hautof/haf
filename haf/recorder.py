@@ -9,7 +9,7 @@ from haf.common.exception import FailRecorderException
 from haf.common.log import Log
 from haf.result import HttpApiResult, EndResult, Detail, Summary, AppResult, WebResult
 from haf.config import *
-from haf.mark import locker
+from haf.mark import locker, new_locker
 from haf.pluginmanager import plugin_manager
 from haf.utils import Utils
 from haf.signal import Signal
@@ -205,6 +205,7 @@ class Recorder(Process):
         suite.cases.append(result)
         self.results.details[result.case.bench_name] = suite
 
+    @locker
     def count_case(self, key: str, lock: m_lock=None):
         '''
         put case's commplete count to loader, from recorder to loader
@@ -213,8 +214,6 @@ class Recorder(Process):
         :return:
         '''
         logger.debug(f"put case count {self.complete_case_count}", __name__)
-        if not self.case_count.empty():
-            self.case_count.get()
         self.case_count.put(self.complete_case_count)
 
     def result_handler(self, result):
@@ -223,7 +222,7 @@ class Recorder(Process):
         :param result:
         :return:
         '''
-        self.count_case("case_count", self.lock)
+        self.count_case(self.recorder_key, self.lock)
         self.add_result_to_suite(result)
         self.check_case_result(result)
         self.publish_results()

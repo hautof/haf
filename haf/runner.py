@@ -305,20 +305,26 @@ class BaseRunner(object):
         :param case:
         :return:
         '''
-        logger.debug(f"Base Runner check case run here {case.dependent}", __name__)
+        logger.debug(f"check_case_run_here Base Runner check case run here {case.dependent}", __name__)
+        check_case_run_here_result = False
         if not case.dependent or len(case.dependent) == 0:
-            return True
+            check_case_run_here_result = True
+            return check_case_run_here_result
         elif isinstance(case.dependent, list) and case.dependent==['None']:
-            return True
+            check_case_run_here_result = True
+            return check_case_run_here_result
         try:
             for dependence in case.dependent:
                 if dependence not in self.bench.cases.keys():
-                    return False
+                    check_case_run_here_result = False
+                    return check_case_run_here_result
             if isinstance(case, HttpApiCase):
                 self.get_dependent_var(case)
-            return True
+            check_case_run_here_result = True
+            return check_case_run_here_result
         except Exception:
-            return False
+            check_case_run_here_result = False
+        return check_case_run_here_result
 
     def check_case_filter(self, case):
         '''
@@ -326,14 +332,16 @@ class BaseRunner(object):
         :param case:
         :return:
         '''
-        logger.debug(f"case <{case.ids.name}> check in [{self.bench.args.filter_case}]", __name__)
         filter_cases = self.bench.args.filter_case
+        check_case_filter_result = False
         if filter_cases is None or filter_cases=='None':
-            return True
+            check_case_filter_result = True
         elif isinstance(filter_cases, list):
-            return case.ids.name in filter_cases
+            check_case_filter_result = case.ids.name in filter_cases
         else:
-            return True
+            check_case_filter_result = True
+        logger.debug(f"check_case_filter case <{case.ids.name}> check in [{self.bench.args.filter_case}], result is {check_case_filter_result}", __name__)
+        return check_case_filter_result
 
     def check_case_run(self, case): # if skip, return False
         if self.check_case_filter(case):
@@ -473,9 +481,11 @@ class PyRunner(BaseRunner):
         result.on_case_begin()
 
         if not self.check_case_run_here(case) :
+            logger.debug(f"PyRunner check_case_run_here : Dependent not found ! get False", __name__)
             result.on_case_end()
             return [CASE_CAN_NOT_RUN_HERE, result]
         if not self.check_case_run(case): # not False is skip
+            logger.debug(f"PyRunner check_case_run False", __name__)
             result.case = case
             result.on_case_end()
             result.result = RESULT_SKIP
