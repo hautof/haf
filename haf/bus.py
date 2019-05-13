@@ -57,7 +57,7 @@ class BusServer(Process):
         # runner queue to web server
         publish_runner = Queue(maxsize=1)
         # case count queue
-        case_count = Queue(maxsize=1)
+        case_count = Queue(maxsize=-1)
         # case result summary main queue
         case_result_main = Queue(maxsize=1)
         # logger end queue

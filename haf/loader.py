@@ -82,14 +82,15 @@ class Loader(Process):
                             self.put_case("case", None, self.case_back_queue.get())
 
                         if self.case_queue.empty() and self.case_back_queue.empty():
-                            if complete_case_count not in show_count:
-                                logger.debug(f"complete case count check here {complete_case_count} == {self.true_case_count}", __name__)
-                                show_count.append(complete_case_count)
-                            if complete_case_count==self.true_case_count:
-                                if self.args.nout:
-                                    cb.finish()
-                                self.end_handler()
-                                return
+                            with new_locker(self.bus_client, self.key, self.lock):
+                                if complete_case_count not in show_count:
+                                    logger.debug(f"complete case count check here {complete_case_count} == {self.true_case_count}", __name__)
+                                    show_count.append(complete_case_count)
+                                if complete_case_count==self.true_case_count:
+                                    if self.args.nout:
+                                        cb.finish()
+                                    self.end_handler()
+                                    return
                     time.sleep(0.01)
                 elif temp is None:
                     time.sleep(0.01)
