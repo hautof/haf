@@ -75,7 +75,7 @@ class Recorder(Process):
                     # get result from runner to recorder
                     if isinstance(result, (HttpApiResult, AppResult, WebResult)):
                         if isinstance(result.case, (HttpApiCase, BaseCase, PyCase, WebCase, AppCase)):
-                            logger.info(f"{self.recorder_key} {result.case.bench_name}.{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {RESULT_GROUP.get(str(result.result), None)}", __name__)
+                            logger.debug(f"{self.recorder_key} {result.case.bench_name}.{result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name} is {RESULT_GROUP.get(str(result.result), None)}", __name__)
                         else:
                             logger.info(f"{self.recorder_key} recorder ! wrong result!", __name__)
                             logger.info(f"{self.recorder_key} recorder {result.run_error}", __name__)
@@ -264,6 +264,7 @@ class Recorder(Process):
         '''
         publish results to mysql database
         '''
-        logger.info("publish result to sql", __name__)
-        plugin_manager.publish_to_sql(self.args, self.results)
+        if hasattr(self.args, "sql_publish") and self.args.sql_publish:
+            logger.info("publish result to sql", __name__)
+            plugin_manager.publish_to_sql(self.args, self.results)
 

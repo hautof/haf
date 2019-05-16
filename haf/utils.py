@@ -362,7 +362,6 @@ class Utils(object):
                 elif method == CASE_HTTP_API_METHOD_POST:
                     result = session.post(url, data=data, headers=header)
 
-                logger.info("{} {}".format(key, result), __name__)
                 if isinstance(result, rResponse):
                     response.header = result.headers
                     try:
@@ -383,6 +382,7 @@ class Utils(object):
             method = request.method
             url = request.url
 
+            logger.info(f"{key} {METHOD_GROUP.get(str(method))} {url} with data: {data}, header is: {header}", __name__)
             response = Response()
             result = None
             if method == CASE_HTTP_API_METHOD_GET:
@@ -392,7 +392,6 @@ class Utils(object):
             if method == CASE_HTTP_API_METHOD_PUT:
                 result = HttpController.put(url, data, header)
 
-            logger.info("{} {}".format(key, result), __name__)
             if isinstance(result, HTTPResponse):
                 response.header = result.headers
                 try:

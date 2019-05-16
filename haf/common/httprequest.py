@@ -82,7 +82,7 @@ class HttpController(object):
                 else:
                     data = None
 
-            logger.info(f'{key} GET [url] {url}', __name__)
+            logger.debug(f'{key} GET [url] {url}', __name__)
 
             # using requests to Request the url with headers and method get
             request = ur.Request(url=url, data=data, headers=headers)
@@ -94,16 +94,16 @@ class HttpController(object):
             if response is None:
                 return {"result": "None"}
             else:
-                logger.info(f"{key} {str(response)}", __name__)
+                logger.debug(f"{key} {str(response)}", __name__)
 
             return response
         except ur.URLError as e:
-            logger.info(f"{key}{str(e)}", __name__)
-            logger.info(f"{key}{traceback.format_exc()}", __name__)
+            logger.error(f"{key}{str(e)}", __name__)
+            logger.error(f"{key}{traceback.format_exc()}", __name__)
             return e
         except Exception as ee:
-            logger.info(f"{key}{str(ee)}")
-            logger.info(f"{key}{traceback.format_exc()}", __name__)
+            logger.error(f"{key}{str(ee)}")
+            logger.error(f"{key}{traceback.format_exc()}", __name__)
             return ee
 
     @staticmethod
@@ -130,7 +130,7 @@ class HttpController(object):
             if response is None:
                 return {"result": "None"}
             else:
-                logger.info(f"{key} POST {str(response)}", __name__)
+                logger.debug(f"{key} POST {str(response)}", __name__)
 
             return response
         except ur.URLError as e:

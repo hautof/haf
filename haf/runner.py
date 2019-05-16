@@ -84,7 +84,7 @@ class Runner(Process):
         :param result:
         :return:
         '''
-        logger.info(f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}", __name__)
+        logger.debug(f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}", __name__)
         self.result_handler_queue.put(result)
 
     def put_web_message(self, key: str, lock: m_lock=None):
