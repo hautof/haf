@@ -517,6 +517,7 @@ class PyRunner(BaseRunner):
             result.on_case_end()
             return result
         except Exception as e:
+            case.response = getattr(suite, "response", Response())
             traceback.print_exc()
             logger.error(f"{self.key} : {traceback.format_exc()}", __name__)
             result.result = RESULT_ERROR

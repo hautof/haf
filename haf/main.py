@@ -3,6 +3,8 @@ import json
 import os
 import sys
 
+from haf.utils import Utils
+
 from haf.pluginmanager import PluginManager, plugin_manager
 from haf.program import Program
 from haf.helper import Helper
@@ -166,23 +168,9 @@ def main_args():
 
         # here : case <- dir/file
         if args.case:
-            cases = []
-            for case in args.case:
-                cases.append(case)
+            case_path = args.case
             args.case = []
-            for path in cases:
-                if not path.endswith(".py") and not path.endswith(".yml") and not path.endswith(".json") and not path.endswith(".xlsx"):
-                    if os.path.exists(path) and os.path.isdir(path):
-                        file_list = os.listdir(path)
-                        for f in file_list:
-                            if f.startswith("test_") and (f.endswith(".py") or f.endswith(".yml") or f.endswith(".json") or f.endswith(".xlsx")):
-                                args.case.append(os.path.join(path, f))
-                    else:
-                        print(f"found wrong case path ... {path}")
-                        sys.exit(-2)
-                else:
-                    args.case.append(path)
-
+            args.case = Utils.load_case_from_dir(case_path)
         # here filter not in config
         if isinstance(args.filter_case, str):
             args.filter_case = args.filter_case.split(',')

@@ -478,6 +478,27 @@ class Utils(object):
     def get_platform():
         return platform.system()
 
+    @staticmethod
+    def load_case_from_dir(case_path):
+        cases = []
+        for path in case_path:
+            if not path.endswith(".py") and not path.endswith(".yml") and \
+                    not path.endswith(".json") and not path.endswith(".xlsx"):
+                if os.path.exists(path) and os.path.isdir(path):
+                    file_list = os.listdir(path)
+                    for f in file_list:
+                        if f.startswith("test_") and (f.endswith(".py") or f.endswith(".yml") or f.endswith(".json") or f.endswith(".xlsx")):
+                            cases.append(os.path.join(path, f))
+                        elif os.path.exists(os.path.join(path, f)) and os.path.isdir(os.path.join(path, f)):
+                            for case in Utils.load_case_from_dir([os.path.join(path, f)]):
+                                cases.append(case)
+                else:
+                    print(f"found wrong case path ==> [{path}]")
+                    sys.exit(-2)
+            else:
+                cases.append(path)
+        return cases
+
 
 class LoadFromConfig(object):
 
