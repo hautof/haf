@@ -143,11 +143,11 @@ class MysqlTool(object):
             if commit:
                 self.connect_msql.commit()
             logger.debug(data, __name__)
+            self.close()
             return data
         except Exception as e:
             logger.error(str(e), __name__)
-            if self.connect_msql.open:
-                self.connect_msql.close()
+            self.close()
             return []
 
     def close(self):
@@ -156,7 +156,8 @@ class MysqlTool(object):
             if self.connect_msql is not None:
                 self.connect_msql.close()
         except Exception as e:
-            logger.error(e, __name__)
+            # logger.error(e, __name__)
+            pass
 
 
 class SqlServerTool(object):

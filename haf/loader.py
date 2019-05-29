@@ -89,6 +89,7 @@ class Loader(Process):
                                 if complete_case_count==self.true_case_count:
                                     if self.args.nout:
                                         cb.finish()
+                                    logger.debug(f"{self.key} all cases run over [{complete_case_count}/{self.true_case_count}]",__name__)
                                     self.end_handler()
                                     return
                     time.sleep(0.01)
@@ -211,7 +212,7 @@ class Loader(Process):
         :param case:
         :return:
         '''
-        logger.info(f"{self.key} -- put case {case.bench_name} - {case.ids.id}.{case.ids.subid}.{case.ids.name}", __name__)
+        logger.debug(f"{self.key} -- put case {case.bench_name} - {case.ids.id}.{case.ids.subid}.{case.ids.name}", __name__)
         self.case_queue.put(case)
 
     def end_handler(self, error=None):

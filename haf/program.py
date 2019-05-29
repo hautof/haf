@@ -199,7 +199,7 @@ class Program(object):
             self.wait_end_signal(args)
             sys.exit(0)
         else:
-            logger.info("not only bus mode")
+            logger.debug("not only bus mode")
 
     def only_loader(self, args):
         if args.only_loader:

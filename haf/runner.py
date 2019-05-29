@@ -84,7 +84,7 @@ class Runner(Process):
         :param result:
         :return:
         '''
-        logger.info(f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}", __name__)
+        logger.debug(f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}", __name__)
         self.result_handler_queue.put(result)
 
     def put_web_message(self, key: str, lock: m_lock=None):
@@ -517,6 +517,7 @@ class PyRunner(BaseRunner):
             result.on_case_end()
             return result
         except Exception as e:
+            case.response = getattr(suite, "response", Response())
             traceback.print_exc()
             logger.error(f"{self.key} : {traceback.format_exc()}", __name__)
             result.result = RESULT_ERROR
