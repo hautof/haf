@@ -220,7 +220,7 @@ class Utils(object):
         return class_list if len(class_list) > 0 else None
 
     @staticmethod
-    def get_case_from_class(class_list: list)->dict:
+    def get_case_from_class(class_list: dict)->dict:
         '''
         get_case_from_class : get case from class of class_list
         :param class_list: list
@@ -304,8 +304,8 @@ class Utils(object):
             py_config = {}
             py_config["config"] = []
             config_temp = {}
-            logger.info("{} found python file : {}".format("system$%util$%", file_name), __name__)
             if os.path.exists(file_name):
+                logger.info("{} found python file : {}".format("system$%util$%", file_name), __name__)
                 path, file = Utils.get_path(file_name)
                 sys.path.append(path)
                 module_name = file.rsplit(".", 1)[0]
@@ -330,6 +330,9 @@ class Utils(object):
                     }],
                     "testcases": cases
                 }
+            else:
+                logger.info("{} Not found python file : {}".format("system$%util$%", file_name), __name__)
+
 
         except Exception as e:
             logger.error(f"{file_name} {e} ", __name__)
