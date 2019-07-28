@@ -1,11 +1,5 @@
-import itertools
-import random
-
 import pluggy
-import json
-import os
-import sys
-import argparse
+
 from haf import hookspecs, lib
 
 
@@ -17,16 +11,17 @@ class PluginManager(object):
             : publish_to_sql after test
             : start_web_server at program begining
     '''
+
     def __init__(self):
         self.get_plugin_manager()
 
     def add_options(self, sub_run_arg_program):
         pm = self.pm
-        return pm.hook.add_option(parse = sub_run_arg_program)
+        return pm.hook.add_option(parse=sub_run_arg_program)
 
     def load_from_file(self, file_name):
         pm = self.pm
-        inputs = pm.hook.load_from_file(file_name = file_name)
+        inputs = pm.hook.load_from_file(file_name=file_name)
         if isinstance(inputs, list):
             return inputs[0]
         elif isinstance(inputs, dict):

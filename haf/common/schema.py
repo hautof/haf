@@ -6,8 +6,8 @@ others:
         check_config(config)
 '''
 
-
 from jsonschema import validate
+
 from haf.config import config_schema
 
 

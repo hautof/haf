@@ -28,10 +28,12 @@ class SingletonType(type):
 # this is decorator
 def singleton(cls):
     __instance = {}
+
     def _wraps(*args, **kwargs):
         if cls not in __instance:
             __instance[cls] == cls(*args, **kwargs)
         return __instance[cls]
+
     return _wraps
 
 
@@ -46,5 +48,3 @@ class Singleton(object):
                 if not hasattr(cls, "_instance"):
                     Singleton._instance = super().__new__(cls)
         return Singleton._instance
-
-

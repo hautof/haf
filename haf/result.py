@@ -44,7 +44,7 @@ class HttpApiResult(BaseResult):
         self.end_time = Utils.get_datetime_now()
         self.duration = Utils.get_date_result(self.begin_time, self.end_time)
 
-    def bind_runner(self, runner:int=0):
+    def bind_runner(self, runner: int = 0):
         self.runner = runner
 
     def deserialize(self):
@@ -85,7 +85,7 @@ class AppResult(BaseResult):
         self.end_time = Utils.get_datetime_now()
         self.duration = Utils.get_date_result(self.begin_time, self.end_time)
 
-    def bind_runner(self, runner:int=0):
+    def bind_runner(self, runner: int = 0):
         self.runner = runner
 
     def deserialize(self):
@@ -125,7 +125,7 @@ class WebResult(BaseResult):
         self.end_time = Utils.get_datetime_now()
         self.duration = Utils.get_date_result(self.begin_time, self.end_time)
 
-    def bind_runner(self, runner:int=0):
+    def bind_runner(self, runner: int = 0):
         self.runner = runner
 
     def deserialize(self):
@@ -152,10 +152,10 @@ class Detail(object):
 
     def deserialize(self):
         return {
-            "suite_name":self.suite_name,
-            "begin_time":self.begin_time,
-            "end_time":self.end_time,
-            "duration":self.duration,
+            "suite_name": self.suite_name,
+            "begin_time": self.begin_time,
+            "end_time": self.end_time,
+            "duration": self.duration,
             "cases": [
                 x.deserialize() for x in self.cases
             ]
@@ -164,7 +164,7 @@ class Detail(object):
 
 class EndResult(BaseResult):
 
-    def __init__(self, name:str=""):
+    def __init__(self, name: str = ""):
         super().__init__()
         self.begin_time = ""
         self.end_time = ""
@@ -188,14 +188,14 @@ class EndResult(BaseResult):
             summary[s] = self.summary.get(s).deserialize()
 
         return {
-            "begin_time":self.begin_time,
-            "end_time":self.end_time,
-            "duration":self.duration,
-            "passed":self.passed,
-            "failed":self.failed,
-            "skip":self.skip,
-            "error":self.error,
-            "suite_name":self.suite_name,
+            "begin_time": self.begin_time,
+            "end_time": self.end_time,
+            "duration": self.duration,
+            "passed": self.passed,
+            "failed": self.failed,
+            "skip": self.skip,
+            "error": self.error,
+            "suite_name": self.suite_name,
             "summary": summary,
             "version": self.version,
             "name": self.name,
@@ -222,15 +222,14 @@ class Summary(object):
 
     def deserialize(self):
         return {
-                "passed": self.passed,
-                "skip": self.skip,
-                "failed": self.failed,
-                "error": self.error,
-                "all": self.all,
-                "base_url": self.base_url,
-                "begin_time": self.begin_time,
-                "end_time": self.end_time,
-                "duration": self.duration,
-                "name": self.name
-                }
-
+            "passed": self.passed,
+            "skip": self.skip,
+            "failed": self.failed,
+            "error": self.error,
+            "all": self.all,
+            "base_url": self.base_url,
+            "begin_time": self.begin_time,
+            "end_time": self.end_time,
+            "duration": self.duration,
+            "name": self.name
+        }

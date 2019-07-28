@@ -1,28 +1,27 @@
 # encoding='utf-8'
+import asyncio
 import importlib
 import json
 import sys
 import time
+import traceback
 from multiprocessing import Process, Lock as m_lock
-from threading import Thread, Lock as t_lock
+
 from haf.apihelper import Request, Response
 from haf.apphelper import Stage, BasePage, save_screen_shot
 from haf.asserthelper import AssertHelper
-from haf.bench import HttpApiBench, BaseBench, AppBench, WebBench, PyBench
+from haf.bench import HttpApiBench, AppBench, WebBench, PyBench, BaseBench
 from haf.busclient import BusClient
 from haf.case import HttpApiCase, BaseCase, PyCase, AppCase, WebCase
 from haf.common.database import SQLConfig
 from haf.common.exception import FailRunnerException
 from haf.common.log import Log
-from haf.config import *
 from haf.mark import locker, new_locker
 from haf.result import HttpApiResult, AppResult, WebResult
-from haf.suite import HttpApiSuite, AppSuite
-from haf.utils import Utils, Signal, SignalThread
 from haf.signal import Signal as SignalTemp
+from haf.suite import HttpApiSuite
+from haf.utils import Utils, Signal, SignalThread
 from haf.webhelper import *
-import traceback
-import asyncio
 
 logger = Log.getLogger(__name__)
 
@@ -37,7 +36,7 @@ class Runner(Process):
         self.key = ""
         self.runner_key = ""
         self.lock = False
-        self.runner = {"get": 0, "skip": 0, "run": {}, "done":[], "key": 0}
+        self.runner = {"get": 0, "skip": 0, "run": {}, "done": [], "key": 0}
         self.log_dir = log_dir
         self.args = args
         self.locks = m_lock
@@ -61,7 +60,7 @@ class Runner(Process):
         :return:
         '''
         bench = self.benchs.get(case.bench_name, None)
-        if bench is None :
+        if bench is None:
             if isinstance(case, HttpApiCase):
                 bench = HttpApiBench(self.args)
             elif isinstance(case, PyCase):
@@ -70,13 +69,13 @@ class Runner(Process):
                 bench = AppBench(self.args)
             elif isinstance(case, WebCase):
                 bench = WebBench(self.args)
-        
+
         bench.add_case(case)
         self.benchs[case.bench_name] = bench
         return bench
 
     @locker
-    def put_result(self,  key: str, lock: m_lock=None, result: HttpApiResult=HttpApiResult()):
+    def put_result(self, key: str, lock: m_lock = None, result: HttpApiResult = HttpApiResult()):
         '''
         put result to recorder, from runner to recorder, need lock
         :param key:
@@ -84,10 +83,12 @@ class Runner(Process):
         :param result:
         :return:
         '''
-        logger.debug(f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}", __name__)
+        logger.debug(
+            f"{self.key} : runner {self.pid} put result {result.case.ids.id}.{result.case.ids.subid}.{result.case.ids.name}",
+            __name__)
         self.result_handler_queue.put(result)
 
-    def put_web_message(self, key: str, lock: m_lock=None):
+    def put_web_message(self, key: str, lock: m_lock = None):
         '''
         put web message to web server
         :param key:
@@ -100,14 +101,16 @@ class Runner(Process):
                 self.web_queue.get()
             self.web_queue.put(self.runner)
 
-    def put_case_back(self, key:str, case):
+    def put_case_back(self, key: str, case):
         '''
         put can not run case to loader to republish, from runner to loader, need lock
         :param key:
         :param case:
         :return:
         '''
-        logger.info(f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name} for dependent : {case.dependent}", __name__)
+        logger.info(
+            f"{self.runner_key} : runner put case {case.ids.id}.{case.ids.subid}-{case.ids.name} for dependent : {case.dependent}",
+            __name__)
         with new_locker(self.bus_client, key, self.locks[1]):
             self.case_back_queue.put(case)
         import random
@@ -125,19 +128,19 @@ class Runner(Process):
             self.runner["run"] = {}
             self.runner["done"].append({
                 f"{result.case.ids.id}.{result.case.ids.subid}-{result.case.ids.name}":
-                {
-                    "bench_name" : result.case.bench_name,
-                    "begin" : result.begin_time,
-                    "end" : result.end_time,
-                    "result" : RESULT_GROUP.get(str(result.result))
-                }
+                    {
+                        "bench_name": result.case.bench_name,
+                        "begin": result.begin_time,
+                        "end": result.end_time,
+                        "result": RESULT_GROUP.get(str(result.result))
+                    }
             })
         elif isinstance(result, HttpApiCase) or isinstance(result, AppCase) or isinstance(result, WebCase):
             self.runner["run"] = {
                 f"{result.ids.id}.{result.ids.subid}-{result.ids.name}":
-                {
-                    "bench_name":result.bench_name
-                }
+                    {
+                        "bench_name": result.bench_name
+                    }
             }
         logger.debug(f"{self.key} : runner {self.pid} -- put web message {self.runner}", __name__)
         self.put_web_message("web", self.locks[3])
@@ -150,7 +153,7 @@ class Runner(Process):
         self.signal = Signal()
         self.st = SignalThread(self.signal, 0.2)
         self.st.start()
-    
+
     def stop_signal(self):
         if self.st:
             self.st._stop()
@@ -189,7 +192,7 @@ class Runner(Process):
             while True:
                 case_end = False
                 case = None
-                if not self.case_handler_queue.empty() :
+                if not self.case_handler_queue.empty():
                     with new_locker(self.bus_client, "case_runner", self.locks[0]):
                         case = self.case_handler_queue.get()
                         logger.debug(f"get case from loader {case}", __name__)
@@ -199,14 +202,16 @@ class Runner(Process):
                         cases.append(case)
                     logger.debug(f"cases' length is {len(cases)}, and end is {case}", __name__)
 
-                if len(cases) > 0 and (len(cases) >= 1 or case_end or self.signal.signal):
-                    logger.debug(f"cases' length is {len(cases)}, case_end is {case_end}, signal is {self.signal.signal}", __name__)
+                if len(cases) > 0 and (len(cases) >= 5 or case_end or self.signal.signal):
+                    logger.debug(
+                        f"cases' length is {len(cases)}, case_end is {case_end}, signal is {self.signal.signal}",
+                        __name__)
                     self.run_loop(cases)
                     cases = []
                 if case_end:
                     break
                 time.sleep(0.01)
-            if self.loop: # here fix when cases is None, loop is None
+            if self.loop:  # here fix when cases is None, loop is None
                 self.loop.close()
             self.end_handler()
         except Exception as e:
@@ -296,7 +301,7 @@ class Runner(Process):
 
 
 class BaseRunner(object):
-    def __init__(self, bench:BaseBench):
+    def __init__(self, bench: BaseBench):
         self.bench = bench
 
     def check_case_run_here(self, case):
@@ -310,7 +315,7 @@ class BaseRunner(object):
         if not case.dependent or len(case.dependent) == 0:
             check_case_run_here_result = True
             return check_case_run_here_result
-        elif isinstance(case.dependent, list) and case.dependent==['None']:
+        elif isinstance(case.dependent, list) and case.dependent == ['None']:
             check_case_run_here_result = True
             return check_case_run_here_result
         try:
@@ -334,16 +339,18 @@ class BaseRunner(object):
         '''
         filter_cases = self.bench.args.filter_case
         check_case_filter_result = False
-        if filter_cases is None or filter_cases=='None':
+        if filter_cases is None or filter_cases == 'None':
             check_case_filter_result = True
         elif isinstance(filter_cases, list):
             check_case_filter_result = case.ids.name in filter_cases
         else:
             check_case_filter_result = True
-        logger.debug(f"check_case_filter case <{case.ids.name}> check in [{self.bench.args.filter_case}], result is {check_case_filter_result}", __name__)
+        logger.debug(
+            f"check_case_filter case <{case.ids.name}> check in [{self.bench.args.filter_case}], result is {check_case_filter_result}",
+            __name__)
         return check_case_filter_result
 
-    def check_case_run(self, case): # if skip, return False
+    def check_case_run(self, case):  # if skip, return False
         if self.check_case_filter(case):
             return case.run == CASE_RUN
         else:
@@ -388,8 +395,8 @@ class BaseRunner(object):
                 if temp.get("type") in ["int", "str", "list", "dict"]:
                     logger.debug(f"case is {dependent_case}", __name__)
                     temp_property = temp.get("property")
-                    for i in range(1, len(temp_property)+1):
-                        if i==1:
+                    for i in range(1, len(temp_property) + 1):
+                        if i == 1:
                             current_pp = temp_property.get(str(i))
                             if current_pp == "api_response":
                                 replace_target = dependent_case.response
@@ -405,10 +412,10 @@ class BaseRunner(object):
             elif temp.get("type") in ["find_table_index"]:
                 logger.debug(f"case is {dependent_case}", __name__)
                 replace_target = Utils.find_table_index(temp.get("table_name"),
-                                                        (int(temp.get("range").get("start")), int(temp.get("range").get("end"))),
+                                                        (int(temp.get("range").get("start")),
+                                                         int(temp.get("range").get("end"))),
                                                         temp.get("data"))
                 logger.debug(f"replace_str target found is {replace_target}", __name__)
-
 
             return f"{f}{replace_target}{l}"
 
@@ -475,16 +482,16 @@ class PyRunner(BaseRunner):
         self.bench = bench
         self.key = ""
 
-    async def run(self, case:PyCase):
+    async def run(self, case: PyCase):
         result = HttpApiResult()
         self.key = case.log_key
         result.on_case_begin()
 
-        if not self.check_case_run_here(case) :
+        if not self.check_case_run_here(case):
             logger.debug(f"PyRunner check_case_run_here : Dependent not found ! get False", __name__)
             result.on_case_end()
             return [CASE_CAN_NOT_RUN_HERE, result]
-        if not self.check_case_run(case): # not False is skip
+        if not self.check_case_run(case):  # not False is skip
             logger.debug(f"PyRunner check_case_run False", __name__)
             result.case = case
             result.on_case_end()
@@ -492,7 +499,8 @@ class PyRunner(BaseRunner):
             return [CASE_SKIP, result]
 
         result.case = case
-        logger.info(f"{self.key} : PyRunner run - {case.bench_name} {case.ids.id}.{case.ids.subid}-{case.ids.name}", __name__)
+        logger.info(f"{self.key} : PyRunner run - {case.bench_name} {case.ids.id}.{case.ids.subid}-{case.ids.name}",
+                    __name__)
         suite = HttpApiSuite()
         try:
             module_name = case.module_name
@@ -533,12 +541,13 @@ class ApiRunner(BaseRunner):
     '''
     ApiRunner
     '''
-    def __init__(self, bench:HttpApiBench):
+
+    def __init__(self, bench: HttpApiBench):
         super().__init__(bench)
         self.bench = bench
         self.key = ""
 
-    async def run(self, case:HttpApiCase):
+    async def run(self, case: HttpApiCase):
         '''
         run the HttpApiCase
         :param case: HttpApiCase
@@ -547,10 +556,10 @@ class ApiRunner(BaseRunner):
         self.key = case.log_key
         result = HttpApiResult()
         result.on_case_begin()
-        if not self.check_case_run_here(case) :
+        if not self.check_case_run_here(case):
             result.on_case_end()
             return [CASE_CAN_NOT_RUN_HERE, result]
-        if not self.check_case_run(case): # not False is skip
+        if not self.check_case_run(case):  # not False is skip
             result.case = case
             result.on_case_end()
             result.result = RESULT_SKIP
@@ -560,7 +569,9 @@ class ApiRunner(BaseRunner):
             result.case = case
             case.response = self.request(case.request)
             result.result_check_response = self.check_response(case.response, case.expect.response)
-            case.expect.sql_response_result = self.sql_response(case.sqlinfo.scripts["sql_response"], case.sqlinfo.config, case.sqlinfo.check_list["sql_response"])
+            case.expect.sql_response_result = self.sql_response(case.sqlinfo.scripts["sql_response"],
+                                                                case.sqlinfo.config,
+                                                                case.sqlinfo.check_list["sql_response"])
             temp_r = self.check_sql_response(case)
             result.result_check_sql_response = temp_r[0]
             if not temp_r[0]:
@@ -574,10 +585,10 @@ class ApiRunner(BaseRunner):
         result.on_case_end()
         return result
 
-    def request(self, request:Request):
+    def request(self, request: Request):
         return Utils.http_request(request, key=self.key)
 
-    def sql_response(self, sql_script:str, sql_config:SQLConfig, check_list:list):
+    def sql_response(self, sql_script: str, sql_config: SQLConfig, check_list: list):
         if sql_config is None or sql_script is None:
             return None
 
@@ -587,7 +598,7 @@ class ApiRunner(BaseRunner):
             sql_result = Utils.sql_execute(sql_config, sql_script, key=self.key)
         return sql_result
 
-    def check_response(self, response:Response, response_expect:Response):
+    def check_response(self, response: Response, response_expect: Response):
         result = True
         result_check_code = result and AssertHelper.assert_that(response.code, 200, key=self.key)
         if response_expect.body == {}:
@@ -596,7 +607,7 @@ class ApiRunner(BaseRunner):
             result_check_body = AssertHelper.assert_that(response.body, response_expect.body, key=self.key)
         return [result_check_code, result_check_body]
 
-    def check_sql_response(self, case:HttpApiCase):
+    def check_sql_response(self, case: HttpApiCase):
         '''
         check sql == response, use case's third function
         :param case:
@@ -607,13 +618,14 @@ class ApiRunner(BaseRunner):
             if case.expect.sql_check_func is None or case.expect.sql_response_result is None:
                 return [True, "ok"]
             data = case.response.body
-            logger.info(f"{self.key} : check sql response : {case.expect.sql_check_func}", __name__)
+            logger.debug(f"{self.key} : check sql response : {case.expect.sql_check_func}", __name__)
             class_content = importlib.import_module(case.expect.sql_check_func[0])
             check_func = getattr(getattr(class_content, case.expect.sql_check_func[1]), case.expect.sql_check_func[2])
-            logger.info(f"{self.key} : check func : {check_func}", __name__)
-            logger.info(f"{self.key} : check list is {case.sqlinfo.check_list}", __name__)
+            logger.debug(f"{self.key} : check func : {check_func}", __name__)
+            logger.debug(f"{self.key} : check list is {case.sqlinfo.check_list}", __name__)
             if case.sqlinfo.check_list is not None:
-                check_func(case.expect.sql_response_result, data, case.sqlinfo.check_list["sql_response"], testcase=case)
+                check_func(case.expect.sql_response_result, data, case.sqlinfo.check_list["sql_response"],
+                           testcase=case)
             else:
                 check_func(case.expect.sql_response_result, data)
         except Exception as e:
@@ -627,7 +639,8 @@ class AppRunner(BaseRunner):
     '''
     AppRunner
     '''
-    def __init__(self, bench:AppBench, log_dir):
+
+    def __init__(self, bench: AppBench, log_dir):
         super().__init__(bench)
         self.bench = bench
         self.key = ""
@@ -644,7 +657,7 @@ class AppRunner(BaseRunner):
         """
         try:
             i = 0
-            while i<timeout:
+            while i < timeout:
                 logger.info(f"{self.key}: current activity is {driver.current_activity}", __name__)
                 if driver.current_activity == activity:
                     return
@@ -652,7 +665,7 @@ class AppRunner(BaseRunner):
                 i += 1
         except Exception as e:
             logger.error(f"{self.key}: {e}", __name__)
-            return 
+            return
 
     async def run(self, case: AppCase):
         '''
@@ -663,10 +676,10 @@ class AppRunner(BaseRunner):
         self.key = case.log_key
         result = AppResult()
         result.on_case_begin()
-        if not self.check_case_run_here(case) :
+        if not self.check_case_run_here(case):
             result.on_case_end()
             return [CASE_CAN_NOT_RUN_HERE, result]
-        if not self.check_case_run(case): # not False is skip
+        if not self.check_case_run(case):  # not False is skip
             result.case = case
             result.on_case_end()
             result.result = RESULT_SKIP
@@ -685,7 +698,7 @@ class AppRunner(BaseRunner):
                 time.sleep(case.time_sleep)
             logger.info(f"{self.key} : driver is {driver}", __name__)
             page = BasePage(driver)
-            for key in range(1, len(case.stages.keys())+1):
+            for key in range(1, len(case.stages.keys()) + 1):
                 logger.info(f"{self.key} : {key} == {case.stages.get(key).deserialize()}", __name__)
                 png_dir = f"{self.log_dir}"
                 png_name = f"{case.bench_name}.{case.ids.id}.{case.ids.subid}.{case.ids.name}.{key}"
@@ -700,7 +713,7 @@ class AppRunner(BaseRunner):
             logger.error(f"{self.key} : {e}", __name__)
             result.run_error = e
             # TODO : make the result to error and fail
-            result.result = RESULT_FAIL # RESULT_ERROR, fix #134
+            result.result = RESULT_FAIL  # RESULT_ERROR, fix #134
         result.on_case_end()
         return result
 
@@ -713,14 +726,14 @@ class AppRunner(BaseRunner):
         :param info:
         :return:
         '''
-        if  operation== OPERATION_APP_CLICK:
+        if operation == OPERATION_APP_CLICK:
             page.click(paths)
         elif operation == OPERATION_APP_SENDKEYS:
             page.send_keys(paths, info.get("keys"))
         elif operation == OPERATION_APP_SWIPE:
             page.swipe(info.get("direction"))
 
-    def run_stage(self, case, page, stage: Stage=Stage(), result: AppResult=AppResult()):
+    def run_stage(self, case, page, stage: Stage = Stage(), result: AppResult = AppResult()):
         count_now = 0
         try:
             paths = stage.path
@@ -730,7 +743,7 @@ class AppRunner(BaseRunner):
             run_count = stage.run_count
             stage.result = []
             if isinstance(run_count, int):
-                for x in range(1, run_count+1):
+                for x in range(1, run_count + 1):
                     logger.info(f"{self.key} -- {stage.id} - {OPERATION_APP_ANTI_GROUP[operation]} - {x}", __name__)
                     count_now = x
                     self.run_operation(page, operation, paths, info)
@@ -756,6 +769,7 @@ class WebRunner(BaseRunner):
     '''
     WebRunner
     '''
+
     def __init__(self, bench: WebBench, log_dir):
         super().__init__(bench)
         self.bench = bench
@@ -773,7 +787,7 @@ class WebRunner(BaseRunner):
         """
         try:
             i = 0
-            while i<timeout:
+            while i < timeout:
                 logger.info(f"{self.key}: current activity is {driver.current_activity}", __name__)
                 if driver.current_activity == activity:
                     return
@@ -781,8 +795,8 @@ class WebRunner(BaseRunner):
                 i += 1
         except Exception as e:
             logger.error(f"{self.key}: {e}", __name__)
-            return 
-    
+            return
+
     def create_web_driver(self, desired_caps: WebDesiredCaps):
         from selenium import webdriver
         if desired_caps.platformName == "chrome":
@@ -806,11 +820,11 @@ class WebRunner(BaseRunner):
         result = WebResult()
         result.on_case_begin()
 
-        if not self.check_case_run_here(case) :
+        if not self.check_case_run_here(case):
             result.on_case_end()
             return [CASE_CAN_NOT_RUN_HERE, result]
 
-        if not self.check_case_run(case): # not False is skip
+        if not self.check_case_run(case):  # not False is skip
             result.case = case
             result.on_case_end()
             result.result = RESULT_SKIP
@@ -820,7 +834,8 @@ class WebRunner(BaseRunner):
         try:
             result.case = case
             self.driver = self.create_web_driver(case.desired_caps)
-            logger.info(f"{self.key} : wait web {case.desired_caps.platformName} start ... [{case.time_sleep}s]", __name__)
+            logger.info(f"{self.key} : wait web {case.desired_caps.platformName} start ... [{case.time_sleep}s]",
+                        __name__)
             self.driver.get(case.desired_caps.start_url)
             self.driver.maximize_window()
             if case.wait_activity:
@@ -830,7 +845,7 @@ class WebRunner(BaseRunner):
                 time.sleep(case.time_sleep)
             logger.info(f"{self.key} : driver is {self.driver}", __name__)
             page = BasePage(self.driver)
-            for key in range(1, len(case.stages.keys())+1):
+            for key in range(1, len(case.stages.keys()) + 1):
                 logger.info(f"{self.key} : {key} == {case.stages.get(key).deserialize()}", __name__)
                 png_dir = f"{self.log_dir}"
                 png_name = f"{case.bench_name}.{case.ids.id}.{case.ids.subid}.{case.ids.name}.{key}"
@@ -845,7 +860,7 @@ class WebRunner(BaseRunner):
             logger.error(f"{self.key} : {e}", __name__)
             result.run_error = e
             # TODO : make the result to error and fail
-            result.result = RESULT_FAIL # RESULT_ERROR, fix #134
+            result.result = RESULT_FAIL  # RESULT_ERROR, fix #134
         finally:
             result.on_case_end()
             if self.driver:
@@ -864,14 +879,14 @@ class WebRunner(BaseRunner):
         :param info:
         :return:
         '''
-        if  operation== OPERATION_WEB_CLICK:
+        if operation == OPERATION_WEB_CLICK:
             page.click(paths)
         elif operation == OPERATION_WEB_SENDKEYS:
             page.send_keys(paths, info.get("keys"))
         elif operation == OPERATION_WEB_SWIPE:
             page.swipe(info.get("direction"))
 
-    def run_stage(self, case, page, stage: WebStage=WebStage(), result: WebResult=WebResult()):
+    def run_stage(self, case, page, stage: WebStage = WebStage(), result: WebResult = WebResult()):
         count_now = 0
         try:
             paths = stage.path
@@ -881,7 +896,7 @@ class WebRunner(BaseRunner):
             run_count = stage.run_count
             stage.result = []
             if isinstance(run_count, int):
-                for x in range(1, run_count+1):
+                for x in range(1, run_count + 1):
                     logger.info(f"{self.key} -- {stage.id} - {OPERATION_WEB_ANTI_GROUP[operation]} - {x}", __name__)
                     count_now = x
                     self.run_operation(page, operation, paths, info)

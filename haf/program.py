@@ -6,26 +6,21 @@
 '''
 
 import logging
-import os
 import time
-from multiprocessing import Process, Lock as m_lock
-
-from haf.result import HttpApiResult, AppResult, WebResult, EndResult
+from multiprocessing import Lock as m_lock
 
 from haf.bus import BusServer
 from haf.busclient import BusClient
-from haf.common.database import SQLConfig
-from haf.common.lock import Lock
-from haf.config import *
 from haf.common.exception import *
-from haf.helper import Helper
+from haf.config import *
 from haf.loader import Loader
 from haf.logger import Logger
+from haf.pluginmanager import plugin_manager
 from haf.recorder import Recorder
+from haf.result import EndResult
 from haf.runner import Runner
 from haf.signal import Signal
 from haf.utils import Utils
-from haf.pluginmanager import PluginManager, plugin_manager
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
@@ -73,7 +68,7 @@ class Program(object):
             runner = Runner(log_dir, bus_client, self.multi_process_locks, self.args)
             runner.start()
 
-    def _start_recorder(self, bus_client: BusClient, count: int=1, log_dir: str="", time_str: str=""):
+    def _start_recorder(self, bus_client: BusClient, count: int = 1, log_dir: str = "", time_str: str = ""):
         '''
         start recorder
         :param bus_client:
@@ -82,7 +77,8 @@ class Program(object):
         :param time_str:
         :return:
         '''
-        recorder = Recorder(bus_client, count, self.case_name, time_str, log_dir, self.args.report_template, self.loader_recorder_lock, self.args)
+        recorder = Recorder(bus_client, count, self.case_name, time_str, log_dir, self.args.report_template,
+                            self.loader_recorder_lock, self.args)
         recorder.start()
 
     def _init_logging_module(self, args):
@@ -91,7 +87,8 @@ class Program(object):
         :param args:
         :return:
         '''
-        logging.basicConfig(level=logging.DEBUG if not args.debug else logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+        logging.basicConfig(level=logging.DEBUG if not args.debug else logging.DEBUG,
+                            format='%(asctime)s %(levelname)s %(message)s')
         pass
 
     def _init_system_logger(self, log_dir: str, bus_client: BusClient):
@@ -151,7 +148,7 @@ class Program(object):
             self.time_str = Utils.get_time_str()
             self.case_log_dir = f"{args.log_dir}/{self.case_name}/{self.time_str}"
             self.runner_count = args.runner_count if args.runner_count else 1
-            
+
             self.only_bus(args)
 
             self._start_bus(local=args.bus_server if args.bus_server else False)
@@ -219,16 +216,17 @@ class Program(object):
                         if signal == SIGNAL_RECORD_END or signal == SIGNAL_STOP:
                             if not args.local_logger:
                                 while True:
-                                  if not system_signal.empty():
-                                      signal_logger = system_signal.get()
-                                      signal_logger = signal_logger.signal if isinstance(signal_logger, Signal) else None
-                                      logger.info(f"program signal {SIGNAL_GROUP.get(signal_logger) if signal_logger in [x for x in range(20, 30)] else None}")
-                                      # check the logger signal from logger to main
-                                      if signal_logger == SIGNAL_LOGGER_END:
-                                          logger.info("main -- stop")
-                                          system_signal.put(Signal("main", SIGNAL_RECORD_END))
-                                          system_signal.put(Signal("main", SIGNAL_LOGGER_END))
-                                          break
+                                    if not system_signal.empty():
+                                        signal_logger = system_signal.get()
+                                        signal_logger = signal_logger.signal if isinstance(signal_logger,
+                                                                                           Signal) else None
+                                        logger.info(f"program signal {SIGNAL_GROUP.get(signal_logger) if signal_logger in [x for x in range(20, 30)] else None}")
+                                        # check the logger signal from logger to main
+                                        if signal_logger == SIGNAL_LOGGER_END:
+                                            logger.info("main -- stop")
+                                            system_signal.put(Signal("main", SIGNAL_RECORD_END))
+                                            system_signal.put(Signal("main", SIGNAL_LOGGER_END))
+                                            break
                             # if use local logger, just end the main program
                             else:
                                 logger.info("main -- stop")
@@ -305,10 +303,14 @@ haf-{PLATFORM_VERSION}#
             pass
         else:
             self.results = EndResult()
-        result_summary = "|{:^8}|{:^8}|{:^8}|{:^8}|{:^8}|{:^25}|{:^25}|".format(self.results.passed, self.results.failed, self.results.skip, \
-                        self.results.error, self.results.all, self.results.begin_time, self.results.end_time)
+        result_summary = "|{:^8}|{:^8}|{:^8}|{:^8}|{:^8}|{:^25}|{:^25}|".format(self.results.passed,
+                                                                                self.results.failed, self.results.skip, \
+                                                                                self.results.error, self.results.all,
+                                                                                self.results.begin_time,
+                                                                                self.results.end_time)
         print("--------------------------------------------------------------------------------------------------")
-        print("|--\33[32mPASS\33[0m--|--\33[31mFAIL\33[0m--|--\33[37mSKIP\33[0m--|--\33[35mERROR\33[0m-|---\33[36mALL\33[0m--|----------\33[36mBegin\33[0m----------|-----------\33[36mEnd\33[0m-----------|")
+        print(
+            "|--\33[32mPASS\33[0m--|--\33[31mFAIL\33[0m--|--\33[37mSKIP\33[0m--|--\33[35mERROR\33[0m-|---\33[36mALL\33[0m--|----------\33[36mBegin\33[0m----------|-----------\33[36mEnd\33[0m-----------|")
         print(result_summary)
         print("--------------------------------------------------------------------------------------------------")
 

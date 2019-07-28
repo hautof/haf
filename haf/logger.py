@@ -1,7 +1,9 @@
 # encoding='utf-8'
+import logging
 import os
-import time, logging
+import time
 from multiprocessing import Process
+
 from haf.busclient import BusClient
 from haf.config import *
 from haf.signal import Signal
@@ -13,6 +15,7 @@ class Logger(Process):
     '''
     Logger
     '''
+
     def __init__(self, case_name: str, time_str: str, log_dir: str, bus_client: BusClient, args: tuple):
         super().__init__()
         self.daemon = True
@@ -91,24 +94,24 @@ class Logger(Process):
         if process not in self.loggers:
             self.loggers[process] = logging.getLogger(logger_name)
         logger = self.loggers.get(process)
-        if level=="debug":
+        if level == "debug":
             msg = f"<{process}> [{logger_name}] {msg_origin}"
             if hasattr(self.args, "debug") and self.args.debug:
                 logger.debug(msg)
-        elif level=="info":
+        elif level == "info":
             msg = f"<{process}> [{logger_name}] {msg_origin}"
             logger.info(msg)
-        elif level=="warning":
+        elif level == "warning":
             msg = f"{msg_origin}"
             logger.warning(f"<{process}> [{logger_name}]\33[33m ####################################### \33[0m")
             logger.warning(f"<{process}> [{logger_name}] \33[33m{msg}\33[0m")
             logger.warning(f"<{process}> [{logger_name}]\33[33m ####################################### \33[0m")
-        elif level=="error":
+        elif level == "error":
             msg = f"{msg_origin}"
             logger.error(f"<{process}> [{logger_name}]\33[31m >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \33[0m")
             logger.error(f"<{process}> [{logger_name}]\33[31m | {msg}\33[0m")
             logger.error(f"<{process}> [{logger_name}]\33[31m <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \33[0m")
-        elif level=="critical":
+        elif level == "critical":
             logger.critical(f"\33[5m{log}\33[0m")
 
     def log_handler(self, log):
@@ -121,7 +124,7 @@ class Logger(Process):
         log = log.get("msg")
         try:
             temp1, temp2, msg = self.split_log(log)
-        except :
+        except:
             temp1 = "error"
             temp2 = "error"
             msg = log
@@ -139,7 +142,7 @@ class Logger(Process):
         else:
             self.case_handler(temp1, temp2, msg)
 
-    def loader_handler(self,temp1, msg):
+    def loader_handler(self, temp1, msg):
         self.write("loader", temp1, msg)
 
     def runner_handler(self, temp1, msg):
@@ -199,4 +202,3 @@ class Logger(Process):
         '''
         logger_handler = self.bus_client.get_system()
         logger_handler.put(Signal(self.pid, SIGNAL_LOGGER_END))
-
