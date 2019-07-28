@@ -1,4 +1,5 @@
 import pluggy
+
 '''
 hookspecs
 '''
@@ -32,6 +33,7 @@ def publish_to_sql(args, results):
     :param result : publish result
     :return : None
     """
+
 
 @hookspec
 def start_web_server(args, bus_client):

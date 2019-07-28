@@ -5,7 +5,8 @@ description : the app case helper
 others:
     include BasePage
 '''
-import time, os
+import os
+
 from haf.config import *
 
 
@@ -85,6 +86,7 @@ class Stage(object):
     '''
     stage of app test
     '''
+
     def __init__(self):
         self.id = 0
         self.name = ""
@@ -95,8 +97,8 @@ class Stage(object):
         self.info = {}
         self.result = "NOT RUN"
         self.run_count = 0
-    
-    def constructor(self, input: dict={}):
+
+    def constructor(self, input: dict = {}):
         '''
 
         :param input:
@@ -133,13 +135,14 @@ class AppIds(object):
     '''
     ids of app
     '''
+
     def __init__(self):
         self.id = ""
         self.subid = ""
         self.name = ""
         self.app_name = ""
 
-    def constructor(self, inputs:dict={}):
+    def constructor(self, inputs: dict = {}):
         '''
 
         :param inputs:
@@ -167,6 +170,7 @@ class DesiredCaps(object):
     '''
     desired caps needed by appium
     '''
+
     def __init__(self):
         self.automationName = ""
         self.platformName = ""
@@ -176,7 +180,7 @@ class DesiredCaps(object):
         self.appActivity = ""
         self.noReset = True
 
-    def constructor(self, inputs: dict={}):
+    def constructor(self, inputs: dict = {}):
         '''
 
         :param inputs:

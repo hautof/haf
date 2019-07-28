@@ -1,16 +1,15 @@
 # encoding='utf-8'
+import argparse
 import json
 import os
 import sys
 
-from haf.utils import Utils
-
-from haf.pluginmanager import PluginManager, plugin_manager
-from haf.program import Program
-from haf.helper import Helper
-from haf.config import BANNER_STRS
 from haf.common.schema import check_config
-import argparse
+from haf.config import BANNER_STRS
+from haf.helper import Helper
+from haf.pluginmanager import plugin_manager
+from haf.program import Program
+from haf.utils import Utils
 
 
 def init():
@@ -18,7 +17,6 @@ def init():
 
 
 def main_args():
-
     init()
 
     arg_program = argparse.ArgumentParser(prog="python -m haf", add_help=True)
@@ -90,14 +88,14 @@ def main_args():
 
     # init
     sub_init_arg_program = sub_all_arg_program.add_parser("init",
-                                                         help="init workspace, using 'python -m haf init -t=all' to init workspace of haf")
+                                                          help="init workspace, using 'python -m haf init -t=all' to init workspace of haf")
     sub_init_arg_program.add_argument("--type", "-t", dest="init_type", type=str, default=None,
-                                     help="init workspace with type")
+                                      help="init workspace with type")
     # help
     sub_help_arg_program = sub_all_arg_program.add_parser("help",
-                                                         help="help, using 'python -m haf help' to show this")
+                                                          help="help, using 'python -m haf help' to show this")
     sub_help_arg_program.add_argument("--all", dest="help-all", type=str, default=None,
-                                     help="show all help informations")
+                                      help="show all help informations")
 
     plugin_manager.add_options(sub_run_arg_program)
 
@@ -111,7 +109,7 @@ def main_args():
                 sys.exit(-1)
             try:
                 with open(args.config, 'r') as f:
-                    all_config_json  = json.load(f)
+                    all_config_json = json.load(f)
                     if not check_config(all_config_json):
                         sys.exit(-1)
                     config = all_config_json.get("config")
@@ -121,12 +119,14 @@ def main_args():
                     bus_config = config_run.get("bus")
                     args.bus_server_port = config_run.get("bus_server_port")
                     args.only_bus = bus_config.get("only")
-                    args.bus_server = None if bus_config.get("host") is None or bus_config.get("host")=="" else f"{bus_config.get('auth_key')}@{bus_config.get('host')}:{bus_config.get('host')}"
-                    
+                    args.bus_server = None if bus_config.get("host") is None or bus_config.get("host") == "" \
+                        else f"{bus_config.get('auth_key')}@{bus_config.get('host')}:{bus_config.get('host')}"
+
                     args.debug = True if args.debug else config_run.get("debug", False)
                     args.console = True if args.console else config_run.get("console", False)
                     args.nout = True if args.nout else config_run.get("no_output", False)
-                    args.filter_case = args.filter_case.split(",") if config_run.get("filter_case") is None and isinstance(args.filter_case, str) else config_run.get("filter_case")
+                    args.filter_case = args.filter_case.split(",") if config_run.get(
+                        "filter_case") is None and isinstance(args.filter_case, str) else config_run.get("filter_case")
 
                     config_run_report = config_run.get("report")
                     args.report_html = config_run_report.get("report_html", True)
@@ -135,7 +135,7 @@ def main_args():
                     args.report_export_template = config_run_report.get("report_export_template", None)
                     args.report_export_dir = config_run_report.get("report_export_path", None)
 
-                    args.case = [ x.get("case_path") for x in config_run.get("case") ]
+                    args.case = [x.get("case_path") for x in config_run.get("case")]
                     runner_config = config_run.get("runner")
                     args.runner_count = runner_config.get("count")
                     args.only_runner = runner_config.get("only")
@@ -191,5 +191,6 @@ def main_args():
 
 if __name__ == "__main__":
     import multiprocessing
+
     multiprocessing.freeze_support()
     main_args()

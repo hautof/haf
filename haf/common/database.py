@@ -12,9 +12,7 @@ all these tools need the arg : SQLConfig
         inputs is a dict type, include host, port, username, password, dtabase, protocol, id,  sql_name key
 '''
 
-
 from haf.common.log import Log
-from contextlib import contextmanager
 
 logger = Log.getLogger(__name__)
 
@@ -34,7 +32,7 @@ class SQLConfig(object):
         self.id = None
         self.sqlname = None
 
-    def constructor(self, inputs:dict={}):
+    def constructor(self, inputs: dict = {}):
         '''
         using dict type to init the SQLConfig
         :param inputs
@@ -70,10 +68,11 @@ class MysqlTool(object):
     '''
     MysqlTool
     '''
+
     def __init__(self):
         pass
 
-    def connect_execute(self, sqlconfig: SQLConfig, sqlscript: list, **kwargs)-> tuple:
+    def connect_execute(self, sqlconfig: SQLConfig, sqlscript: list, **kwargs) -> tuple:
         '''
         connect and execute
 
@@ -98,7 +97,8 @@ class MysqlTool(object):
                                                     passwd=sqlconfig.password, db=sqlconfig.database,
                                                     cursorclass=pymysql.cursors.DictCursor)
             else:
-                self.connect_msql = pymysql.connect(host=sqlconfig.host, port=sqlconfig.port, user=sqlconfig.username, passwd=sqlconfig.password, db=sqlconfig.database)
+                self.connect_msql = pymysql.connect(host=sqlconfig.host, port=sqlconfig.port, user=sqlconfig.username,
+                                                    passwd=sqlconfig.password, db=sqlconfig.database)
             cursor_m = self.connect_msql.cursor()
             data = []
             # here if sqlscript is list type, must execute every
@@ -114,7 +114,7 @@ class MysqlTool(object):
                         if not run_background:
                             logger.info(f"{key} result {str(data)}", __name__)
                     # if sql script is tuple type, means to be 2 parts: 1 is the script, 2 is the parameter
-                    if isinstance(ss, tuple) and len(ss)>2:
+                    if isinstance(ss, tuple) and len(ss) > 2:
                         if not run_background:
                             logger.info(f"{key} tuple start {sqlconfig.host} execute {ss}", __name__)
                         cursor_m.execute(ss[0], ss[1])
@@ -164,10 +164,11 @@ class SqlServerTool(object):
     '''
     SqlServerTool
     '''
+
     def __init__(self):
         pass
 
-    def connect_execute(self, sqlconfig:SQLConfig, sqlscript:list, **kwargs):
+    def connect_execute(self, sqlconfig: SQLConfig, sqlscript: list, **kwargs):
         '''
         connect and execute
 
@@ -247,7 +248,6 @@ class SqlServerTool(object):
             return []
 
     def close(self):
-        import pymssql
         if self.connect_msql is not None:
             self.connect_msql.close()
 
@@ -256,6 +256,7 @@ class RedisTool(object):
     '''
     Redis
     '''
+
     def __init__(self):
         pass
 
@@ -283,7 +284,8 @@ class RedisTool(object):
 
         try:
             self.connect_redis = redis.Redis(host=sqlconfig.host, port=sqlconfig.port, db=sqlconfig.database)
-            logger.info(f"{key} start {sqlconfig.host} : [{self.connect_redis.type(sqlscript)}] execute {sqlscript}", __name__)
+            logger.info(f"{key} start {sqlconfig.host} : [{self.connect_redis.type(sqlscript)}] execute {sqlscript}",
+                        __name__)
             if "zset" in str(self.connect_redis.type(sqlscript)):
                 start = kwargs["start"]
                 end = kwargs["end"]

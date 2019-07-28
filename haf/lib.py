@@ -3,8 +3,8 @@ lib
 '''
 
 import haf
-from haf.utils import LoadFromConfig
 from haf.common.log import Log
+from haf.utils import LoadFromConfig
 
 logger = Log.getLogger(__name__)
 

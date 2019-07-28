@@ -1,13 +1,13 @@
 # encoding='utf-8'
 import os
+import traceback
 
+from jinja2 import Environment, FileSystemLoader
 from jinja2.environment import TemplateStream
 
-from haf.result import EndResult
-from jinja2 import Environment, FileSystemLoader
 from haf.common.log import Log
+from haf.result import EndResult
 from haf.utils import Utils
-import traceback
 
 logger = Log.getLogger(__name__)
 
@@ -16,6 +16,7 @@ class Jinja2Report(object):
     '''
     generate report by jinja2
     '''
+
     def __init__(self):
         pass
 
@@ -108,7 +109,7 @@ class Jinja2Report(object):
             return {"status": "error", "msg": "results is None"}
         template = Jinja2Report.get_template("online")
         return template.render(results=results)
-    
+
     @staticmethod
     def report_online_app(results: EndResult):
         '''

@@ -56,7 +56,7 @@ SIGNAL_GROUP = {
 # api method [get, post, put, delete]
 CASE_HTTP_API_METHOD_GET = 30
 CASE_HTTP_API_METHOD_POST = 31
-CASE_HTTP_API_METHOD_PUT= 32
+CASE_HTTP_API_METHOD_PUT = 32
 CASE_HTTP_API_METHOD_DELETE = 33
 
 METHOD_GROUP = {
@@ -100,19 +100,19 @@ OPERATION_APP_OTHER = 73
 OPERATION_APP_EXISTS = 74
 
 OPERATION_APP_GROUP = {
-  "click": OPERATION_APP_CLICK,
-  "swipe": OPERATION_APP_SWIPE,
-  "send_keys": OPERATION_APP_SENDKEYS,
-  "other": OPERATION_APP_OTHER,
-  "exists": OPERATION_APP_EXISTS
+    "click": OPERATION_APP_CLICK,
+    "swipe": OPERATION_APP_SWIPE,
+    "send_keys": OPERATION_APP_SENDKEYS,
+    "other": OPERATION_APP_OTHER,
+    "exists": OPERATION_APP_EXISTS
 }
 
 OPERATION_APP_ANTI_GROUP = {
-  OPERATION_APP_CLICK: "click",
-  OPERATION_APP_SWIPE: "swipe",
-  OPERATION_APP_SENDKEYS: "send_keys",
-  OPERATION_APP_OTHER: "other",
-  OPERATION_APP_EXISTS: "exists"
+    OPERATION_APP_CLICK: "click",
+    OPERATION_APP_SWIPE: "swipe",
+    OPERATION_APP_SENDKEYS: "send_keys",
+    OPERATION_APP_OTHER: "other",
+    OPERATION_APP_EXISTS: "exists"
 }
 
 # operation of web [click, sendkeys, swipe, other, exists]
@@ -123,19 +123,19 @@ OPERATION_WEB_OTHER = 83
 OPERATION_WEB_EXISTS = 84
 
 OPERATION_WEB_GROUP = {
-  "click": OPERATION_WEB_CLICK,
-  "swipe": OPERATION_WEB_SWIPE,
-  "send_keys": OPERATION_WEB_SENDKEYS,
-  "other": OPERATION_WEB_OTHER,
-  "exists": OPERATION_WEB_EXISTS
+    "click": OPERATION_WEB_CLICK,
+    "swipe": OPERATION_WEB_SWIPE,
+    "send_keys": OPERATION_WEB_SENDKEYS,
+    "other": OPERATION_WEB_OTHER,
+    "exists": OPERATION_WEB_EXISTS
 }
 
 OPERATION_WEB_ANTI_GROUP = {
-  OPERATION_WEB_CLICK: "click",
-  OPERATION_WEB_SWIPE: "swipe",
-  OPERATION_WEB_SENDKEYS: "send_keys",
-  OPERATION_WEB_OTHER: "other",
-  OPERATION_WEB_EXISTS: "exists"
+    OPERATION_WEB_CLICK: "click",
+    OPERATION_WEB_SWIPE: "swipe",
+    OPERATION_WEB_SENDKEYS: "send_keys",
+    OPERATION_WEB_OTHER: "other",
+    OPERATION_WEB_EXISTS: "exists"
 }
 
 # log path
@@ -194,16 +194,17 @@ config_schema = {
                                 "database": {"type": "string"},
                                 "protocol": {"enum": ["mysql", "mssql"]}
                             },
-                            "required": ["id", "sql_name", "publish", "host", "port", "username", "password", "database", "protocol"]
+                            "required": ["id", "sql_name", "publish", "host", "port", "username", "password",
+                                         "database", "protocol"]
                         },
-                        "log":{
+                        "log": {
                             "type": "object",
                             "properties": {
                                 "log_path": {"type": "string"}
                             },
                             "required": ["log_path"]
                         },
-                        "bus":{
+                        "bus": {
                             "type": "object",
                             "properties": {
                                 "only": {"type": "boolean"},
@@ -218,7 +219,7 @@ config_schema = {
                             },
                             "required": ["only", "host", "port", "auth_key"]
                         },
-                        "report":{
+                        "report": {
                             "type": "object",
                             "properties": {
                                 "report_path": {"type": "string"},
@@ -227,7 +228,7 @@ config_schema = {
                             },
                             "required": ["report_path"]
                         },
-                        "case":{
+                        "case": {
                             "type": "array",
                             "items": {
                                 "type": "object",
@@ -237,7 +238,7 @@ config_schema = {
                                 "required": ["case_path"]
                             }
                         },
-                        "runner":{
+                        "runner": {
                             "type": "object",
                             "properties": {
                                 "only": {"type": "boolean"},
@@ -245,21 +246,21 @@ config_schema = {
                             },
                             "required": ["only", "count"]
                         },
-                        "loader":{
+                        "loader": {
                             "type": "object",
                             "propertied": {
                                 "only": {"type": "boolean"}
                             },
                             "required": ["only"]
                         },
-                        "recorder":{
+                        "recorder": {
                             "type": "object",
                             "propertied": {
                                 "only": {"type": "boolean"}
                             },
                             "required": ["only"]
                         },
-                        "web_server":{
+                        "web_server": {
                             "type": "object",
                             "propertied": {
                                 "only": {"type": "boolean"},

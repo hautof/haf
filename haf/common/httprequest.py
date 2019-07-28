@@ -8,13 +8,13 @@ others :
     support with headers, data
 '''
 
-
 import json
-import urllib.request as ur
-import urllib.parse
-import urllib.error as urlerror
-from haf.common.log import Log
 import traceback
+import urllib.error as urlerror
+import urllib.parse
+import urllib.request as ur
+
+from haf.common.log import Log
 
 logger = Log.getLogger(__name__)
 
@@ -137,7 +137,7 @@ class HttpController(object):
             logger.error(f"{key} {str(e)}", __name__)
             return e
         except urlerror.HTTPError as httpe:
-            logger.error(f"{key} { str(httpe)}", __name__)
+            logger.error(f"{key} {str(httpe)}", __name__)
             return httpe
         except Exception as ee:
             logger.error(f"{key} {str(ee)}", __name__)
