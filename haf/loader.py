@@ -57,8 +57,6 @@ class Loader(Process):
                     logger.info(f"{self.key} -- get start signal from main", __name__)
                     break
 
-            if self.args.nout:
-                cb = ChargingBar(max=100)
             complete_case_count = 0
             show_count = []
             all_count = []
@@ -67,6 +65,8 @@ class Loader(Process):
                 temp = self.get_parameter()
                 # check the signal of stop, after stop nothing!
                 if isinstance(temp, Signal) and temp.signal == SIGNAL_STOP:
+                    if self.args.nout:
+                        cb = ChargingBar(max=self.true_case_count)
                     while True:
                         if not self.case_count.empty():
                             complete_case_count = self.case_count.get()
@@ -75,7 +75,7 @@ class Loader(Process):
                         else:
                             pass
                         if self.args.nout:
-                            cb.goto(complete_case_count * 100 / self.true_case_count)
+                            cb.goto(complete_case_count)
                         if self.case_back_queue.empty():
                             pass
                         else:
@@ -97,9 +97,9 @@ class Loader(Process):
                                         __name__)
                                     self.end_handler()
                                     return
-                    time.sleep(0.01)
+                    # time.sleep(0.001)
                 elif temp is None:
-                    time.sleep(0.01)
+                    # time.sleep(0.001)
                     continue
                 else:
                     file_name = temp.get("file_name")

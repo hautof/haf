@@ -91,7 +91,8 @@ class Recorder(Process):
                         if self.runner_count == self.signal_end_count:
                             self.end_handler()
                             break
-                time.sleep(0.001)
+                # time.sleep(0.001)
+            self.publish_to_main()
         except Exception:
             raise FailRecorderException
 
@@ -179,7 +180,7 @@ class Recorder(Process):
         suite_name = result.case.bench_name
         if suite_name not in self.results.summary.keys():
             self.results.summary[suite_name] = Summary(suite_name, result.case.request.host_port if isinstance(result,
-                                                                                                               HttpApiResult) else None)
+                                                                                               HttpApiResult) else None)
         if result.result == RESULT_SKIP:
             self.on_case_skip(suite_name)
         elif result.result == RESULT_PASS:
@@ -236,11 +237,13 @@ class Recorder(Process):
         publish results to web server
         :return:
         '''
-        logger.debug(f"publish results now...", __name__)
         if hasattr(self.args, "web_server") and self.args.web_server:
+            logger.debug(f"publish results now...", __name__)
             if self.publish_result.full():
                 self.publish_result.get()
             self.publish_result.put(self.results)
+
+    def publish_to_main(self):
         if self.publish_result_main.full():
             self.publish_result_main.get()
         self.publish_result_main.put(self.results)
