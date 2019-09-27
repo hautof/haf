@@ -150,3 +150,4 @@ def new_locker(bus_client, key, lock: m_lock = None):
     finally:
         locker.release_lock()
         return
+

@@ -165,8 +165,9 @@ class Runner(Process):
         :param cases:
         :return:
         '''
-        self.loop = asyncio.get_event_loop()
-        results = self.loop.run_until_complete(self.run_cases(cases))
+        # self.loop = asyncio.get_event_loop()
+        #  results = self.loop.run_until_complete(self.run_cases(cases))
+        results = asyncio.run(self.run_cases(cases))
         for result in results:
             if isinstance(result, (HttpApiResult, AppResult, WebResult)):
                 self.put_result("result", self.locks[2], result)
@@ -202,7 +203,7 @@ class Runner(Process):
                         cases.append(case)
                     logger.debug(f"cases' length is {len(cases)}, and end is {case}", __name__)
 
-                if len(cases) > 0 and (len(cases) >= 50 or case_end or self.signal.signal):
+                if len(cases) > 0 and (len(cases) >= 10 or case_end or self.signal.signal):
                     logger.debug(
                         f"cases' length is {len(cases)}, case_end is {case_end}, signal is {self.signal.signal}",
                         __name__)
@@ -224,7 +225,7 @@ class Runner(Process):
         :param local_cases:
         :return:
         '''
-        done, pending = await asyncio.wait([self.run_case(local_case) for local_case in local_cases])
+        done, pending = await asyncio.wait([asyncio.create_task(self.run_case(local_case)) for local_case in local_cases])
         results = []
         for r in done:
             results.append(r.result())
