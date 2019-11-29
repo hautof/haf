@@ -85,7 +85,7 @@ class Loader(Process):
                         if self.case_queue.empty() and self.case_back_queue.empty():
                             with new_locker(self.bus_client, self.key, self.lock):
                                 if complete_case_count not in show_count:
-                                    logger.debug(
+                                    logger.info(
                                         f"complete case count check here {complete_case_count} == {self.true_case_count}",
                                         __name__)
                                     show_count.append(complete_case_count)
