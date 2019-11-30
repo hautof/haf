@@ -1,17 +1,28 @@
 # encoding = 'utf-8'
-import importlib, inspect, json, os, sys, time, traceback, urllib, random, platform, yaml
+import importlib
+import inspect
+import json
+import os
+import platform
+import random
+import sys
+import time
+import traceback
+import urllib
+from datetime import datetime
 from http.client import HTTPResponse
 from threading import Thread
-from datetime import datetime
 
-from haf.common.sigleton import SingletonType
+import yaml
 from openpyxl import load_workbook
+
 from haf.apihelper import Request, Response
 from haf.case import BaseCase
 from haf.common.database import MysqlTool, SqlServerTool, SQLConfig
 from haf.common.exception import FailLoadCaseFromPyException
-from haf.common.log import Log
 from haf.common.httprequest import HttpController
+from haf.common.log import Log
+from haf.common.sigleton import SingletonType
 from haf.config import *
 from haf.mark import test, skip
 
@@ -21,7 +32,7 @@ logger = Log.getLogger(__name__)
 class Utils(object):
 
     @staticmethod
-    def sql_execute(sqlconfig: SQLConfig, sqlscript: str, **kwargs)->list:
+    def sql_execute(sqlconfig: SQLConfig, sqlscript: str, **kwargs) -> list:
         '''
         sql_execute : connect to sqlconfig & execute sqlscript
         :param sqlconfig: SQLConfig
@@ -35,9 +46,9 @@ class Utils(object):
         try:
             sqlconfig = sqlconfig
             if sqlconfig.protocol == "mysql":
-                 func_obj = MysqlTool()
+                func_obj = MysqlTool()
             elif sqlconfig.protocol == "sqlserver":
-                 func_obj = SqlServerTool()
+                func_obj = SqlServerTool()
             # elif sqlconfig.protocol == "redis":
             #     func_obj = RedisTool()
             # elif sqlconfig.protocol == "neo4j":
@@ -48,12 +59,12 @@ class Utils(object):
         except Exception as e:
             logger.error(f"{key} {e}", __name__)
         finally:
-            logger.info(f"{key} sql result : {data}", __name__)
+            logger.debug(f"{key} sql result : {data}", __name__)
             if func_obj is not None:
                 func_obj.close()
 
     @staticmethod
-    def get_rows_from_xlsx(filename: str)->dict:
+    def get_rows_from_xlsx(filename: str) -> dict:
         '''
         get_rows_from_xlsx : read rows from xlsx file (filename)
         :param filename: xlsx filename
@@ -120,7 +131,7 @@ class Utils(object):
             logger.error(f"{filename} {e} ", __name__)
 
     @staticmethod
-    def load_from_json(file_name: str)->dict:
+    def load_from_json(file_name: str) -> dict:
         '''
         load_from_json : load json obj from file_name
         :param file_name:
@@ -138,7 +149,7 @@ class Utils(object):
             logger.error(f"{file_name} {e} ", __name__)
 
     @staticmethod
-    def load_from_yml(file_name: str)-> dict:
+    def load_from_yml(file_name: str) -> dict:
         '''
         load_from_yml : load dict from yml file (file_name)
         :param file_name:
@@ -163,7 +174,7 @@ class Utils(object):
     @staticmethod
     def crc32(data):
         import binascii
-        return  (binascii.crc32(bytes(str(data), encoding='utf-8')))
+        return (binascii.crc32(bytes(str(data), encoding='utf-8')))
 
     @staticmethod
     def find_hash_in_range(hashrange, data, id):
@@ -201,13 +212,16 @@ class Utils(object):
         return tablehashmap.get(str(findhash))
 
     @staticmethod
-    def get_class_from_py(module: str)->list:
+    def get_class_from_py(module: str) -> list:
         '''
         get_class_from_py : get classes from py file (module)
         :param module: str, module file name
         :return: list [classes]
         '''
-        built_in_list = ['__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__']
+        built_in_list = ['__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__',
+                         '__getattribute__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__',
+                         '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__',
+                         '__sizeof__', '__str__', '__subclasshook__', '__weakref__']
         attr_list = ['AttrNoneList', 'bench_name', 'error_msg', 'expect', 'id', 'mark', 'name', 'run', 'subid', 'type']
         attr_none_list = ["BaseCase", "PyCase", "HttpApiCase"]
         class_list = []
@@ -220,7 +234,7 @@ class Utils(object):
         return class_list if len(class_list) > 0 else None
 
     @staticmethod
-    def get_case_from_class(class_list: list)->dict:
+    def get_case_from_class(class_list: dict) -> dict:
         '''
         get_case_from_class : get case from class of class_list
         :param class_list: list
@@ -276,7 +290,9 @@ class Utils(object):
                     for case in suite_temp.get("cases"):
 
                         for key in case.keys():
-                            case_temp = {"id": id, "subid": subid, "name": key, "run": case.get(key).run if hasattr(case.get(key), 'run') else False, "reason": case.get(key).reason if hasattr(case.get(key), 'reason') else None}
+                            case_temp = {"id": id, "subid": subid, "name": key,
+                                         "run": case.get(key).run if hasattr(case.get(key), 'run') else False,
+                                         "reason": case.get(key).reason if hasattr(case.get(key), 'reason') else None}
                             case_temp["func"] = key
                             case_temp["suite"] = suite_key
                             case_temp["request"] = suite_temp.get("request", Request())
@@ -288,13 +304,22 @@ class Utils(object):
                                     case_temp_1["param"] = param
                                     cases.append(case_temp_1)
                                     subid += 1
+                            elif hasattr(func, "stress"):
+                                threads = func.stress.get("threads")
+                                count = func.stress.get("count")
+                                for case_index in range(threads):
+                                    case_stress = case_temp.copy()
+                                    case_stress["subid"] = subid
+                                    case_stress["run_times"] = count
+                                    cases.append(case_stress)
+                                    subid += 1
                             else:
                                 subid += 1
                                 cases.append(case_temp)
         return cases
 
     @staticmethod
-    def load_from_py(file_name: str)->dict:
+    def load_from_py(file_name: str) -> dict:
         '''
         load_from_py : load from py
         :param file_name: str, filename of python
@@ -304,8 +329,8 @@ class Utils(object):
             py_config = {}
             py_config["config"] = []
             config_temp = {}
-            logger.info("{} found python file : {}".format("system$%util$%", file_name), __name__)
             if os.path.exists(file_name):
+                logger.debug("{} found python file : {}".format("system$%util$%", file_name), __name__)
                 path, file = Utils.get_path(file_name)
                 sys.path.append(path)
                 module_name = file.rsplit(".", 1)[0]
@@ -330,13 +355,16 @@ class Utils(object):
                     }],
                     "testcases": cases
                 }
+            else:
+                logger.error("{} Not found python file : {}".format("system$%util$%", file_name), __name__)
+
 
         except Exception as e:
             logger.error(f"{file_name} {e} ", __name__)
             logger.error(f"{file_name} {traceback.format_exc()}", __name__)
 
     @staticmethod
-    def http_request(request:Request, **kwargs) :
+    def http_request(request: Request, **kwargs):
         '''
         http request
         :param request: Request
@@ -346,7 +374,7 @@ class Utils(object):
 
         session = kwargs.get("session")
 
-        if session :
+        if session:
             import requests
             from requests import Response as rResponse
             if isinstance(session, requests.Session):
@@ -374,7 +402,7 @@ class Utils(object):
                     response.code = result.code if hasattr(result, "code") else None
                     response.header = result.info() if hasattr(result, "info") else None
 
-                logger.info(f"{key} response is {response.deserialize()}", __name__)
+                logger.debug(f"{key} response is {response.deserialize()}", __name__)
                 return response
         else:
             header = request.header
@@ -382,7 +410,7 @@ class Utils(object):
             method = request.method
             url = request.url
 
-            logger.info(f"{key} {METHOD_GROUP.get(str(method))} {url} with data: {data}, header is: {header}", __name__)
+            logger.debug(f"{key} {METHOD_GROUP.get(str(method))} {url} with data: {data}, header is: {header}", __name__)
             response = Response()
             result = None
             if method == CASE_HTTP_API_METHOD_GET:
@@ -396,15 +424,17 @@ class Utils(object):
                 response.header = result.headers
                 try:
                     response.body = json.loads(result.read())
-                except :
+                except:
                     response.body = result.read()
                 response.code = result.code
-            elif isinstance(result,urllib.request.URLError) or isinstance(result, urllib.request.HTTPError) or isinstance(result, urllib.request.HTTPHandler):
-                response.body =  {}
+            elif isinstance(result, urllib.request.URLError) or isinstance(result,
+                                                                           urllib.request.HTTPError) or isinstance(
+                result, urllib.request.HTTPHandler):
+                response.body = {}
                 response.code = result.code if hasattr(result, "code") else None
                 response.header = result.info() if hasattr(result, "info") else None
 
-            logger.info(f"{key} response is {response.deserialize()}", __name__)
+            logger.debug(f"{key} response is {response.deserialize()}", __name__)
             return response
 
     @staticmethod
@@ -421,7 +451,7 @@ class Utils(object):
         return timenow
 
     @staticmethod
-    def get_date_result(begin: str, end: str)->int:
+    def get_date_result(begin: str, end: str) -> int:
         '''
         get_date_result : get duration from begin to end
         :param begin: str
@@ -437,14 +467,13 @@ class Utils(object):
             s1 = float(s1)
             d2 = datetime.strptime(d2, "%Y-%m-%d %H:%M:%S")
             s2 = float(s2)
-            sec = (d2-d1).seconds
+            sec = (d2 - d1).seconds
             if sec == 0:
-                return (s2-s1)/1000
+                return (s2 - s1) / 1000
             else:
-                return float(sec) + (s2-s1)/1000
+                return float(sec) + (s2 - s1) / 1000
         except Exception as e:
             return 0
-
 
     @staticmethod
     def get_time_str():
@@ -487,7 +516,8 @@ class Utils(object):
                 if os.path.exists(path) and os.path.isdir(path):
                     file_list = os.listdir(path)
                     for f in file_list:
-                        if f.startswith("test_") and (f.endswith(".py") or f.endswith(".yml") or f.endswith(".json") or f.endswith(".xlsx")):
+                        if f.startswith("test_") and (
+                                f.endswith(".py") or f.endswith(".yml") or f.endswith(".json") or f.endswith(".xlsx")):
                             cases.append(os.path.join(path, f))
                         elif os.path.exists(os.path.join(path, f)) and os.path.isdir(os.path.join(path, f)):
                             for case in Utils.load_case_from_dir([os.path.join(path, f)]):
@@ -548,4 +578,3 @@ class SignalThread(Thread):
             # logger.debug(f"signal of {self.signal.signal}", __name__)
             self.signal.change_status()
             time.sleep(self.time)
-

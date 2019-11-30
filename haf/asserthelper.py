@@ -9,13 +9,14 @@ others:
 from datetime import datetime
 
 from assertpy import assert_that
-from haf.common.log import Log
 from deepdiff import DeepDiff
+
+from haf.common.log import Log
 
 logger = Log.getLogger(__name__)
 
 
-#TODO: here need extend
+# TODO: here need extend
 
 
 class AssertHelper(object):

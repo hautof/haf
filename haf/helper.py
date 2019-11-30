@@ -4,8 +4,7 @@ file name : helper
 desc : show help informations
 '''
 
-import os, sys
-from haf.config import *
+import os
 
 
 class Helper(object):
@@ -13,7 +12,7 @@ class Helper(object):
         pass
         # include init_workspace
 
-    def init_workspace(self, case_type: str=None):
+    def init_workspace(self, case_type: str = None):
         ''' init haf workspace with type case'''
         if case_type:
             pass

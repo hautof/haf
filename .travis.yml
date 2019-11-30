@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.6"
+  - "3.7"
 # command to install dependencies
 install:
   - pip install paramiko
@@ -16,7 +16,6 @@ install:
   - pip install pyaml
   - pip install deepdiff
   - pip install setuptools
-  - pip install pymssql
   - pip install jsonschema
   - pip install progress
 script:

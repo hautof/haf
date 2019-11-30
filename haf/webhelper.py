@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import time, os
+import os
+
 from haf.config import *
 
 
@@ -86,8 +87,8 @@ class WebStage(object):
         self.info = {}
         self.result = "NOT RUN"
         self.run_count = 1
-    
-    def constructor(self, input: dict={}):
+
+    def constructor(self, input: dict = {}):
         self.id = input.get("id")
         self.name = input.get("name")
         self.operation = OPERATION_WEB_GROUP[input.get("operation")]
@@ -118,7 +119,7 @@ class WebIds(object):
         self.name = ""
         self.web_name = ""
 
-    def constructor(self, inputs:dict={}):
+    def constructor(self, inputs: dict = {}):
         self.id = inputs.get("id")
         self.subid = inputs.get("subid")
         self.name = inputs.get("name")
@@ -139,7 +140,7 @@ class WebDesiredCaps(object):
         self.platformVersion = ""
         self.start_url = ""
 
-    def constructor(self, inputs: dict={}):
+    def constructor(self, inputs: dict = {}):
         self.platformName = inputs.get("platformName")
         self.platformVersion = inputs.get("platformVersion")
         self.start_url = inputs.get("start_url")

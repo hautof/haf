@@ -8,11 +8,9 @@ others :
         class TestApi(BaseCase):
 
 '''
-import json
 
 from haf.apihelper import Request, Response, Ids, Expect, SqlInfo
 from haf.apphelper import Stage, AppIds, DesiredCaps
-from haf.config import *
 from haf.common.log import Log
 from haf.webhelper import *
 
@@ -23,6 +21,7 @@ class BaseCase(object):
     '''
     BaseCase the base of cases
     '''
+
     def __init__(self):
         self.mark = CASE_MARK_BASE
         self.name = None
@@ -35,12 +34,22 @@ class BaseCase(object):
         self.error_msg = ""
         self.AttrNoneList = ["result", "error", "AttrNoneList", ]
         self.func = None
+        self.run_times = 1
+
+
+class StressBaseCase(object):
+    '''
+    StressBaseCase the case os stress test
+    '''
+    def __init__(self):
+        pass
 
 
 class PyCase(BaseCase):
     '''
     py cases
     '''
+
     def __init__(self, module_name, module_path):
         super().__init__()
         self.mark = CASE_MARK_API
@@ -82,14 +91,14 @@ class PyCase(BaseCase):
             args_init = args[0]
         else:
             args_init = kwargs
-        #logger.info(args_init)
+        # logger.info(args_init)
         self.ids.constructor(args_init)
         self.run = CASE_RUN if args_init.get("run") is True else CASE_SKIP
         self.func = args_init.get("func")
         self.suite = args_init.get("suite")
         self.param = args_init.get("param")
-        temp = args_init.get("request")
-        self.request = temp if temp else Request()
+        self.request = args_init.get("request", Request())
+        self.run_times = args_init.get("runt_times", 1)
 
     def bind_bench(self, bench_name):
         '''
@@ -122,7 +131,8 @@ class PyCase(BaseCase):
             "param": str(self.param),
             "module_name": self.module_name,
             "module_path": self.module_path,
-            "sqlinfo": self.sqlinfo.deserialize()
+            "sqlinfo": self.sqlinfo.deserialize(),
+            "run_times": self.run_times
         }
 
 
@@ -130,6 +140,7 @@ class HttpApiCase(BaseCase):
     '''
     http api case
     '''
+
     def __init__(self):
         super().__init__()
         self.mark = CASE_MARK_API
@@ -168,8 +179,11 @@ class HttpApiCase(BaseCase):
             args_init = kwargs
         self.ids.constructor(args_init)
         self.run = CASE_RUN if args_init.get("run") is True else CASE_SKIP
-        self.dependent = [x for x in str(args_init.get("dependent")).split(";") if args_init.get("dependent") is not None]
-        self.dependent_var = [x for x in str(args_init.get("dependent_var")).split(";") if args_init.get("dependent_var") is not None]
+        self.run_time = args_init.get('run_times', 1)
+        self.dependent = [x for x in str(args_init.get("dependent")).split(";") if
+                          args_init.get("dependent") is not None]
+        self.dependent_var = [x for x in str(args_init.get("dependent_var")).split(";") if
+                              args_init.get("dependent_var") is not None]
         self.request.constructor(args_init)
         self.response.constructor(args_init)
         self.expect.constructor(args_init)
@@ -200,13 +214,14 @@ class HttpApiCase(BaseCase):
             "ids": self.ids.deserialize(),
             "run": self.run,
             "dependent": self.dependent,
-            "dependent_var" : self.dependent_var,
+            "dependent_var": self.dependent_var,
             "bench_name": self.bench_name,
             "request": self.request.deserialize(),
             "response": self.response.deserialize(),
             "expect": self.expect.deserialize(),
             "sqlinfo": self.sqlinfo.deserialize(),
-            "type": self.type
+            "type": self.type,
+            "runt_times": self.run_times
         }
 
 
@@ -214,6 +229,7 @@ class AppCase(BaseCase):
     '''
     app case
     '''
+
     def __init__(self):
         super().__init__()
         self.mark = CASE_MARK_APP
@@ -254,7 +270,8 @@ class AppCase(BaseCase):
         self.ids.constructor(args_init)
         self.time_sleep = args_init.get("wait_time") or 5
         self.run = CASE_RUN if args_init.get("run") is True else CASE_SKIP
-        self.dependent = [x for x in str(args_init.get("dependent")).split(";") if args_init.get("dependent") is not None]
+        self.dependent = [x for x in str(args_init.get("dependent")).split(";") if
+                          args_init.get("dependent") is not None]
         self.desired_caps.constructor(args_init.get("desired_caps"))
         self.stages = {}
         self.wait_activity = args_init.get("wait_activity", None)
@@ -302,6 +319,7 @@ class WebCase(BaseCase):
     '''
     web case
     '''
+
     def __init__(self):
         super().__init__()
         self.mark = CASE_MARK_WEB
@@ -342,7 +360,8 @@ class WebCase(BaseCase):
         self.ids.constructor(args_init)
         self.time_sleep = args_init.get("wait_time") or 5
         self.run = CASE_RUN if args_init.get("run") is True else CASE_SKIP
-        self.dependent = [x for x in str(args_init.get("dependent")).split(";") if args_init.get("dependent") is not None]
+        self.dependent = [x for x in str(args_init.get("dependent")).split(";") if
+                          args_init.get("dependent") is not None]
         self.desired_caps.constructor(args_init.get("desired_caps"))
         self.stages = {}
         self.wait_activity = args_init.get("wait_activity", None)

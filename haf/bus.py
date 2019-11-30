@@ -6,11 +6,11 @@
 #
 '''
 import logging
-import time
 from multiprocessing import Process
 from queue import Queue
+
 from haf.common.exception import FailBusException
-from haf.config import BUS_DOMAIN, BUS_PORT, BUS_AUTH_KEY, SIGNAL_BUS_END
+from haf.config import BUS_DOMAIN, BUS_PORT, BUS_AUTH_KEY
 from haf.message import InfoManager
 
 logger = logging.getLogger(__name__)
@@ -20,6 +20,7 @@ class BusServer(Process):
     '''
     # BusServer the bus server process
     '''
+
     def __init__(self, port: int = None):
         super().__init__()
         self.domain = BUS_DOMAIN
@@ -28,7 +29,7 @@ class BusServer(Process):
         self.queue_manager = None
         self.server = None
         self.is_stop = False
-        self.daemon = True # Here to make bus exit when main progress end
+        self.daemon = True  # Here to make bus exit when main progress end
 
     def start_manager_server(self):
         '''
@@ -104,8 +105,3 @@ class BusServer(Process):
         logger.info(f"end bus")
         self.server.shutdown()
         self.is_stop = True
-
-
-
-
-

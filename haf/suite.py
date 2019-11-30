@@ -5,6 +5,7 @@ class BaseSuite(object):
     '''
     BaseSuite the base of suite
     '''
+
     def __init__(self):
         self.name = None
 
@@ -13,6 +14,7 @@ class HttpApiSuite(BaseSuite):
     '''
     http api suite
     '''
+
     def __init__(self):
         super().__init__()
         self.name = ""
@@ -29,6 +31,7 @@ class AppSuite(BaseSuite):
     '''
     app suite
     '''
+
     def __init__(self):
         super().__init__()
         self.name = ""
@@ -39,6 +42,3 @@ class AppSuite(BaseSuite):
 
     def add_case(self, case):
         self.cases.append(case)
-
-
-

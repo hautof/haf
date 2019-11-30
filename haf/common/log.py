@@ -19,8 +19,9 @@ others:
         logger.error
 '''
 
+import os
+import time
 
-import logging, os, time
 from haf.busclient import BusClient
 from haf.common.sigleton import SingletonType
 
@@ -35,7 +36,7 @@ class BaseLogger(metaclass=SingletonType):
         self.logger_name = logger_name
         self.bus_client = None
         self.process_id = 0
-    
+
     # here using this function to reconnect to the bus : loader, runner, recorder
     def bind_busclient(self, bus_client: BusClient):
         self.bus_client = BusClient(bus_client.domain, bus_client.port, bus_client.auth_key)
@@ -52,23 +53,28 @@ class BaseLogger(metaclass=SingletonType):
         self.debug_ = debug
 
     def debug(self, msg, logger_name=None):
-        msg = {"process": self.process_id, "logger_name":self.logger_name if not logger_name else logger_name, "level":"debug", "msg": msg}
+        msg = {"process": self.process_id, "logger_name": self.logger_name if not logger_name else logger_name,
+               "level": "debug", "msg": msg}
         self.msg_write(msg)
 
     def info(self, msg, logger_name=None):
-        msg = {"process": self.process_id, "logger_name":self.logger_name if not logger_name else logger_name, "level":"info", "msg": msg}
+        msg = {"process": self.process_id, "logger_name": self.logger_name if not logger_name else logger_name,
+               "level": "info", "msg": msg}
         self.msg_write(msg)
 
     def warning(self, msg, logger_name=None):
-        msg = {"process": self.process_id, "logger_name":self.logger_name if not logger_name else logger_name, "level":"warning", "msg": msg}
+        msg = {"process": self.process_id, "logger_name": self.logger_name if not logger_name else logger_name,
+               "level": "warning", "msg": msg}
         self.msg_write(msg)
 
     def error(self, msg, logger_name=None):
-        msg = {"process": self.process_id, "logger_name":self.logger_name if not logger_name else logger_name, "level":"error", "msg": msg}
+        msg = {"process": self.process_id, "logger_name": self.logger_name if not logger_name else logger_name,
+               "level": "error", "msg": msg}
         self.msg_write(msg)
 
     def critical(self, msg, logger_name=None):
-        msg = {"process": self.process_id, "logger_name":self.logger_name if not logger_name else logger_name, "level":"critical", "msg": msg}
+        msg = {"process": self.process_id, "logger_name": self.logger_name if not logger_name else logger_name,
+               "level": "critical", "msg": msg}
         self.msg_write(msg)
 
     def __new__(cls, *args, **kwargs):
@@ -81,7 +87,7 @@ class BaseLogger(metaclass=SingletonType):
         :return: None
         '''
         if not self.nout:
-            if origin_msg.get('level')=='debug' and not self.debug_:
+            if origin_msg.get('level') == 'debug' and not self.debug_:
                 return
             print(msg)
 
@@ -108,7 +114,7 @@ class BaseLogger(metaclass=SingletonType):
             with open(full_name, 'a+', encoding='utf-8') as f:
                 f.write(f"{msg_now}\n")
                 f.close()
-    
+
     @property
     def now(self):
         '''
@@ -133,8 +139,8 @@ class BaseLogger(metaclass=SingletonType):
         if self.local_logger:
             self.write_local_logger(msg)
         else:
-            if msg.get('level')=='debug' and not self.debug_:
-                return 
+            if msg.get('level') == 'debug' and not self.debug_:
+                return
             self.log.put(msg)
 
 
@@ -143,4 +149,3 @@ class Log:
     def getLogger(logger_name):
         logger = BaseLogger(logger_name)
         return logger
-

@@ -4,6 +4,7 @@ file name : globalenv
 desc : using to multi file var shared
 '''
 
+
 def _init():
     '''
     global init

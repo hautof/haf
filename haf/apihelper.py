@@ -6,6 +6,7 @@ others:
     include request, response ...
 '''
 import json
+
 from haf.common.database import SQLConfig
 from haf.config import *
 
@@ -14,6 +15,7 @@ class Request(object):
     '''
     Request object of api request
     '''
+
     def __init__(self):
         self.header = {}
         self.data = {}
@@ -23,7 +25,7 @@ class Request(object):
         self.host_port = ""
         self.url_part = ""
 
-    def constructor(self, inputs: dict={}):
+    def constructor(self, inputs: dict = {}):
         '''
         constructor the Request by dict type
         :param inputs:
@@ -74,12 +76,13 @@ class Response(object):
     '''
     Response
     '''
+
     def __init__(self):
         self.header = {}
         self.body = {}
         self.code = ""
 
-    def constructor(self, inputs:dict={}):
+    def constructor(self, inputs: dict = {}):
         '''
 
         :param inputs:
@@ -116,13 +119,14 @@ class Ids(object):
     '''
     api ids
     '''
+
     def __init__(self):
         self.id = ""
         self.subid = ""
         self.name = ""
         self.api_name = ""
 
-    def constructor(self, inputs:dict={}):
+    def constructor(self, inputs: dict = {}):
         '''
 
         :param inputs:
@@ -150,6 +154,7 @@ class SqlInfo(object):
     '''
     sql info of api
     '''
+
     def __init__(self):
         self.scripts = {}
         self.config = None
@@ -157,7 +162,7 @@ class SqlInfo(object):
         # for old cases
         self.check_list = {}
 
-    def constructor(self, inputs:dict={}):
+    def constructor(self, inputs: dict = {}):
         '''
 
         :param inputs:
@@ -179,7 +184,7 @@ class SqlInfo(object):
 
         self.config_id = str(inputs.get("sql_config")) if inputs.get("sql_config") is not None else ""
 
-    def bind_config(self, config:SQLConfig):
+    def bind_config(self, config: SQLConfig):
         '''
         bind sql config
         :param config:
@@ -203,12 +208,13 @@ class Expect(object):
     '''
     expect of api
     '''
+
     def __init__(self):
         self.response = Response()
         self.sql_check_func = ""
         self.sql_response_result = {}
 
-    def constructor(self, inputs:dict={}):
+    def constructor(self, inputs: dict = {}):
         '''
 
         :param inputs:
@@ -232,4 +238,3 @@ class Expect(object):
             "sql_check_func": str(self.sql_check_func),
             "sql_response_result": self.sql_response_result
         }
-

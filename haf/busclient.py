@@ -1,13 +1,13 @@
-#encoding='utf-8'
+# encoding='utf-8'
 
 '''
 # BusClient
 '''
 
 import logging
-from multiprocessing.managers import BaseManager
-from haf.config import *
+
 from haf.common.sigleton import SingletonType
+from haf.config import *
 from haf.message import InfoManager
 
 logger = logging.getLogger(__name__)
@@ -17,12 +17,13 @@ class BusClient(metaclass=SingletonType):
     '''
     bus client, using to connect to the bus server with host,port,auth_key
     '''
-    def __init__(self, domain:str=None, port:str=None, auth_key:str=None):
+
+    def __init__(self, domain: str = None, port: str = None, auth_key: str = None):
         self.domain = BUS_CLIENT_DOMAIN if domain is None else domain
         self.port = BUS_PORT if port is None else port
         self.auth_key = BUS_AUTH_KEY if auth_key is None else auth_key
         self.queue = None
-        #register the functions to InfoManager
+        # register the functions to InfoManager
         InfoManager.register("get_param")
         InfoManager.register("get_case")
         InfoManager.register("get_result")
@@ -124,7 +125,7 @@ class BusClient(metaclass=SingletonType):
         :return:
         '''
         return self.info_manager.get_case_result_main()
-      
+
     def get_logger_end(self):
         '''
         '''

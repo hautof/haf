@@ -17,3 +17,10 @@ haf.egg-info/*
 testcases/*
 thirdparty/*
 venv/*
+
+
+.DS_Store
+.DS_Store/*
+
+
+

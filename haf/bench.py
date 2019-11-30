@@ -5,14 +5,15 @@ description : the test bench
 others:
     include All Case bench
 '''
+from haf.case import HttpApiCase, AppCase
 from haf.common.database import SQLConfig
-from haf.case import HttpApiCase, AppCase, WebCase
 
 
 class BaseBench(object):
     '''
     BaseCase the base of cases
     '''
+
     def __init__(self, args):
         self.name = None
         self.args = args
@@ -23,6 +24,7 @@ class PyBench(BaseBench):
     '''
     py case bench
     '''
+
     def __init__(self, args):
         self.name = None
         self.args = args
@@ -85,6 +87,7 @@ class HttpApiBench(BaseBench):
     '''
     the api bench
     '''
+
     def __init__(self, args):
         self.name = None
         self.args = args
@@ -99,7 +102,7 @@ class HttpApiBench(BaseBench):
         self.cases = {}
         self.dbs = {}
 
-    def add_case(self, case:HttpApiCase):
+    def add_case(self, case: HttpApiCase):
         '''
         add case to bench
         :param case:
@@ -108,14 +111,14 @@ class HttpApiBench(BaseBench):
         key = f"{case.ids.id}.{case.ids.subid}.{case.ids.name}"
         self.cases.update({key: case})
 
-    def add_db(self, db:SQLConfig):
+    def add_db(self, db: SQLConfig):
         '''
         add db to bench
         :param db:
         :return:
         '''
         key_db = str(db.id)
-        self.dbs.update({key_db:db})
+        self.dbs.update({key_db: db})
 
     def update_case(self, case: HttpApiCase):
         '''
@@ -126,7 +129,7 @@ class HttpApiBench(BaseBench):
         key = f"{case.ids.id}.{case.ids.subid}.{case.ids.name}"
         self.cases.update({key: case})
 
-    def get_case(self, key:str) -> 'Case':
+    def get_case(self, key: str) -> 'Case':
         '''
         get case by key
         :param key:
@@ -134,7 +137,7 @@ class HttpApiBench(BaseBench):
         '''
         return self.cases.get(key, None)
 
-    def get_db(self, key:str) -> 'SQLConfig':
+    def get_db(self, key: str) -> 'SQLConfig':
         '''
         get database config by key
         :param key:
@@ -147,6 +150,7 @@ class AppBench(BaseBench):
     '''
     app bench
     '''
+
     def __init__(self, args):
         self.name = None
         self.args = args
@@ -177,7 +181,7 @@ class AppBench(BaseBench):
         :return:
         '''
         key_db = str(db.id)
-        self.dbs.update({key_db:db})
+        self.dbs.update({key_db: db})
 
     def update_case(self, case: AppCase):
         '''
@@ -188,7 +192,7 @@ class AppBench(BaseBench):
         key = f"{case.ids.id}.{case.ids.subid}.{case.ids.name}"
         self.cases.update({key: case})
 
-    def get_case(self, key:str) -> 'Case':
+    def get_case(self, key: str) -> 'Case':
         '''
         get case by key
         :param key:
@@ -196,7 +200,7 @@ class AppBench(BaseBench):
         '''
         return self.cases.get(key, None)
 
-    def get_db(self, key:str) -> 'SQLConfig':
+    def get_db(self, key: str) -> 'SQLConfig':
         '''
         get database config by key
         :param key:
@@ -209,6 +213,7 @@ class WebBench(BaseBench):
     '''
     web bench
     '''
+
     def __init__(self, args):
         self.name = None
         self.args = args
@@ -239,7 +244,7 @@ class WebBench(BaseBench):
         :return:
         '''
         key_db = str(db.id)
-        self.dbs.update({key_db:db})
+        self.dbs.update({key_db: db})
 
     def update_case(self, case: AppCase):
         '''
@@ -250,7 +255,7 @@ class WebBench(BaseBench):
         key = f"{case.ids.id}.{case.ids.subid}.{case.ids.name}"
         self.cases.update({key: case})
 
-    def get_case(self, key:str) -> 'Case':
+    def get_case(self, key: str) -> 'Case':
         '''
         get case by key
         :param key:
@@ -258,7 +263,7 @@ class WebBench(BaseBench):
         '''
         return self.cases.get(key, None)
 
-    def get_db(self, key:str) -> 'SQLConfig':
+    def get_db(self, key: str) -> 'SQLConfig':
         '''
         get database config by key
         :param key:
