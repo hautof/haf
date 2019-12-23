@@ -203,7 +203,7 @@ class Runner(Process):
                         cases.append(case)
                     logger.debug(f"cases' length is {len(cases)}, and end is {case}", __name__)
 
-                if len(cases) > 0 and (len(cases) >= 10 or case_end or self.signal.signal):
+                if len(cases) > 0 and (len(cases) >= 1 or case_end or self.signal.signal):
                     logger.debug(
                         f"cases' length is {len(cases)}, case_end is {case_end}, signal is {self.signal.signal}",
                         __name__)
