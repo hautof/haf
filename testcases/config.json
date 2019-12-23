@@ -6,10 +6,10 @@
         "id": 1,
         "sql_name": "upload",
         "publish": true,
-        "host": "192.168.41.208",
+        "host": "122.51.145.198",
         "port": 3306,
         "username": "root",
-        "password": "testzhan123",
+        "password": "mengwei",
         "database": "haf_publish",
         "protocol": "mysql"
       },
