@@ -13,6 +13,7 @@ import traceback
 import urllib.error as urlerror
 import urllib.parse
 import urllib.request as ur
+import requests
 
 from haf.common.log import Log
 
@@ -85,19 +86,19 @@ class HttpController(object):
             logger.debug(f'{key} GET [url] {url}', __name__)
 
             # using requests to Request the url with headers and method get
-            request = ur.Request(url=url, data=data, headers=headers)
-            if headers is not None:
-                for key in headers.keys():
-                    request.add_header(key, headers[key])
-            response = ur.urlopen(request, timeout=10)
-
+            # request = ur.Request(url=url, data=data, headers=headers)
+            # if headers is not None:
+            #     for key in headers.keys():
+            #         request.add_header(key, headers[key])
+            # response = ur.urlopen(request, timeout=10)
+            response = requests.get(url, json=data, headers=headers, timeout=10)
             if response is None:
                 return {"result": "None"}
             else:
                 logger.debug(f"{key} {str(response)}", __name__)
 
             return response
-        except ur.URLError as e:
+        except requests.HTTPError as e:
             logger.error(f"{key}{str(e)}", __name__)
             logger.error(f"{key}{traceback.format_exc()}", __name__)
             return e
@@ -124,16 +125,15 @@ class HttpController(object):
             else:
                 data = bytes(urllib.parse.urlencode(data), encoding='utf-8')
 
-            request = ur.Request(url=url, data=data, headers=headers, method="POST")
-            response = ur.urlopen(request)
-
+            # request = ur.Request(url=url, data=data, headers=headers, method="POST")
+            # response = ur.urlopen(request)
+            response = requests.post(url, json=data, headers=headers, timeout=10)
             if response is None:
                 return {"result": "None"}
             else:
                 logger.debug(f"{key} POST {str(response)}", __name__)
-
             return response
-        except ur.URLError as e:
+        except requests.HTTPError as e:
             logger.error(f"{key} {str(e)}", __name__)
             return e
         except urlerror.HTTPError as httpe:
@@ -156,10 +156,12 @@ class HttpController(object):
         key = kwargs.get("key")
         try:
             data = bytes(data, encoding='utf8') if data is not None else None
-            request = ur.Request(url, headers=self.headers, data=data)
-            request.get_method = lambda: 'PUT'
-            response = ur.urlopen(request, timeout=10)
-            result = response.read()
+            # request = ur.Request(url, headers=self.headers, data=data)
+            # request.get_method = lambda: 'PUT'
+            # response = ur.urlopen(request, timeout=10)
+            # result = response.read()
+            response = requests.put(url, json=data, headers=self.headers, timeout=10)
+            result = response.content
             return result
         except ur.URLError as e:
             logger.error(f"{key} {str(e)}", __name__)

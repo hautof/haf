@@ -5,6 +5,7 @@ import json
 import sys
 import time
 import traceback
+from datetime import datetime
 from multiprocessing import Process, Lock as m_lock
 
 from haf.apihelper import Request, Response

@@ -9,10 +9,12 @@ import sys
 import time
 import traceback
 import urllib
+import requests
 from datetime import datetime
 from http.client import HTTPResponse
 from threading import Thread
 
+import requests as requests
 import yaml
 from openpyxl import load_workbook
 
@@ -405,6 +407,8 @@ class Utils(object):
                 logger.debug(f"{key} response is {response.deserialize()}", __name__)
                 return response
         else:
+            import requests
+            from requests import Response as rResponse
             header = request.header
             data = request.data
             method = request.method
@@ -419,22 +423,21 @@ class Utils(object):
                 result = HttpController.post(url, data, header)
             if method == CASE_HTTP_API_METHOD_PUT:
                 result = HttpController.put(url, data, header)
-
-            if isinstance(result, HTTPResponse):
+            if isinstance(result, rResponse):
                 response.header = result.headers
                 try:
-                    response.body = json.loads(result.read())
+                    logger.debug(f"{key} response is {response.deserialize()}", __name__)
+                    # response.body = json.loads(result.read()) here was too slow
+                    response.body = result.json()
                 except:
-                    response.body = result.read()
-                response.code = result.code
-            elif isinstance(result, urllib.request.URLError) or isinstance(result,
-                                                                           urllib.request.HTTPError) or isinstance(
-                result, urllib.request.HTTPHandler):
+                    response.body = result.content
+                response.code = result.status_code
+            elif isinstance(result, requests.HTTPError) or isinstance(result, requests.ConnectionError) or isinstance(
+                result, requests.NullHandler):
                 response.body = {}
-                response.code = result.code if hasattr(result, "code") else None
-                response.header = result.info() if hasattr(result, "info") else None
+                response.code = result.status_code if hasattr(result, "status_code") else None
+                response.header = result.headers if hasattr(result, "headers") else None
 
-            logger.debug(f"{key} response is {response.deserialize()}", __name__)
             return response
 
     @staticmethod
