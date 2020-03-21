@@ -24,7 +24,7 @@ class TestHello(BaseCase):
             "request_header": {},
             "request_data": {},
             "method": "get",
-            "host_port": "localhost:9070",
+            "host_port": "www.baidu.com",
             # "url": "/v1/front/keng/?building_id=2&location_id=1"
             "url": ""
         }
@@ -33,6 +33,6 @@ class TestHello(BaseCase):
         self.request.constructor(data_request)
         self.response = Utils.http_request(self.request)
         print(f"2:{datetime.now()-time_temp}")
-        assert self.response.code == 404
+        assert self.response.code == 200
         print(f"[{params}]end at", datetime.now().strftime("%H:%M:%S"))
         print(f"{datetime.now()-time_begin}")

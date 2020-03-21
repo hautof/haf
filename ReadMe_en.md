@@ -1,6 +1,6 @@
 # HAF    
 
-    支持多种测试的高可用测试框架
+    The high automation framework. 
 
 [![Build Status](https://travis-ci.org/hautof/haf.svg?branch=master)](https://travis-ci.org/hautof/haf)
 [![Documentation Status](https://readthedocs.org/projects/haf/badge/?version=latest)](https://haf.readthedocs.io/en/latest/?badge=latest)
@@ -10,15 +10,15 @@
 ![all](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/all.gif)
 
 
-# 安装
+# How to get it
 
-## 使用 pip 直接安装
+## using pip to get it
 
 ```shell
    tsbxmw@ps# pip install haf --upgrade
 ```
 
-## 使用 git 下载源码安装
+## using git tool to get it
 
 ```bash
    tsbxmw@ps# git clone https://github.com/tsbxmw/haf
@@ -27,65 +27,65 @@
 ```
 
 
-# 如何运行例子
+# How to run
 
-## 1，使用 `init` 命令 或者 `git` 获取源码例子
+## 1 using init to init workspace
 
 ```bash
     python -m haf init
 ```
 
-或者
+or 
 
 ```bash
     git clone https://github.com/tsbxmw/haf-sample
 ```
 
-## 2, 例子提供了 `api` 和 `web-ui` 的测试用例
+## 2 run it in dir haf-sample
 
-### 运行 `api` 用例
+### run api case
 
 ```bash
     python -m haf run -c=config.json
 ```
 
-### 运行 `web ui` 测试用例
+### run web ui case
 
 ```bash
     python -m haf run -c=config-web.json
 ```
 
-## 3, 可以在 `data` 文件夹下找到 `index.html`，作为默认的 html 报告
+## 3 find the report at the data dir
 
-    使用 `chrome` 或者其他浏览器打开即可。
+    using chrome or other browsers to open the html file
 
-# 其他内容
+# Others
 
-| 快速开始 | 例子 | pypi 主页 | 文档主页 |
+| quick start | haf-sample | pypi | read the doc |
 |---|---|---|---|
-| [开始](https://github.com/tsbxmw/haf/wiki/Quick-Start) | [haf-sample](https://github.com/hautof/haf-sample) | [pypi](https://pypi.org/project/haf/) | [doc](https://haf-doc.readthedocs.io/en/dev-2.1.0/) |
+| [start](https://github.com/tsbxmw/haf/wiki/Quick-Start) | [haf-sample](https://github.com/hautof/haf-sample) | [pypi](https://pypi.org/project/haf/) | [doc](https://haf-doc.readthedocs.io/en/dev-2.1.0/) |
 
 
-# 插件
+# Plugins
 
-| id | 插件名称 | 插件版本 | github 主页|
+| id | plugin name | version | git hub repo|
 |---|---|---|---|
 | 1 | haf api server | [![PyPI](https://img.shields.io/pypi/v/hafapiserver.svg)](https://img.shields.io/pypi/v/hafapiserver.svg) | [haf webserver](https://github.com/hautof/haf-plugin-webserver) |
 | 2 | haf sql publish | [![PyPI](https://img.shields.io/pypi/v/hafsqlpublish.svg)](https://img.shields.io/pypi/v/hafsqlpublish.svg) | [haf sqlpublish](https://github.com/hautof/haf-plugin-sqlpublish) |
 
 
-# 如何运行自定义的用例
+# How to run your define cases
 
-## 可以本地运行所以的用例
+## Other running locally
 
-### 所有的进程在本地模式下都是在本机存在的
+### Local bus mode, using local bus to run all cases
 
-- `--bus-server(-bs)` 参数不适用时便是本地模式
+- local bus is without --bus-server(-bs) args, when running the program, the bus would be created
 
-### 修改 `testcases` 中的 `config.json` 文件，用来运行自己的用例
+### modify the config.json in testcases
 
-- 修改 `log_path` 和 `report_path` 和 `case_path` 3 个字段为自己默认的地址，分别为 日志路径、报告路径、用例路径。
-- 可以删除 `config->run->sql_publish` 字段，如果不需要将数据上传到数据库。
+- change the `log_path` and `report_path` and `case_path` to your own path
+- delete `config->run->sql_publish` if you don't have an haf-publish
 
 ```json
     {
@@ -153,35 +153,35 @@
     }
 ```
 
-### 可以使用 `testcases` 中提供的默认例子创建新的用例
+### create testcase or using default cases
 
-- 创建 `xlsx/py/json/yaml` 格式的用例
-- 也可以使用 `haf-sample` 中的例子
+- create xlsx/json/yml/py file with template in testcases/
+- using haf-sample case template
 
-### 运行
+### run
 
-#### 使用 `config` 配置运行 测试
+#### run with config
 
 ```shell
     python -m haf run -c=./testcases/config.json
 ```
 
-#### 使用 参数 运行测试
+#### run with args
 
 ```shell
     python -m haf run -case=./testcases/test.xlsx,./testcases/test2.json -ld=./data -rh=true -rod=./data/report.html
 ```
 
-# 测试报告
+# when running the api cases
 
 
 ![report](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/report.gif)
 
 
 
-# 如何运行 app-ui 测试用例
+# when running the app cases
 
-- 更改 `config.json` 中的 `report` 字段，增加 `report_template` 子字段， 使用 `base_app` 为模板
+- change the config.json's "report" to add report_template
 
 ```json
     "run": {
@@ -197,9 +197,9 @@
 ![report-app](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/show/report-app.gif)
 
 
-# 运行 web-ui 测试用例
+# when runnng the web ui cases
 
-- 更改 `config.json` 中的 `report` 字段，增加 `report_template` 子字段， 使用 `base_web` 为模板
+- change the config.json's "report" to add report_template
 
 
 ```json
@@ -217,26 +217,26 @@
 
 
 
-# haf 例子
+# haf samples
 
 > https://github.com/hautof/haf-sample
 
 
-# 其他的命令行参数
+# other run args
 
-- 使用多个 runner 增加运行速度， `runner-count`
+- run with multi-runners (4 runners)
 
 ```shell
     python -m haf run -rc=4
 ```
 
-- 启动 web-server，提供可视化过程，`web-server` 
+- run with web server 
 
 ```shell
     python -m haf run -ws=true
 ```
 
-- 只启动 `loader/runner/bus/recorder` 中的某个
+- run with only-mode
 
 ```shell
     # only loader
@@ -249,7 +249,7 @@
     python -m haf run -ore=true
 ```
 
-- 使用自定义的报告模板
+- run with third report template
 
 ```json
     "report": {
@@ -257,7 +257,7 @@
     }
 ```
 
-- 使用插件将数据发送到 数据库
+- run with mysql publish
 
 ```json
     "sql_publish": {
@@ -276,7 +276,7 @@
 ![sql](https://raw.githubusercontent.com/tsbxmw/haf/master/docs/png/haf-publish.png)
 
 
-### 其他支持
+### now hafweb support 
 
 ```bash
     tsbx# pip install hafweb -U
@@ -287,7 +287,7 @@
     python -m hafweb -ss=root:root@localhost:3306@haf_publish -p=8081
 ```
 
-- 默认页面
+- default page
 
    http://localhost:8081/
 
