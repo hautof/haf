@@ -85,12 +85,6 @@ class HttpController(object):
 
             logger.debug(f'{key} GET [url] {url}', __name__)
 
-            # using requests to Request the url with headers and method get
-            # request = ur.Request(url=url, data=data, headers=headers)
-            # if headers is not None:
-            #     for key in headers.keys():
-            #         request.add_header(key, headers[key])
-            # response = ur.urlopen(request, timeout=10)
             response = requests.get(url, json=data, headers=headers, timeout=10)
             if response is None:
                 return {"result": "None"}
@@ -124,9 +118,6 @@ class HttpController(object):
                 data = bytes(json.dumps(data), encoding='utf-8')
             else:
                 data = bytes(urllib.parse.urlencode(data), encoding='utf-8')
-
-            # request = ur.Request(url=url, data=data, headers=headers, method="POST")
-            # response = ur.urlopen(request)
             response = requests.post(url, json=data, headers=headers, timeout=10)
             if response is None:
                 return {"result": "None"}
@@ -143,7 +134,7 @@ class HttpController(object):
             logger.error(f"{key} {str(ee)}", __name__)
             return ee
 
-    def put(self, url, data=None, **kwargs):
+    def put(self, url, data=None, headers=None, **kwargs):
         '''
         put of http
 
@@ -155,20 +146,27 @@ class HttpController(object):
         '''
         key = kwargs.get("key")
         try:
-            data = bytes(data, encoding='utf8') if data is not None else None
-            # request = ur.Request(url, headers=self.headers, data=data)
-            # request.get_method = lambda: 'PUT'
-            # response = ur.urlopen(request, timeout=10)
-            # result = response.read()
-            response = requests.put(url, json=data, headers=self.headers, timeout=10)
-            result = response.content
-            return result
-        except ur.URLError as e:
+            if "application/json" in headers.values():
+                data = bytes(json.dumps(data), encoding='utf-8')
+            else:
+                data = bytes(urllib.parse.urlencode(data), encoding='utf-8')
+            response = requests.put(url, json=data, headers=headers, timeout=10)
+            if response is None:
+                return {"result": "None"}
+            else:
+                logger.debug(f"{key} PUT {str(response)}", __name__)
+            return response
+        except requests.HTTPError as e:
             logger.error(f"{key} {str(e)}", __name__)
+            return e
+        except urlerror.HTTPError as httpe:
+            logger.error(f"{key} {str(httpe)}", __name__)
+            return httpe
         except Exception as ee:
             logger.error(f"{key} {str(ee)}", __name__)
+            return ee
 
-    def delete(self, url, data=None):
+    def delete(self, url, data=None, headers=None, **kwargs):
         '''
         delete of http
 
@@ -178,15 +176,24 @@ class HttpController(object):
 
         :return the response of delete
         '''
-        data = bytes(data, encoding='utf8') if data is not None else None
+        key = kwargs.get("key")
         try:
-            request = ur.Request(url, headers=self.headers, data=data)
-            request.get_method = lambda: 'DELETE'
-            response = ur.urlopen(request, timeout=10)
-            result = response.read()
-            data = data.encode() if data is not None else None
-            return result
-        except ur.URLError as e:
-            logger.error(str(e), __name__)
+            if "application/json" in headers.values():
+                data = bytes(json.dumps(data), encoding='utf-8')
+            else:
+                data = bytes(urllib.parse.urlencode(data), encoding='utf-8')
+            response = requests.delete(url, json=data, headers=headers, timeout=10)
+            if response is None:
+                return {"result": "None"}
+            else:
+                logger.debug(f"{key} DELETE {str(response)}", __name__)
+            return response
+        except requests.HTTPError as e:
+            logger.error(f"{key} {str(e)}", __name__)
+            return e
+        except urlerror.HTTPError as httpe:
+            logger.error(f"{key} {str(httpe)}", __name__)
+            return httpe
         except Exception as ee:
-            logger.error(str(ee), __name__)
+            logger.error(f"{key} {str(ee)}", __name__)
+            return ee
