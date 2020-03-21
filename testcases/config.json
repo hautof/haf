@@ -14,7 +14,7 @@
         "protocol": "mysql"
       },
       "log": {
-        "log_path": "D:/workspace/mine/python/haf/data"
+        "log_path": "./data"
       },
       "bus": {
         "only": false,
@@ -23,23 +23,27 @@
         "auth_key": ""
       },
       "report": {
-        "report_path": "D:/workspace/mine/python/haf/data/report.html"
+        "report_path": "./data/report.html"
       },
       "case": [
         {
-          "case_path": "D:/workspace/mine/python/haf/testcases/test2.json"
+          "case_path": ".f/testcases/test2.json"
         },
 
         {
-          "case_path": "D:/workspace/mine/python/haf/testcases/test1.xlsx"
+          "case_path": "./testcases/test1.xlsx"
         },
 
         {
-          "case_path": "D:/workspace/mine/python/haf/testcases/test3.yml"
+          "case_path": "./testcases/test3.yml"
         },
 
         {
-          "case_path": "D:/workspace/mine/python/haf/testcases/test4.py"
+          "case_path": "./testcases/test4.py"
+        },
+
+        {
+          "case_path": "./testcases/test5.py"
         }
       ],
       "runner":{
